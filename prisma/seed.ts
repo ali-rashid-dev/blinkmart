@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from "@/generated/prisma/client";
+import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
 
@@ -10,7 +10,17 @@ const prisma = new PrismaClient({
   adapter,
 });
 
-const userData: Prisma.UserCreateInput[] = [
+const userData: Array<{
+  name: string;
+  email: string;
+  posts: {
+    create: Array<{
+      title: string;
+      content: string;
+      published?: boolean;
+    }>;
+  };
+}> = [
   {
     name: "Alice",
     email: "alice@prisma.io",
@@ -44,9 +54,19 @@ const userData: Prisma.UserCreateInput[] = [
 ];
 
 export async function main() {
-  for (const u of userData) {
-    await prisma.user.create({ data: u });
+  await prisma.post.deleteMany();
+  await prisma.user.deleteMany();
+
+  for (const user of userData) {
+    await prisma.user.create({ data: user });
   }
 }
 
-main();
+main()
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
