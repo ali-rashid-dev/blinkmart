@@ -1,43 +1,54 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Mail, Lock, User, Check } from "lucide-react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { FloatingInput } from "@/components/auth/FloatingInput";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { SubmitButton } from "@/components/auth/SubmitButton";
-
-const emailValid = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-
-const rules = [
-  { label: "At least 8 characters", test: (v: string) => v.length >= 8 },
-  { label: "One uppercase letter", test: (v: string) => /[A-Z]/.test(v) },
-  { label: "One number", test: (v: string) => /\d/.test(v) },
-  { label: "One symbol", test: (v: string) => /[^A-Za-z0-9]/.test(v) },
-];
+import { authClient } from "@/lib/auth-client";
+import { getSignupFieldErrors, isValidEmail, signupSchema } from "@/lib/auth-schemas";
 
 export default function SignupPage() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [touched, setTouched] = useState({ name: false, email: false });
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [formError, setFormError] = useState("");
 
-  const passed = rules.filter((r) => r.test(password)).length;
-  const nameError = touched.name && name.trim().length < 2 ? "Please enter your full name" : "";
-  const emailError = touched.email && !emailValid(email) ? "Enter a valid email address" : "";
-  const ready = name.trim().length >= 2 && emailValid(email) && passed >= 3;
+  const validation = getSignupFieldErrors({ name, email, password });
+  const nameError = touched.name && validation.name?.[0] ? validation.name[0] : "";
+  const emailError = touched.email && validation.email?.[0] ? validation.email[0] : "";
+  const ready = signupSchema.safeParse({ name, email, password }).success;
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!ready || loading) return;
+
+    setFormError("");
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setDone(true);
-    }, 1400);
+
+    const result = await authClient.signUp.email({
+      name,
+      email,
+      password,
+      callbackURL: "/",
+    });
+
+    setLoading(false);
+
+    if (result.error) {
+      setFormError(result.error.message || "Unable to create account right now.");
+      return;
+    }
+
+    setDone(true);
+    router.push("/");
   };
 
   return (
@@ -51,6 +62,15 @@ export default function SignupPage() {
       <p className="mt-2 text-sm text-muted-foreground">
         Fresh baskets, curated weekly, delivered to your door.
       </p>
+
+      {formError && (
+        <div
+          role="alert"
+          className="mt-6 rounded-xl border border-destructive/30 bg-destructive/8 px-4 py-3 text-sm text-destructive"
+        >
+          {formError}
+        </div>
+      )}
 
       {done && (
         <div className="mt-6 flex items-center gap-2 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
@@ -77,7 +97,7 @@ export default function SignupPage() {
           onChange={(e) => setEmail(e.target.value)}
           onBlur={() => setTouched((t) => ({ ...t, email: true }))}
           error={emailError}
-          success={emailValid(email) ? "Looks good" : ""}
+          success={isValidEmail(email) ? "Looks good" : ""}
         />
         <FloatingInput
           label="Password"

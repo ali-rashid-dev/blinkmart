@@ -8,35 +8,40 @@ datasource db {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  name          String?
-  email         String    @unique
-  emailVerified Boolean   @default(false)
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
+  createdAt     DateTime
+  updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
-  posts         Post[]
+
+  @@unique([email])
+  @@map("user")
 }
 
 model Session {
-  id        Int      @id @default(autoincrement())
+  id        String   @id
   expiresAt DateTime
-  token     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
   ipAddress String?
   userAgent String?
-  userId    Int
+  userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
 }
 
 model Account {
-  id                    Int       @id @default(autoincrement())
+  id                    String    @id
   accountId             String
   providerId            String
-  userId                Int
+  userId                String
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
@@ -45,28 +50,19 @@ model Account {
   refreshTokenExpiresAt DateTime?
   scope                 String?
   password              String?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @default(now()) @updatedAt
+  createdAt             DateTime
+  updatedAt             DateTime
 
-  @@unique([providerId, accountId])
+  @@map("account")
 }
 
 model Verification {
-  id         Int       @id @default(autoincrement())
+  id         String    @id
   identifier String
   value      String
   expiresAt  DateTime
-  createdAt  DateTime? @default(now())
-  updatedAt  DateTime? @default(now()) @updatedAt
+  createdAt  DateTime?
+  updatedAt  DateTime?
 
-  @@unique([identifier, value])
-}
-
-model Post {
-  id        Int     @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean @default(false)
-  authorId  Int
-  author    User    @relation(fields: [authorId], references: [id])
+  @@map("verification")
 }

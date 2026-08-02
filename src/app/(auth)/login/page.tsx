@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Mail, Lock, Check } from "lucide-react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { FloatingInput } from "@/components/auth/FloatingInput";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { SubmitButton } from "@/components/auth/SubmitButton";
-
-const emailValid = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+import { authClient } from "@/lib/auth-client";
+import { getLoginFieldErrors, isValidEmail, loginSchema } from "@/lib/auth-schemas";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [touched, setTouched] = useState({ email: false, password: false });
@@ -18,20 +20,34 @@ export default function LoginPage() {
   const [done, setDone] = useState(false);
   const [formError, setFormError] = useState("");
 
-  const emailError = touched.email && !emailValid(email) ? "Enter a valid email address" : "";
-  const passwordError =
-    touched.password && password.length < 8 ? "Password must be at least 8 characters" : "";
-  const ready = emailValid(email) && password.length >= 8;
+  const validation = getLoginFieldErrors({ email, password });
+  const emailError = touched.email && validation.email?.[0] ? validation.email[0] : "";
+  const passwordError = touched.password && validation.password?.[0] ? validation.password[0] : "";
+  const ready = loginSchema.safeParse({ email, password }).success;
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!ready || loading) return;
+
     setFormError("");
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setDone(true);
-    }, 1400);
+
+    const result = await authClient.signIn.email({
+      email,
+      password,
+      rememberMe: true,
+      callbackURL: "/",
+    });
+
+    setLoading(false);
+
+    if (result.error) {
+      setFormError(result.error.message || "Unable to sign in right now.");
+      return;
+    }
+
+    setDone(true);
+    router.push("/");
   };
 
   return (
@@ -71,7 +87,7 @@ export default function LoginPage() {
           onChange={(e) => setEmail(e.target.value)}
           onBlur={() => setTouched((t) => ({ ...t, email: true }))}
           error={emailError}
-          success={emailValid(email) ? "Looks good" : ""}
+          success={isValidEmail(email) ? "Looks good" : ""}
         />
         <FloatingInput
           label="Password"
