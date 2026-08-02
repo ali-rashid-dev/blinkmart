@@ -7,8 +7,6 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { FloatingInput } from "@/components/auth/FloatingInput";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { SubmitButton } from "@/components/auth/SubmitButton";
-import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 
 const emailValid = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
@@ -23,15 +21,11 @@ export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [pwFocused, setPwFocused] = useState(false);
   const [touched, setTouched] = useState({ name: false, email: false });
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
   const passed = rules.filter((r) => r.test(password)).length;
-  const strength = password ? passed : 0;
-  const strengthLabel = ["Too weak", "Weak", "Fair", "Good", "Strong"][strength];
-
   const nameError = touched.name && name.trim().length < 2 ? "Please enter your full name" : "";
   const emailError = touched.email && !emailValid(email) ? "Enter a valid email address" : "";
   const ready = name.trim().length >= 2 && emailValid(email) && passed >= 3;
@@ -85,82 +79,15 @@ export default function SignupPage() {
           error={emailError}
           success={emailValid(email) ? "Looks good" : ""}
         />
-        <Popover open={pwFocused || password.length > 0}>
-          <PopoverAnchor asChild>
-            <div>
-              <FloatingInput
-                label="Password"
-                type="password"
-                autoComplete="new-password"
-                revealable
-                icon={<Lock />}
-                value={password}
-                onFocus={() => setPwFocused(true)}
-                onBlur={() => setPwFocused(false)}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          </PopoverAnchor>
-          <PopoverContent
-            side="left"
-            align="start"
-            sideOffset={14}
-            onOpenAutoFocus={(e) => e.preventDefault()}
-            onCloseAutoFocus={(e) => e.preventDefault()}
-            className="w-72 rounded-xl border-border bg-popover p-4 shadow-lg"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">Password strength</span>
-              <span
-                className={cn(
-                  "text-xs font-semibold",
-                  strength <= 1 && "text-destructive",
-                  strength === 2 && "text-primary",
-                  strength === 3 && "text-secondary",
-                  strength === 4 && "text-success",
-                )}
-              >
-                {strengthLabel}
-              </span>
-            </div>
-            <div className="mt-2 flex gap-1.5">
-              {[0, 1, 2, 3].map((i) => (
-                <span
-                  key={i}
-                  className={cn(
-                    "h-1.5 flex-1 rounded-full transition-all duration-300",
-                    i < strength
-                      ? strength <= 1
-                        ? "bg-destructive"
-                        : strength === 2
-                          ? "bg-primary"
-                          : strength === 3
-                            ? "bg-secondary"
-                            : "bg-success"
-                      : "bg-border",
-                  )}
-                />
-              ))}
-            </div>
-            <ul className="mt-3 grid gap-1.5 sm:grid-cols-2">
-              {rules.map((r) => {
-                const ok = r.test(password);
-                return (
-                  <li
-                    key={r.label}
-                    className={cn(
-                      "flex items-center gap-1.5 text-xs transition-colors",
-                      ok ? "text-success" : "text-muted-foreground",
-                    )}
-                  >
-                    <Check className={cn("size-3.5", !ok && "opacity-35")} />
-                    {r.label}
-                  </li>
-                );
-              })}
-            </ul>
-          </PopoverContent>
-        </Popover>
+        <FloatingInput
+          label="Password"
+          type="password"
+          autoComplete="new-password"
+          revealable
+          icon={<Lock />}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
         <SubmitButton loading={loading} disabled={!ready}>
           {loading ? "Creating account…" : "Create Account"}
@@ -177,7 +104,7 @@ export default function SignupPage() {
 
       <p className="mt-8 text-center text-sm text-muted-foreground">
         Already have an account?{" "}
-        <Link href="/" className="font-semibold text-primary underline-offset-4 hover:underline">
+        <Link href="/login" className="font-semibold text-primary underline-offset-4 hover:underline">
           Login
         </Link>
       </p>
