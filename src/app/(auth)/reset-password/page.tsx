@@ -5,6 +5,7 @@ import { Lock, Check } from "lucide-react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { FloatingInput } from "@/components/auth/FloatingInput";
 import { SubmitButton } from "@/components/auth/SubmitButton";
+import { authClient } from "@/lib/auth-client";
 import { getFieldErrors, resetPasswordSchema } from "@/schema/auth";
 
 export default function ResetPassword() {
@@ -14,24 +15,48 @@ export default function ResetPassword() {
     const [confirmTouched, setConfirmTouched] = useState(false);
     const [loading, setLoading] = useState(false);
     const [done, setDone] = useState(false);
+    const [formError, setFormError] = useState("");
 
+    const token = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("token") ?? "" : "";
     const validation = getFieldErrors(resetPasswordSchema, {
         password,
         confirmPassword: confirm,
-        token: "",
+        token,
     });
     const passwordError = passwordTouched ? validation.password ?? "" : "";
     const confirmError = confirmTouched ? validation.confirmPassword ?? "" : "";
-    const ready = resetPasswordSchema.safeParse({ password, confirmPassword: confirm, token: "" }).success;
+    const ready = resetPasswordSchema.safeParse({ password, confirmPassword: confirm, token }).success;
 
-    const onSubmit = (e: FormEvent) => {
+    const onSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!ready || loading) return;
+
         setLoading(true);
-        setTimeout(() => {
+        setFormError("");
+
+        if (!token) {
             setLoading(false);
-            setDone(true);
-        }, 1400);
+            setFormError("This reset link is invalid or missing a token.");
+            return;
+        }
+
+        const { error } = await authClient.resetPassword({
+            newPassword: password,
+            token,
+        });
+
+        setLoading(false);
+
+        if (error) {
+            setFormError(error.message || "We could not reset your password right now.");
+            return;
+        }
+
+        setDone(true);
+        setPassword("");
+        setConfirm("");
+        setPasswordTouched(false);
+        setConfirmTouched(false);
     };
 
     return (
@@ -45,6 +70,12 @@ export default function ResetPassword() {
             <p className="mt-2 text-sm text-muted-foreground">
                 Choose something memorable — and hard to guess.
             </p>
+
+            {formError ? (
+                <div className="mt-6 rounded-xl border border-destructive/30 bg-destructive/8 px-4 py-3 text-sm text-destructive">
+                    {formError}
+                </div>
+            ) : null}
 
             {done && (
                 <div className="mt-6 flex items-center gap-2 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">

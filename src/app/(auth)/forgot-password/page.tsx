@@ -5,6 +5,7 @@ import { Mail, Check, ArrowLeft } from "lucide-react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { FloatingInput } from "@/components/auth/FloatingInput";
 import { SubmitButton } from "@/components/auth/SubmitButton";
+import { authClient } from "@/lib/auth-client";
 import { forgotPasswordSchema, getFieldErrors, isValidEmail } from "@/schema/auth";
 
 export default function ForgotPassword() {
@@ -12,19 +13,32 @@ export default function ForgotPassword() {
     const [touched, setTouched] = useState(false);
     const [loading, setLoading] = useState(false);
     const [sent, setSent] = useState(false);
+    const [formError, setFormError] = useState("");
 
     const validation = getFieldErrors(forgotPasswordSchema, { email });
     const emailError = touched ? validation.email ?? "" : "";
     const ready = forgotPasswordSchema.safeParse({ email }).success;
 
-    const onSubmit = (e: FormEvent) => {
+    const onSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!ready || loading) return;
+
         setLoading(true);
-        setTimeout(() => {
-            setLoading(false);
-            setSent(true);
-        }, 1400);
+        setFormError("");
+
+        const { error } = await authClient.requestPasswordReset({
+            email,
+            redirectTo: `${window.location.origin}/reset-password`,
+        });
+
+        setLoading(false);
+
+        if (error) {
+            setFormError(error.message || "We could not send a reset link right now.");
+            return;
+        }
+
+        setSent(true);
     };
 
     return (
@@ -39,6 +53,12 @@ export default function ForgotPassword() {
                 Enter the email tied to your account and we&apos;ll send a reset link.
             </p>
 
+            {formError ? (
+                <div className="mt-6 rounded-xl border border-destructive/30 bg-destructive/8 px-4 py-3 text-sm text-destructive">
+                    {formError}
+                </div>
+            ) : null}
+
             {sent ? (
                 <div className="mt-7 space-y-6">
                     <div className="flex items-start gap-2 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
@@ -50,7 +70,10 @@ export default function ForgotPassword() {
                     </div>
                     <button
                         type="button"
-                        onClick={() => setSent(false)}
+                        onClick={() => {
+                            setSent(false);
+                            setFormError("");
+                        }}
                         className="rounded text-sm font-medium text-secondary underline-offset-4 transition-colors hover:text-primary hover:underline"
                     >
                         Use a different email
