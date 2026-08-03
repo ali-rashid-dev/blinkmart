@@ -1,29 +1,19 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-// If your Prisma file is located elsewhere, you can change the path
-import { PrismaClient } from "@/generated/prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import prisma from "@/lib/prisma";
 
-const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL,
-});
-
-const prisma = new PrismaClient({
-    adapter,
-});
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
         provider: "postgresql",
-      }),
-    baseURL: process.env.BETTER_AUTH_URL, 
-    emailAndPassword: { 
-    enabled: true, 
-  },
-  socialProviders: {
-        google: { 
-            clientId: process.env.GOOGLE_CLIENT_ID as string, 
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, 
-        }, 
+    }),
+    emailAndPassword: {
+        enabled: true,
     },
- 
+    baseURL: process.env.BETTER_AUTH_URL,
+    socialProviders: {
+        google: {
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+        },
+    },
 });

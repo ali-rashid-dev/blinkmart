@@ -7,6 +7,9 @@ const globalForPrisma = globalThis as unknown as {
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
+  max: 10,
+  connectionTimeoutMillis: 10_000, // give cold starts room to breathe
+  idleTimeoutMillis: 30_000,
 });
 
 const prisma =

@@ -2,9 +2,9 @@ import { createAuthClient } from "better-auth/client";
 const authClient = createAuthClient()
 export function GoogleButton({ label }: { label: string }) {
   const handleGoogleSignIn = async () => {
-    const data = await authClient.signIn.social({
-    provider: "google",
-  });
+    await authClient.signIn.social({
+      provider: "google",
+    });
   }
   return (
     <button
