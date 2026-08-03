@@ -23,12 +23,34 @@ export type SignupValues = z.infer<typeof signupSchema>;
 
 export function getLoginFieldErrors(values: LoginValues) {
   const result = loginSchema.safeParse(values);
-  return result.success ? {} : result.error.flatten().fieldErrors;
+
+  if (result.success) return {} as Record<keyof LoginValues, string>;
+
+  return result.error.issues.reduce<Record<keyof LoginValues, string>>((acc, issue) => {
+    const field = issue.path[0];
+
+    if (typeof field === "string") {
+      acc[field as keyof LoginValues] = issue.message;
+    }
+
+    return acc;
+  }, {} as Record<keyof LoginValues, string>);
 }
 
 export function getSignupFieldErrors(values: SignupValues) {
   const result = signupSchema.safeParse(values);
-  return result.success ? {} : result.error.flatten().fieldErrors;
+
+  if (result.success) return {} as Record<keyof SignupValues, string>;
+
+  return result.error.issues.reduce<Record<keyof SignupValues, string>>((acc, issue) => {
+    const field = issue.path[0];
+
+    if (typeof field === "string") {
+      acc[field as keyof SignupValues] = issue.message;
+    }
+
+    return acc;
+  }, {} as Record<keyof SignupValues, string>);
 }
 
 export function isValidEmail(value: string) {

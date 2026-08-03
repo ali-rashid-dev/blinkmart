@@ -1,8 +1,16 @@
+import { createAuthClient } from "better-auth/client";
+const authClient = createAuthClient()
 export function GoogleButton({ label }: { label: string }) {
+  const handleGoogleSignIn = async () => {
+    const data = await authClient.signIn.social({
+    provider: "google",
+  });
+  }
   return (
     <button
       type="button"
       className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-border bg-card text-sm font-semibold text-foreground transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-soft active:translate-y-0"
+      onClick={handleGoogleSignIn}
     >
       <svg viewBox="0 0 48 48" aria-hidden="true" className="size-5">
         <path

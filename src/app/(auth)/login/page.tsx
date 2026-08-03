@@ -21,12 +21,13 @@ export default function LoginPage() {
   const [formError, setFormError] = useState("");
 
   const validation = getLoginFieldErrors({ email, password });
-  const emailError = touched.email && validation.email?.[0] ? validation.email[0] : "";
-  const passwordError = touched.password && validation.password?.[0] ? validation.password[0] : "";
+  const emailError = touched.email ? validation.email ?? "" : "";
+  const passwordError = touched.password ? validation.password ?? "" : "";
   const ready = loginSchema.safeParse({ email, password }).success;
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setTouched({ email: true, password: true });
     if (!ready || loading) return;
 
     setFormError("");

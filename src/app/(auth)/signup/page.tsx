@@ -16,18 +16,20 @@ export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [touched, setTouched] = useState({ name: false, email: false });
+  const [touched, setTouched] = useState({ name: false, email: false, password: false });
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [formError, setFormError] = useState("");
 
   const validation = getSignupFieldErrors({ name, email, password });
-  const nameError = touched.name && validation.name?.[0] ? validation.name[0] : "";
-  const emailError = touched.email && validation.email?.[0] ? validation.email[0] : "";
+  const nameError = touched.name ? validation.name ?? "" : "";
+  const emailError = touched.email ? validation.email ?? "" : "";
+  const passwordError = touched.password ? validation.password ?? "" : "";
   const ready = signupSchema.safeParse({ name, email, password }).success;
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setTouched({ name: true, email: true, password: true });
     if (!ready || loading) return;
 
     setFormError("");
@@ -107,6 +109,8 @@ export default function SignupPage() {
           icon={<Lock />}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onBlur={() => setTouched((t) => ({ ...t, password: true }))}
+          error={passwordError}
         />
 
         <SubmitButton loading={loading} disabled={!ready}>
