@@ -9,7 +9,7 @@ import { FloatingInput } from "@/components/auth/FloatingInput";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { authClient } from "@/lib/auth-client";
-import { getSignupFieldErrors, isValidEmail, signupSchema } from "@/lib/auth-schemas";
+import { getFieldErrors, isValidEmail, signupSchema } from "@/schema/auth";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -21,7 +21,7 @@ export default function SignupPage() {
   const [done, setDone] = useState(false);
   const [formError, setFormError] = useState("");
 
-  const validation = getSignupFieldErrors({ name, email, password });
+  const validation = getFieldErrors(signupSchema, { name, email, password });
   const nameError = touched.name ? validation.name ?? "" : "";
   const emailError = touched.email ? validation.email ?? "" : "";
   const passwordError = touched.password ? validation.password ?? "" : "";

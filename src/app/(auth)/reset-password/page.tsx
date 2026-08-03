@@ -5,26 +5,24 @@ import { Lock, Check } from "lucide-react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { FloatingInput } from "@/components/auth/FloatingInput";
 import { SubmitButton } from "@/components/auth/SubmitButton";
-
-const rules = [
-    { label: "At least 8 characters", test: (v: string) => v.length >= 8 },
-    { label: "One uppercase letter", test: (v: string) => /[A-Z]/.test(v) },
-    { label: "One number", test: (v: string) => /\d/.test(v) },
-    { label: "One symbol", test: (v: string) => /[^A-Za-z0-9]/.test(v) },
-];
+import { getFieldErrors, resetPasswordSchema } from "@/schema/auth";
 
 export default function ResetPassword() {
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
+    const [passwordTouched, setPasswordTouched] = useState(false);
     const [confirmTouched, setConfirmTouched] = useState(false);
     const [loading, setLoading] = useState(false);
     const [done, setDone] = useState(false);
 
-    const passed = rules.filter((r) => r.test(password)).length;
-
-    const confirmError =
-        confirmTouched && confirm !== password ? "Passwords don't match" : "";
-    const ready = passed >= 3 && confirm === password && confirm.length > 0;
+    const validation = getFieldErrors(resetPasswordSchema, {
+        password,
+        confirmPassword: confirm,
+        token: "",
+    });
+    const passwordError = passwordTouched ? validation.password ?? "" : "";
+    const confirmError = confirmTouched ? validation.confirmPassword ?? "" : "";
+    const ready = resetPasswordSchema.safeParse({ password, confirmPassword: confirm, token: "" }).success;
 
     const onSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -62,7 +60,12 @@ export default function ResetPassword() {
                     revealable
                     icon={<Lock />}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                        setPassword(e.target.value);
+                        setPasswordTouched(true);
+                    }}
+                    onBlur={() => setPasswordTouched(true)}
+                    error={passwordError}
                 />
 
 

@@ -5,8 +5,7 @@ import { Mail, Check, ArrowLeft } from "lucide-react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { FloatingInput } from "@/components/auth/FloatingInput";
 import { SubmitButton } from "@/components/auth/SubmitButton";
-
-const emailValid = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+import { forgotPasswordSchema, getFieldErrors, isValidEmail } from "@/schema/auth";
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState("");
@@ -14,8 +13,9 @@ export default function ForgotPassword() {
     const [loading, setLoading] = useState(false);
     const [sent, setSent] = useState(false);
 
-    const emailError = touched && !emailValid(email) ? "Enter a valid email address" : "";
-    const ready = emailValid(email);
+    const validation = getFieldErrors(forgotPasswordSchema, { email });
+    const emailError = touched ? validation.email ?? "" : "";
+    const ready = forgotPasswordSchema.safeParse({ email }).success;
 
     const onSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -67,7 +67,7 @@ export default function ForgotPassword() {
                         onChange={(e) => setEmail(e.target.value)}
                         onBlur={() => setTouched(true)}
                         error={emailError}
-                        success={emailValid(email) ? "Looks good" : ""}
+                        success={isValidEmail(email) ? "Looks good" : ""}
                     />
                     <SubmitButton loading={loading} disabled={!ready}>
                         {loading ? "Sending link…" : "Send reset link"}
