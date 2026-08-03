@@ -24,14 +24,11 @@ export const Navbar = () => {
                         <h1 className="text-xl font-bold">BlinkMart</h1>
                     </div>
                     <nav className="flex space-x-4">
-                        <Link href="/" className="text-gray-700 hover:text-blue-500">
-                            Home
+                        <Link href="/login" className="text-gray-700 hover:text-blue-500">
+                            Login
                         </Link>
-                        <Link href="/products" className="text-gray-700 hover:text-blue-500">
-                            Products
-                        </Link>
-                        <Link href="/about" className="text-gray-700 hover:text-blue-500">
-                            About
+                        <Link href="/signup" className="text-gray-700 hover:text-blue-500">
+                            Register
                         </Link>
                         <Button onClick={handleLogout}>log out</Button>
                     </nav>
