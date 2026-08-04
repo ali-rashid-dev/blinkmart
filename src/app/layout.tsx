@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Geist_Mono, Manrope } from "next/font/google";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -36,7 +37,7 @@ export default function RootLayout({
       className={cn("h-full", "antialiased", fraunces.variable, manrope.variable, geistMono.variable, "font-sans")}
     >
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-background text-foreground">
-        {children}
+        <TooltipProvider delayDuration={100}>{children}</TooltipProvider>
       </body>
     </html>
   );
