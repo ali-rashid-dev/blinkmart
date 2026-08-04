@@ -45,15 +45,56 @@ function Tooltip({ children, ...props }: React.PropsWithChildren<Record<string, 
   )
 }
 
+function composeEventHandlers<T extends (...args: any[]) => void>(childHandler?: T, triggerHandler?: T) {
+  return ((event: Parameters<T>[0]) => {
+    childHandler?.(event);
+    triggerHandler?.(event);
+  }) as T;
+}
+
+function mergeRefs<T>(...refs: Array<React.Ref<T> | undefined>) {
+  return (value: T) => {
+    refs.forEach((ref) => {
+      if (typeof ref === "function") {
+        ref(value);
+      } else if (ref) {
+        (ref as React.MutableRefObject<T | null>).current = value;
+      }
+    });
+  };
+}
+
 function TooltipTrigger({ children, asChild, ...props }: TooltipTriggerProps) {
   if (asChild) {
-    const child = children as React.ReactElement;
+    const child = React.Children.only(children) as React.ReactElement<{
+      className?: string;
+      onClick?: React.MouseEventHandler<HTMLElement>;
+      ref?: React.Ref<HTMLElement>;
+      [key: string]: unknown;
+    }>;
+    const childProps = child.props as Record<string, unknown>;
 
     return (
       <TooltipPrimitive.Trigger
         data-slot="tooltip-trigger"
         {...(props as Record<string, unknown>)}
-        render={(triggerProps) => React.cloneElement(child, triggerProps)}
+        render={(triggerProps) => {
+          const mergedProps = {
+            ...childProps,
+            ...triggerProps,
+            className: [childProps.className, triggerProps.className].filter(Boolean).join(" "),
+            onClick: composeEventHandlers(
+              childProps.onClick as React.MouseEventHandler<HTMLElement> | undefined,
+              triggerProps.onClick as React.MouseEventHandler<HTMLElement> | undefined
+            ),
+            ref: mergeRefs(
+              childProps.ref as React.Ref<HTMLElement> | undefined,
+              triggerProps.ref as React.Ref<HTMLElement> | undefined
+            ),
+          };
+
+          return React.cloneElement(child, mergedProps);
+        }}
       />
     )
   }
