@@ -1,4 +1,5 @@
 import { PrismaClient } from "../src/generated/prisma/client";
+import { Role } from "../src/generated/prisma/enums";
 import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
 
@@ -10,51 +11,30 @@ const prisma = new PrismaClient({
   adapter,
 });
 
-const userData: Array<{
-  name: string;
-  email: string;
-  posts: {
-    create: Array<{
-      title: string;
-      content: string;
-      published?: boolean;
-    }>;
-  };
-}> = [
+const userData = [
   {
+    id: "admin-1",
     name: "Alice",
     email: "alice@prisma.io",
-    posts: {
-      create: [
-        {
-          title: "Join the Prisma Discord",
-          content: "https://pris.ly/discord",
-          published: true,
-        },
-        {
-          title: "Prisma on YouTube",
-          content: "https://pris.ly/youtube",
-        },
-      ],
-    },
+    emailVerified: true,
+    role: Role.ADMIN,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
+    id: "user-1",
     name: "Bob",
     email: "bob@prisma.io",
-    posts: {
-      create: [
-        {
-          title: "Follow Prisma on Twitter",
-          content: "https://www.twitter.com/prisma",
-          published: true,
-        },
-      ],
-    },
+    emailVerified: true,
+    role: Role.USER,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
 ];
 
 export async function main() {
-  await prisma.post.deleteMany();
+  await prisma.session.deleteMany();
+  await prisma.account.deleteMany();
   await prisma.user.deleteMany();
 
   for (const user of userData) {
