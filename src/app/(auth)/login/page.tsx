@@ -30,11 +30,13 @@ export default function LoginPage() {
     setTouched({ email: true, password: true });
     if (!ready || loading) return;
 
+    const trimmedEmail = email.trim();
+
     setFormError("");
     setLoading(true);
 
     const result = await authClient.signIn.email({
-      email,
+      email: trimmedEmail,
       password,
       rememberMe: true,
       callbackURL: "/",

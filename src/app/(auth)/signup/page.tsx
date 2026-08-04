@@ -32,12 +32,14 @@ export default function SignupPage() {
     setTouched({ name: true, email: true, password: true });
     if (!ready || loading) return;
 
+    const trimmedEmail = email.trim();
+
     setFormError("");
     setLoading(true);
 
     const result = await authClient.signUp.email({
       name,
-      email,
+      email: trimmedEmail,
       password,
       callbackURL: "/",
     });

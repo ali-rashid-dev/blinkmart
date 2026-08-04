@@ -14,6 +14,7 @@ export type ProfileData = {
   postalCode: string | null;
   createdAt: Date;
   updatedAt: Date;
+  memberSince: Date;
 };
 
 export async function getProfileForUser(userId: string): Promise<ProfileData> {
@@ -38,6 +39,7 @@ export async function getProfileForUser(userId: string): Promise<ProfileData> {
     postalCode: profile.postalCode ?? null,
     createdAt: profile.createdAt,
     updatedAt: profile.updatedAt,
+    memberSince: user.createdAt,
   };
 }
 
@@ -67,5 +69,6 @@ export async function updateProfileForUser(userId: string, input: ProfileUpdateI
     postalCode: result.profile.postalCode ?? null,
     createdAt: result.profile.createdAt,
     updatedAt: result.profile.updatedAt,
+    memberSince: result.user.createdAt,
   };
 }

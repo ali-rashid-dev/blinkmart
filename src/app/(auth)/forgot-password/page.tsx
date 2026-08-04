@@ -23,11 +23,13 @@ export default function ForgotPassword() {
         e.preventDefault();
         if (!ready || loading) return;
 
+        const trimmedEmail = email.trim();
+
         setLoading(true);
         setFormError("");
 
         const { error } = await authClient.requestPasswordReset({
-            email,
+            email: trimmedEmail,
             redirectTo: `${window.location.origin}/reset-password`,
         });
 

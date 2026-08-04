@@ -39,8 +39,11 @@ export function getPhoneError(phone: string) {
 }
 
 export function getPostalError(postal: string) {
-  if (!postal) return "";
-  return postal.length > 0 && !/^\d{5}$/.test(postal) ? "Postal code must be 5 digits" : "";
+  const trimmed = postal.trim();
+
+  if (!trimmed) return "";
+
+  return !/^\d{5}$/.test(trimmed) ? "Postal code must be 5 digits" : "";
 }
 
 export function getCompletion(form: ProfileForm) {

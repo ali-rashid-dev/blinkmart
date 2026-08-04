@@ -22,24 +22,34 @@ export async function getUserWithProfile(userId: string) {
   });
 }
 
+function isUniqueConstraintError(error: unknown) {
+  return (
+    Boolean(error) &&
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "P2002"
+  );
+}
+
 export async function ensureProfileForUser(userId: string): Promise<ProfileRecord> {
-  return prisma.$transaction(async (tx) => {
-    const existingProfile = await tx.userProfile.findUnique({
-      where: { userId },
-    });
-
-    if (existingProfile) {
-      return existingProfile;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      return await prisma.$transaction(async (tx) => {
+        return tx.userProfile.upsert({
+          where: { userId },
+          create: { userId },
+          update: { updatedAt: new Date() },
+        });
+      });
+    } catch (error) {
+      if (!isUniqueConstraintError(error) || attempt === 2) {
+        throw error;
+      }
     }
+  }
 
-    const createdProfile = await tx.userProfile.create({
-      data: {
-        userId,
-      },
-    });
-
-    return createdProfile;
-  });
+  throw new Error("Unable to ensure profile exists after retries");
 }
 
 export async function updateUserProfile(userId: string, data: {

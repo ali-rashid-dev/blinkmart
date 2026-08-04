@@ -56,26 +56,33 @@ export default function ProfilePage() {
       setLoading(true);
       setError(null);
 
-      const result = await getProfile();
+      try {
+        const result = await getProfile();
 
-      if (!active) return;
+        if (!active) return;
 
-      if (result.success) {
-        const nextForm = buildFormFromProfile(result.data);
-        setForm(nextForm);
-        setSavedForm(nextForm);
-        setProfileUser({
-          name: result.data.name,
-          email: result.data.email,
-          avatarUrl: result.data.image ?? undefined,
-          memberSince: formatMemberSince(result.data.createdAt),
-          tier: result.data.role === "ADMIN" ? "Administrator" : "Verified Customer",
-        });
-      } else {
-        setError(result.error.message);
+        if (result.success) {
+          const nextForm = buildFormFromProfile(result.data);
+          setForm(nextForm);
+          setSavedForm(nextForm);
+          setProfileUser({
+            name: result.data.name,
+            email: result.data.email,
+            avatarUrl: result.data.image ?? undefined,
+            memberSince: formatMemberSince(result.data.memberSince),
+            tier: result.data.role === "ADMIN" ? "Administrator" : "Verified Customer",
+          });
+        } else {
+          setError(result.error.message);
+        }
+      } catch {
+        if (!active) return;
+        setError("Unable to load your profile right now.");
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
       }
-
-      setLoading(false);
     }
 
     void loadProfile();
@@ -103,35 +110,39 @@ export default function ProfilePage() {
     setSaving(true);
     setError(null);
 
-    const result = await updateProfile({
-      name: form.fullName.trim(),
-      phone: form.phone.trim() || undefined,
-      houseNo: form.house.trim() || undefined,
-      street: form.street.trim() || undefined,
-      area: form.area.trim() || undefined,
-      city: form.city.trim() || undefined,
-      postalCode: form.postal.trim() || undefined,
-    });
-
-    setSaving(false);
-
-    if (result.success) {
-      const nextForm = buildFormFromProfile(result.data);
-      setForm(nextForm);
-      setSavedForm(nextForm);
-      setProfileUser({
-        name: result.data.name,
-        email: result.data.email,
-        avatarUrl: result.data.image ?? undefined,
-        memberSince: formatMemberSince(result.data.createdAt),
-        tier: result.data.role === "ADMIN" ? "Administrator" : "Verified Customer",
+    try {
+      const result = await updateProfile({
+        name: form.fullName.trim(),
+        phone: form.phone.replace(/\s+/g, "") || undefined,
+        houseNo: form.house.trim() || undefined,
+        street: form.street.trim() || undefined,
+        area: form.area.trim() || undefined,
+        city: form.city.trim() || undefined,
+        postalCode: form.postal.trim() || undefined,
       });
-      setSaved(true);
-      setEditing(false);
-      return;
-    }
 
-    setError(result.error.message);
+      if (result.success) {
+        const nextForm = buildFormFromProfile(result.data);
+        setForm(nextForm);
+        setSavedForm(nextForm);
+        setProfileUser({
+          name: result.data.name,
+          email: result.data.email,
+          avatarUrl: result.data.image ?? undefined,
+          memberSince: formatMemberSince(result.data.memberSince),
+          tier: result.data.role === "ADMIN" ? "Administrator" : "Verified Customer",
+        });
+        setSaved(true);
+        setEditing(false);
+        return;
+      }
+
+      setError(result.error.message);
+    } catch {
+      setError("Unable to update your profile right now.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {
