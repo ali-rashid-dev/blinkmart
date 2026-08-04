@@ -9,7 +9,7 @@ import { FloatingInput } from "@/components/auth/FloatingInput";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { authClient } from "@/lib/auth-client";
-import { getFieldErrors, isValidEmail, loginSchema } from "@/schema/auth";
+import { getFieldErrors, isValidEmail, loginSchema } from "@/lib/validations/auth";
 
 export default function LoginPage() {
   const router = useRouter();

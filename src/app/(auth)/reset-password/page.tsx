@@ -6,7 +6,7 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { FloatingInput } from "@/components/auth/FloatingInput";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { authClient } from "@/lib/auth-client";
-import { getFieldErrors, resetPasswordSchema } from "@/schema/auth";
+import { getFieldErrors, resetPasswordSchema } from "@/lib/validations/auth";
 
 export default function ResetPassword() {
     const [password, setPassword] = useState("");

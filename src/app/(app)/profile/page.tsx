@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState, type ChangeEvent, type FormEvent } from "react";
-import { Check } from "lucide-react";
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
+import { Check, Loader2 } from "lucide-react";
+import { getProfile, updateProfile } from "@/app/(app)/profile/actions";
 import { SummaryCard, type ProfileUser } from "@/components/profile/SummaryCard";
 import { AccountStatusCard } from "@/components/profile/AccountStatusCard";
 import { PersonalInfoSection } from "@/components/profile/PersonalInfoSection";
@@ -14,13 +15,24 @@ import {
   initialProfileForm,
   type ProfileForm,
 } from "@/components/profile/profileForm";
+import type { ProfileData } from "@/services/profile.service";
 
-const user: ProfileUser = {
-  name: "Ayesha Rahman",
-  email: "ayesha.rahman@gmail.com",
-  memberSince: "March 2024",
-  tier: "Verified Customer",
-};
+function buildFormFromProfile(profile: ProfileData): ProfileForm {
+  return {
+    fullName: profile.name,
+    email: profile.email,
+    phone: profile.phone ?? "",
+    house: profile.houseNo ?? "",
+    street: profile.street ?? "",
+    area: profile.area ?? "",
+    city: profile.city ?? "",
+    postal: profile.postalCode ?? "",
+  };
+}
+
+function formatMemberSince(value: Date) {
+  return new Intl.DateTimeFormat("en", { month: "long", year: "numeric" }).format(new Date(value));
+}
 
 export default function ProfilePage() {
   const [form, setForm] = useState<ProfileForm>(initialProfileForm);
@@ -28,6 +40,50 @@ export default function ProfilePage() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [profileUser, setProfileUser] = useState<ProfileUser>({
+    name: "",
+    email: "",
+    memberSince: "",
+    tier: "Verified Customer",
+  });
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadProfile() {
+      setLoading(true);
+      setError(null);
+
+      const result = await getProfile();
+
+      if (!active) return;
+
+      if (result.success) {
+        const nextForm = buildFormFromProfile(result.data);
+        setForm(nextForm);
+        setSavedForm(nextForm);
+        setProfileUser({
+          name: result.data.name,
+          email: result.data.email,
+          avatarUrl: result.data.image ?? undefined,
+          memberSince: formatMemberSince(result.data.createdAt),
+          tier: result.data.role === "ADMIN" ? "Administrator" : "Verified Customer",
+        });
+      } else {
+        setError(result.error.message);
+      }
+
+      setLoading(false);
+    }
+
+    void loadProfile();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const set = (key: keyof ProfileForm) => (e: ChangeEvent<HTMLInputElement>) => {
     setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -40,17 +96,54 @@ export default function ProfilePage() {
 
   const dirty = (Object.keys(form) as (keyof ProfileForm)[]).some((k) => form[k] !== savedForm[k]);
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!editing || phoneError || postalError) return;
+
     setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
+    setError(null);
+
+    const result = await updateProfile({
+      name: form.fullName.trim(),
+      phone: form.phone.trim() || undefined,
+      houseNo: form.house.trim() || undefined,
+      street: form.street.trim() || undefined,
+      area: form.area.trim() || undefined,
+      city: form.city.trim() || undefined,
+      postalCode: form.postal.trim() || undefined,
+    });
+
+    setSaving(false);
+
+    if (result.success) {
+      const nextForm = buildFormFromProfile(result.data);
+      setForm(nextForm);
+      setSavedForm(nextForm);
+      setProfileUser({
+        name: result.data.name,
+        email: result.data.email,
+        avatarUrl: result.data.image ?? undefined,
+        memberSince: formatMemberSince(result.data.createdAt),
+        tier: result.data.role === "ADMIN" ? "Administrator" : "Verified Customer",
+      });
       setSaved(true);
-      setSavedForm(form);
       setEditing(false);
-    }, 900);
+      return;
+    }
+
+    setError(result.error.message);
   };
+
+  if (loading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background px-5 py-10">
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-card px-5 py-4 text-sm text-muted-foreground shadow-card">
+          <Loader2 className="size-4 animate-spin text-primary" />
+          Loading your profile…
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-background">
@@ -78,11 +171,16 @@ export default function ProfilePage() {
 
         <div className="mt-8 grid animate-rise gap-6 lg:mt-10 lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start xl:gap-8">
           <div className="space-y-6 lg:sticky lg:top-8">
-            <SummaryCard user={user} completion={completion} />
+            <SummaryCard user={profileUser} completion={completion} />
             <AccountStatusCard />
           </div>
 
           <form onSubmit={onSubmit} className="space-y-6">
+            {error && (
+              <p className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+                {error}
+              </p>
+            )}
             <PersonalInfoSection
               form={form}
               editing={editing}

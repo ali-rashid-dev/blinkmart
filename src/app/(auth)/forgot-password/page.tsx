@@ -6,7 +6,7 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { FloatingInput } from "@/components/auth/FloatingInput";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { authClient } from "@/lib/auth-client";
-import { forgotPasswordSchema, getFieldErrors, isValidEmail } from "@/schema/auth";
+import { forgotPasswordSchema, getFieldErrors, isValidEmail } from "@/lib/validations/auth";
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState("");

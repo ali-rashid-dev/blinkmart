@@ -1,32 +1,45 @@
-export type ProfileForm = {
-  fullName: string;
-  email: string;
-  phone: string;
-  house: string;
-  street: string;
-  area: string;
-  city: string;
-  postal: string;
-};
+import { z } from "zod";
+
+export const profileFormSchema = z.object({
+  fullName: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
+  email: z.string().trim().email("Please enter a valid email address"),
+  phone: z
+    .string()
+    .trim()
+    .optional()
+    .default("")
+    .transform((value) => value.replace(/\s+/g, ""))
+    .pipe(z.string().regex(/^(?:\+92|92|0)3[0-9]{9}$/, "Enter a valid Pakistani phone number"))
+    .or(z.literal("")),
+  house: z.string().trim().max(50).optional().default(""),
+  street: z.string().trim().max(150).optional().default(""),
+  area: z.string().trim().max(100).optional().default(""),
+  city: z.string().trim().max(100).optional().default(""),
+  postal: z.string().trim().max(20).optional().default(""),
+});
+
+export type ProfileForm = z.infer<typeof profileFormSchema>;
 
 export const initialProfileForm: ProfileForm = {
-  fullName: "Ayesha Rahman",
-  email: "ayesha.rahman@gmail.com",
-  phone: "+92 301 4457 220",
-  house: "25-B",
-  street: "Main Boulevard",
-  area: "DHA Phase 6",
-  city: "Lahore",
-  postal: "54792",
+  fullName: "",
+  email: "",
+  phone: "",
+  house: "",
+  street: "",
+  area: "",
+  city: "",
+  postal: "",
 };
 
 export function getPhoneError(phone: string) {
-  return phone.length > 0 && phone.replace(/\D/g, "").length < 10
-    ? "Enter a valid phone number so the rider can reach you"
-    : "";
+  if (!phone) return "";
+
+  const result = profileFormSchema.shape.phone.safeParse(phone);
+  return result.success ? "" : result.error.issues[0]?.message ?? "";
 }
 
 export function getPostalError(postal: string) {
+  if (!postal) return "";
   return postal.length > 0 && !/^\d{5}$/.test(postal) ? "Postal code must be 5 digits" : "";
 }
 
@@ -38,8 +51,9 @@ export function getCompletion(form: ProfileForm) {
     ["Delivery address", form.street && form.area ? "y" : ""],
     ["Postal code", form.postal],
   ];
-  const done = entries.filter(([, v]) => v.trim().length > 0).map(([k]) => k);
-  const remaining = entries.filter(([, v]) => v.trim().length === 0).map(([k]) => k);
+  const done = entries.filter(([, value]) => value.trim().length > 0).map(([label]) => label);
+  const remaining = entries.filter(([, value]) => value.trim().length === 0).map(([label]) => label);
+
   return { percent: Math.round((done.length / entries.length) * 100), done, remaining };
 }
 
