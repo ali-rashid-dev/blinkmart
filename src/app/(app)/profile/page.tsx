@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "
 import { Check, Loader2 } from "lucide-react";
 import { getProfile, updateProfile } from "@/app/(app)/profile/actions";
 import { SummaryCard, type ProfileUser } from "@/components/profile/SummaryCard";
-import { AccountStatusCard } from "@/components/profile/AccountStatusCard";
+import { AccountStatusCard, type AccountStatusInfo } from "@/components/profile/AccountStatusCard";
 import { PersonalInfoSection } from "@/components/profile/PersonalInfoSection";
 import { DeliveryAddressSection } from "@/components/profile/DeliveryAddressSection";
 import { EditActions } from "@/components/profile/EditActions";
@@ -42,6 +42,7 @@ export default function ProfilePage() {
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [accountStatus, setAccountStatus] = useState<AccountStatusInfo | null>(null);
   const [profileUser, setProfileUser] = useState<ProfileUser>({
     name: "",
     email: "",
@@ -71,6 +72,13 @@ export default function ProfilePage() {
             avatarUrl: result.data.image ?? undefined,
             memberSince: formatMemberSince(result.data.memberSince),
             tier: result.data.role === "ADMIN" ? "Administrator" : "Verified Customer",
+          });
+          setAccountStatus({
+            emailVerified: result.data.emailVerified,
+            phone: result.data.phone,
+            role: result.data.role,
+            createdAt: result.data.createdAt,
+            updatedAt: result.data.updatedAt,
           });
         } else {
           setError(result.error.message);
@@ -132,6 +140,13 @@ export default function ProfilePage() {
           memberSince: formatMemberSince(result.data.memberSince),
           tier: result.data.role === "ADMIN" ? "Administrator" : "Verified Customer",
         });
+        setAccountStatus({
+          emailVerified: result.data.emailVerified,
+          phone: result.data.phone,
+          role: result.data.role,
+          createdAt: result.data.createdAt,
+          updatedAt: result.data.updatedAt,
+        });
         setSaved(true);
         setEditing(false);
         return;
@@ -183,7 +198,16 @@ export default function ProfilePage() {
         <div className="mt-8 grid animate-rise gap-6 lg:mt-10 lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start xl:gap-8">
           <div className="space-y-6 lg:sticky lg:top-8">
             <SummaryCard user={profileUser} completion={completion} />
-            <AccountStatusCard />
+            <AccountStatusCard
+              status={
+                accountStatus
+                  ? {
+                      ...accountStatus,
+                      phone: form.phone,
+                    }
+                  : undefined
+              }
+            />
           </div>
 
           <form onSubmit={onSubmit} className="space-y-6">

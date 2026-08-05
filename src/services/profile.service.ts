@@ -1,21 +1,12 @@
 import { getUserWithProfile, ensureProfileForUser, updateUserProfile } from "@/repositories/profile.repository";
-import { updateProfileSchema, type ProfileUpdateInput } from "@/lib/validations/profile";
+import {
+  updateProfileSchema,
+  profileDataSchema,
+  type ProfileData,
+  type ProfileUpdateInput,
+} from "@/lib/validations/profile";
 
-export type ProfileData = {
-  name: string;
-  email: string;
-  image: string | null;
-  role: "USER" | "ADMIN";
-  phone: string | null;
-  houseNo: string | null;
-  street: string | null;
-  area: string | null;
-  city: string | null;
-  postalCode: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  memberSince: Date;
-};
+export { profileDataSchema, type ProfileData };
 
 export async function getProfileForUser(userId: string): Promise<ProfileData> {
   const user = await getUserWithProfile(userId);
@@ -29,6 +20,7 @@ export async function getProfileForUser(userId: string): Promise<ProfileData> {
   return {
     name: user.name,
     email: user.email,
+    emailVerified: user.emailVerified,
     image: user.image ?? null,
     role: user.role,
     phone: profile.phone ?? null,
@@ -59,6 +51,7 @@ export async function updateProfileForUser(userId: string, input: ProfileUpdateI
   return {
     name: result.user.name,
     email: result.user.email,
+    emailVerified: result.user.emailVerified,
     image: result.user.image ?? null,
     role: result.user.role,
     phone: result.profile.phone ?? null,

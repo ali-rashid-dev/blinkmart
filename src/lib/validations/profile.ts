@@ -31,6 +31,35 @@ export const updateProfileSchema = z.object({
 
 export type ProfileUpdateInput = z.infer<typeof updateProfileSchema>;
 
+export const profileDataSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  emailVerified: z.boolean(),
+  image: z.string().nullable(),
+  role: z.enum(["USER", "ADMIN"]),
+  phone: z.string().nullable(),
+  houseNo: z.string().nullable(),
+  street: z.string().nullable(),
+  area: z.string().nullable(),
+  city: z.string().nullable(),
+  postalCode: z.string().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  memberSince: z.date(),
+});
+
+export type ProfileData = z.infer<typeof profileDataSchema>;
+
+export const accountStatusInfoSchema = z.object({
+  emailVerified: z.boolean().optional(),
+  phone: z.string().nullable().optional(),
+  role: z.string().optional(),
+  createdAt: z.union([z.date(), z.string()]).optional(),
+  updatedAt: z.union([z.date(), z.string()]).optional(),
+});
+
+export type AccountStatusInfo = z.infer<typeof accountStatusInfoSchema>;
+
 export function getFieldErrors<TSchema extends z.ZodTypeAny>(schema: TSchema, values: z.input<TSchema>) {
   const result = schema.safeParse(values);
 

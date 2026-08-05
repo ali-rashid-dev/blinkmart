@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import { CircleAlert, Clock3, ShieldCheck, UserRound } from "lucide-react";
+import { accountStatusInfoSchema, type AccountStatusInfo } from "@/lib/validations/profile";
 import { cn } from "@/lib/utils";
+
+export { accountStatusInfoSchema, type AccountStatusInfo };
 
 function StatusRow({
   label,
@@ -33,16 +36,62 @@ function StatusRow({
   );
 }
 
-export function AccountStatusCard() {
+function formatDate(value?: Date | string | null) {
+  if (!value) return "N/A";
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return "N/A";
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
+
+function formatRelativeTime(value?: Date | string | null) {
+  if (!value) return "N/A";
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return "N/A";
+
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return "Just now";
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours}h ago`;
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 30) return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+
+  return formatDate(value);
+}
+
+export function AccountStatusCard({ status }: { status?: AccountStatusInfo }) {
+  const isEmailVerified = status?.emailVerified ?? true;
+  const hasPhone = Boolean(status?.phone && status.phone.trim().length > 0);
+  const roleDisplay = status?.role === "ADMIN" ? "Administrator" : status?.role ? "Customer" : "Customer";
+  const createdAtDisplay = formatDate(status?.createdAt);
+  const updatedAtDisplay = formatRelativeTime(status?.updatedAt);
+
   return (
     <section className="rounded-3xl border border-border bg-card p-6 shadow-card">
       <h2 className="font-display text-lg text-foreground">Account status</h2>
       <ul className="mt-2 divide-y divide-border">
-        <StatusRow label="Email address" value="Verified" tone="success" icon={<ShieldCheck />} />
-        <StatusRow label="Phone number" value="Unverified" tone="warning" icon={<CircleAlert />} />
-        <StatusRow label="Role" value="Customer" icon={<UserRound />} />
-        <StatusRow label="Account created" value="12 Mar 2024" icon={<Clock3 />} />
-        <StatusRow label="Last updated" value="2 days ago" icon={<Clock3 />} />
+        <StatusRow
+          label="Email address"
+          value={isEmailVerified ? "Verified" : "Unverified"}
+          tone={isEmailVerified ? "success" : "warning"}
+          icon={isEmailVerified ? <ShieldCheck /> : <CircleAlert />}
+        />
+        <StatusRow
+          label="Phone number"
+          value={hasPhone ? "Verified" : "Unverified"}
+          tone={hasPhone ? "success" : "warning"}
+          icon={hasPhone ? <ShieldCheck /> : <CircleAlert />}
+        />
+        <StatusRow label="Role" value={roleDisplay} tone="neutral" icon={<UserRound />} />
+        <StatusRow label="Account created" value={createdAtDisplay} tone="neutral" icon={<Clock3 />} />
+        <StatusRow label="Last updated" value={updatedAtDisplay} tone="neutral" icon={<Clock3 />} />
       </ul>
     </section>
   );
