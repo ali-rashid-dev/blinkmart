@@ -4,7 +4,7 @@ import {
   profileDataSchema,
   type ProfileData,
   type ProfileUpdateInput,
-} from "@/lib/validations/profile";
+} from "@/validations/profile";
 
 export { profileDataSchema, type ProfileData };
 

@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { getProfileForUser, updateProfileForUser, type ProfileData } from "@/services/profile.service";
-import { getFieldErrors, updateProfileSchema, type ProfileUpdateInput } from "@/lib/validations/profile";
+import { getFieldErrors, updateProfileSchema, type ProfileUpdateInput } from "@/validations/profile";
 
 export type ProfileActionErrorCode = "UNAUTHORIZED" | "VALIDATION_ERROR" | "DATABASE_ERROR" | "UNKNOWN_ERROR";
 

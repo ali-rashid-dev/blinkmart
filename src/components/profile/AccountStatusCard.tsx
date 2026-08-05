@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { CircleAlert, Clock3, ShieldCheck, UserRound } from "lucide-react";
-import { accountStatusInfoSchema, type AccountStatusInfo } from "@/lib/validations/profile";
+import { accountStatusInfoSchema, type AccountStatusInfo } from "@/validations/profile";
 import { cn } from "@/lib/utils";
 
 export { accountStatusInfoSchema, type AccountStatusInfo };
