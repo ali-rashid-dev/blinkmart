@@ -36,16 +36,15 @@ export async function getProfileForUser(userId: string): Promise<ProfileData> {
 }
 
 export async function updateProfileForUser(userId: string, input: ProfileUpdateInput): Promise<ProfileData> {
-  const parsedInput = updateProfileSchema.parse(input);
-
+  // Input is validated by the caller (actions) — avoid throwing raw ZodError here.
   const result = await updateUserProfile(userId, {
-    name: parsedInput.name,
-    phone: parsedInput.phone,
-    houseNo: parsedInput.houseNo,
-    street: parsedInput.street,
-    area: parsedInput.area,
-    city: parsedInput.city,
-    postalCode: parsedInput.postalCode,
+    name: input.name,
+    phone: input.phone,
+    houseNo: input.houseNo,
+    street: input.street,
+    area: input.area,
+    city: input.city,
+    postalCode: input.postalCode,
   });
 
   return {

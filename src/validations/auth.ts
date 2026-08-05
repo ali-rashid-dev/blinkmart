@@ -56,7 +56,7 @@ export function getFieldErrors<TSchema extends z.ZodTypeAny>(schema: TSchema, va
     const field = issue.path[0];
 
     if (typeof field === "string") {
-      acc[field] = issue.message;
+      if (!acc[field]) acc[field] = issue.message;
     }
 
     return acc;

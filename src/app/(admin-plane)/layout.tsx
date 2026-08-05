@@ -4,7 +4,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { auth } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "BlinkMart Admin",

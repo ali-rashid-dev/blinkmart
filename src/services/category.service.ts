@@ -13,6 +13,7 @@ import {
   type CategoryRecord,
   type CustomerCategoryRecord,
 } from "@/repositories/category.repository";
+import { Prisma } from "@prisma/client";
 import {
   slugify,
   type CreateCategoryInput,
@@ -99,13 +100,24 @@ export async function createCategory(input: CreateCategoryInput): Promise<Catego
     slug = await generateUniqueSlug(input.name);
   }
 
-  return dbCreate({
-    name: input.name,
-    slug,
-    imageUrl: input.imageUrl ?? null,
-    sortOrder: input.sortOrder ?? 0,
-    isActive: input.isActive ?? true,
-  });
+  try {
+    return await dbCreate({
+      name: input.name,
+      slug,
+      imageUrl: input.imageUrl ?? null,
+      sortOrder: input.sortOrder ?? 0,
+      isActive: input.isActive ?? true,
+    });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      const target = (err.meta as any)?.target;
+      if (Array.isArray(target)) {
+        if (target.includes("name")) throw new CategoryNameConflictError(input.name);
+        if (target.includes("slug")) throw new CategorySlugConflictError(slug);
+      }
+    }
+    throw err;
+  }
 }
 
 // ──────────────────────────────────────────────────────────
@@ -133,13 +145,24 @@ export async function updateCategory(input: UpdateCategoryInput): Promise<Catego
     slug = await generateUniqueSlug(input.name, input.id);
   }
 
-  return dbUpdate(input.id, {
-    ...(input.name !== undefined && { name: input.name }),
-    ...(slug !== undefined && { slug }),
-    ...(input.imageUrl !== undefined && { imageUrl: input.imageUrl }),
-    ...(input.sortOrder !== undefined && { sortOrder: input.sortOrder }),
-    ...(input.isActive !== undefined && { isActive: input.isActive }),
-  });
+  try {
+    return await dbUpdate(input.id, {
+      ...(input.name !== undefined && { name: input.name }),
+      ...(slug !== undefined && { slug }),
+      ...(input.imageUrl !== undefined && { imageUrl: input.imageUrl }),
+      ...(input.sortOrder !== undefined && { sortOrder: input.sortOrder }),
+      ...(input.isActive !== undefined && { isActive: input.isActive }),
+    });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      const target = (err.meta as any)?.target;
+      if (Array.isArray(target)) {
+        if (target.includes("name")) throw new CategoryNameConflictError(input.name ?? "");
+        if (target.includes("slug")) throw new CategorySlugConflictError(slug ?? "");
+      }
+    }
+    throw err;
+  }
 }
 
 // ──────────────────────────────────────────────────────────

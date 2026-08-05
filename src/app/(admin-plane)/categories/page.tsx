@@ -132,7 +132,7 @@ function CategoryFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger>{trigger}</DialogTrigger>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
 
       <DialogContent className="max-w-md bg-card">
         <DialogHeader>
@@ -270,16 +270,32 @@ export default function CategoriesPage() {
   }
 
   // ── Load ──────────────────────────────────────────────
+  const requestIdRef = useRef(0);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   const loadCategories = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     setLoading(true);
     const result = await getCategoriesAction({ search, status, sortBy, page, limit });
+    // ignore stale responses
+    if (requestId !== requestIdRef.current) return;
+
     if (result.success) {
+      if (!mountedRef.current) return;
       setCategories(result.data.items);
       setTotalItems(result.data.totalItems);
       setTotalPages(result.data.totalPages);
     } else {
+      if (!mountedRef.current) return;
       toast.error(result.error.message);
     }
+    if (!mountedRef.current) return;
     setLoading(false);
   }, [search, status, sortBy, page, limit]);
 
@@ -408,6 +424,7 @@ export default function CategoriesPage() {
 
         {/* Sort */}
         <select
+          aria-label="Sort categories"
           className="h-9 rounded-md border border-input bg-background px-3 text-sm"
           value={sortBy}
           onChange={(e) => updateQuery({ sortBy: e.target.value })}

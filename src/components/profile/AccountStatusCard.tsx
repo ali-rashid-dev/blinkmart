@@ -67,7 +67,7 @@ function formatRelativeTime(value?: Date | string | null) {
 }
 
 export function AccountStatusCard({ status }: { status?: AccountStatusInfo }) {
-  const isEmailVerified = status?.emailVerified ?? true;
+  const isEmailVerified = status?.emailVerified ?? false;
   const hasPhone = Boolean(status?.phone && status.phone.trim().length > 0);
   const roleDisplay = status?.role === "ADMIN" ? "Administrator" : status?.role ? "Customer" : "Customer";
   const createdAtDisplay = formatDate(status?.createdAt);

@@ -77,7 +77,7 @@ export default function ProfilePage() {
             emailVerified: result.data.emailVerified,
             phone: result.data.phone,
             role: result.data.role,
-            createdAt: result.data.createdAt,
+            createdAt: result.data.memberSince,
             updatedAt: result.data.updatedAt,
           });
         } else {
@@ -144,7 +144,7 @@ export default function ProfilePage() {
           emailVerified: result.data.emailVerified,
           phone: result.data.phone,
           role: result.data.role,
-          createdAt: result.data.createdAt,
+          createdAt: result.data.memberSince,
           updatedAt: result.data.updatedAt,
         });
         setSaved(true);
@@ -203,7 +203,7 @@ export default function ProfilePage() {
                 accountStatus
                   ? {
                       ...accountStatus,
-                      phone: form.phone,
+                      phone: accountStatus.phone ?? savedForm.phone,
                     }
                   : undefined
               }

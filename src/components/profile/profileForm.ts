@@ -4,13 +4,15 @@ export const profileFormSchema = z.object({
   fullName: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
   email: z.string().trim().email("Please enter a valid email address"),
   phone: z
-    .string()
-    .trim()
+    .union([
+      z.string()
+        .trim()
+        .transform((v) => v.replace(/\s+/g, ""))
+        .refine((v) => /^(?:\+92|92|0)3[0-9]{9}$/.test(v), { message: "Enter a valid Pakistani phone number" }),
+      z.literal("")
+    ])
     .optional()
-    .default("")
-    .transform((value) => value.replace(/\s+/g, ""))
-    .pipe(z.string().regex(/^(?:\+92|92|0)3[0-9]{9}$/, "Enter a valid Pakistani phone number"))
-    .or(z.literal("")),
+    .default(""),
   house: z.string().trim().max(50).optional().default(""),
   street: z.string().trim().max(150).optional().default(""),
   area: z.string().trim().max(100).optional().default(""),
