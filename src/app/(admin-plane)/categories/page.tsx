@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +25,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { CldImage, CldUploadWidget } from "next-cloudinary";
 
 import {
   Pencil,
@@ -49,6 +49,9 @@ import {
 } from "./actions";
 import type { CategoryRecord } from "@/repositories/category.repository";
 import { slugify } from "@/validations/category";
+
+const CLOUDINARY_UPLOAD_PRESET =
+  process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET ?? "your_unsigned_preset";
 
 // ──────────────────────────────────────────────────────────
 //  Category Form Dialog
@@ -76,7 +79,6 @@ function CategoryFormDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } =
     useForm<CategoryFormValues>({
@@ -111,17 +113,6 @@ function CategoryFormDialog({
         isActive: defaultValues?.isActive ?? true,
       });
     }
-  }
-
-  function handleFile(file: File | null) {
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
-      return;
-    }
-    // In a Cloudinary setup the URL comes from the uploader widget.
-    // For now, we accept a paste-in URL; the upload button acts as a placeholder.
-    toast.info("Paste the Cloudinary URL into the Image URL field after uploading.");
   }
 
   function onSubmit(values: CategoryFormValues) {
@@ -169,27 +160,51 @@ function CategoryFormDialog({
           {/* Image */}
           <div className="space-y-1.5">
             <Label htmlFor="cat-image">Image URL <span className="text-xs text-muted-foreground">(Cloudinary)</span></Label>
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-2 items-start">
               <div className="h-10 w-10 shrink-0 rounded-md border bg-accent grid place-items-center overflow-hidden">
                 {watch("imageUrl") ? (
-                  <img src={watch("imageUrl")} alt="preview" className="h-full w-full object-cover" />
+                  <CldImage
+                    src={watch("imageUrl")}
+                    width={40}
+                    height={40}
+                    crop="fill"
+                    gravity="auto"
+                    alt="preview"
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <ImageIcon className="h-4 w-4 text-muted-foreground" />
                 )}
               </div>
-              <Input
-                id="cat-image"
-                {...register("imageUrl")}
-                placeholder="https://res.cloudinary.com/..."
-              />
+              <div className="flex-1 space-y-2">
+                <Input
+                  id="cat-image"
+                  {...register("imageUrl")}
+                  placeholder="https://res.cloudinary.com/..."
+                />
+                <div className="flex flex-wrap gap-2">
+                  <CldUploadWidget
+                    uploadPreset={CLOUDINARY_UPLOAD_PRESET}
+                    options={{ folder: "grocery-app/categories", maxFiles: 1 }}
+                    onSuccess={(result: any) => {
+                      if (result.event === "success" && result.info?.secure_url) {
+                        setValue("imageUrl", result.info.secure_url);
+                        toast.success("Category image uploaded successfully.");
+                      }
+                    }}
+                  >
+                    {({ open }) => (
+                      <Button type="button" variant="outline" onClick={() => open()}>
+                        Upload category image
+                      </Button>
+                    )}
+                  </CldUploadWidget>
+                  <span className="text-xs text-muted-foreground self-center">
+                    Uploading will fill the Cloudinary URL automatically.
+                  </span>
+                </div>
+              </div>
             </div>
-            <input
-              ref={fileRef}
-              hidden
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
-            />
           </div>
 
           {/* Sort Order */}
