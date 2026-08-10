@@ -25,7 +25,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { CldImage, CldUploadWidget } from "next-cloudinary";
 
 import {
   Pencil,
@@ -46,12 +45,10 @@ import {
   deleteCategoryAction,
   toggleCategoryStatusAction,
   getCategoriesAction,
+  type CategoryActionResult,
 } from "./actions";
 import type { CategoryRecord } from "@/repositories/category.repository";
 import { slugify } from "@/validations/category";
-
-const CLOUDINARY_UPLOAD_PRESET =
-  process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET ?? "your_unsigned_preset";
 
 // ──────────────────────────────────────────────────────────
 //  Category Form Dialog
@@ -74,7 +71,7 @@ function CategoryFormDialog({
   trigger: React.ReactNode;
   title: string;
   defaultValues?: Partial<CategoryFormValues>;
-  onSave: (values: CategoryFormValues) => void;
+  onSave: (values: CategoryFormValues) => Promise<CategoryActionResult<CategoryRecord>>;
   isPending?: boolean;
 }) {
   const [open, setOpen] = useState(false);
@@ -115,10 +112,14 @@ function CategoryFormDialog({
     }
   }
 
-  function onSubmit(values: CategoryFormValues) {
+  async function onSubmit(values: CategoryFormValues) {
     if (!values.name.trim()) return;
-    onSave(values);
-    setOpen(false);
+
+    const result = await onSave(values);
+
+    if (result.success) {
+      setOpen(false);
+    }
   }
 
   return (
@@ -159,16 +160,12 @@ function CategoryFormDialog({
 
           {/* Image */}
           <div className="space-y-1.5">
-            <Label htmlFor="cat-image">Image URL <span className="text-xs text-muted-foreground">(Cloudinary)</span></Label>
+            <Label htmlFor="cat-image">Image URL</Label>
             <div className="flex gap-2 items-start">
               <div className="h-10 w-10 shrink-0 rounded-md border bg-accent grid place-items-center overflow-hidden">
                 {watch("imageUrl") ? (
-                  <CldImage
+                  <img
                     src={watch("imageUrl")}
-                    width={40}
-                    height={40}
-                    crop="fill"
-                    gravity="auto"
                     alt="preview"
                     className="h-full w-full object-cover"
                   />
@@ -180,29 +177,8 @@ function CategoryFormDialog({
                 <Input
                   id="cat-image"
                   {...register("imageUrl")}
-                  placeholder="https://res.cloudinary.com/..."
+                  placeholder="https://example.com/image.png"
                 />
-                <div className="flex flex-wrap gap-2">
-                  <CldUploadWidget
-                    uploadPreset={CLOUDINARY_UPLOAD_PRESET}
-                    options={{ folder: "grocery-app/categories", maxFiles: 1 }}
-                    onSuccess={(result: any) => {
-                      if (result.event === "success" && result.info?.secure_url) {
-                        setValue("imageUrl", result.info.secure_url);
-                        toast.success("Category image uploaded successfully.");
-                      }
-                    }}
-                  >
-                    {({ open }) => (
-                      <Button type="button" variant="outline" onClick={() => open()}>
-                        Upload category image
-                      </Button>
-                    )}
-                  </CldUploadWidget>
-                  <span className="text-xs text-muted-foreground self-center">
-                    Uploading will fill the Cloudinary URL automatically.
-                  </span>
-                </div>
               </div>
             </div>
           </div>
@@ -214,7 +190,9 @@ function CategoryFormDialog({
               id="cat-sort"
               type="number"
               min={0}
-              {...register("sortOrder", { valueAsNumber: true })}
+              {...register("sortOrder", {
+                setValueAs: (value) => (value === "" ? 0 : Number(value)),
+              })}
               placeholder="0"
             />
           </div>
@@ -227,6 +205,7 @@ function CategoryFormDialog({
             </div>
             <Switch
               checked={isActiveValue}
+              aria-label="Toggle category active status"
               onCheckedChange={(v) => setValue("isActive", v)}
             />
           </div>
@@ -254,18 +233,32 @@ export default function CategoriesPage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // Query state from URL
+  const search = searchParams.get("search") ?? "";
+  const validStatuses = ["all", "active", "inactive"] as const;
+  const validSortBy = ["name-asc", "name-desc", "created-desc", "created-asc", "sort-order"] as const;
+  const rawStatus = searchParams.get("status");
+  const rawSortBy = searchParams.get("sortBy");
+  const rawPage = Number(searchParams.get("page") ?? "");
+  const status = validStatuses.includes(rawStatus as typeof validStatuses[number])
+    ? (rawStatus as typeof validStatuses[number])
+    : "all";
+  const sortBy = validSortBy.includes(rawSortBy as typeof validSortBy[number])
+    ? (rawSortBy as typeof validSortBy[number])
+    : "sort-order";
+  const page = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
+  const limit = 10;
+
   const [categories, setCategories] = useState<CategoryRecord[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
+  const [searchInput, setSearchInput] = useState(search);
 
-  // Query state from URL
-  const search = searchParams.get("search") ?? "";
-  const status = (searchParams.get("status") ?? "all") as "all" | "active" | "inactive";
-  const sortBy = (searchParams.get("sortBy") ?? "sort-order") as "name-asc" | "name-desc" | "created-desc" | "created-asc" | "sort-order";
-  const page = Math.max(1, Number(searchParams.get("page") ?? 1));
-  const limit = 10;
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
 
   // ── Helpers ───────────────────────────────────────────
   function updateQuery(updates: Record<string, string>) {
@@ -275,13 +268,15 @@ export default function CategoriesPage() {
       else params.delete(k);
     }
     params.delete("page"); // reset to page 1 on filter change
-    router.push(`${pathname}?${params.toString()}`);
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname);
   }
 
   function setPage(p: number) {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", String(p));
-    router.push(`${pathname}?${params.toString()}`);
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname);
   }
 
   // ── Load ──────────────────────────────────────────────
@@ -289,6 +284,8 @@ export default function CategoriesPage() {
   const mountedRef = useRef(true);
 
   useEffect(() => {
+    mountedRef.current = true;
+
     return () => {
       mountedRef.current = false;
     };
@@ -297,61 +294,68 @@ export default function CategoriesPage() {
   const loadCategories = useCallback(async () => {
     const requestId = ++requestIdRef.current;
     setLoading(true);
-    const result = await getCategoriesAction({ search, status, sortBy, page, limit });
-    // ignore stale responses
-    if (requestId !== requestIdRef.current) return;
 
-    if (result.success) {
+    try {
+      const result = await getCategoriesAction({ search, status, sortBy, page, limit });
+      if (requestId !== requestIdRef.current) return;
       if (!mountedRef.current) return;
-      setCategories(result.data.items);
-      setTotalItems(result.data.totalItems);
-      setTotalPages(result.data.totalPages);
-    } else {
-      if (!mountedRef.current) return;
-      toast.error(result.error.message);
+
+      if (result.success) {
+        setCategories(result.data.items);
+        setTotalItems(result.data.totalItems);
+        setTotalPages(result.data.totalPages);
+      } else {
+        toast.error(result.error.message);
+      }
+    } catch (error) {
+      if (requestId !== requestIdRef.current || !mountedRef.current) return;
+      toast.error((error as Error).message || "Unable to load categories.");
+    } finally {
+      if (requestId !== requestIdRef.current || !mountedRef.current) return;
+      setLoading(false);
     }
-    if (!mountedRef.current) return;
-    setLoading(false);
   }, [search, status, sortBy, page, limit]);
 
   useEffect(() => { loadCategories(); }, [loadCategories]);
 
   // ── Mutations ─────────────────────────────────────────
-  function handleCreate(values: CategoryFormValues) {
-    startTransition(async () => {
-      const result = await createCategoryAction({
-        name: values.name,
-        slug: values.slug || undefined,
-        imageUrl: values.imageUrl || null,
-        sortOrder: values.sortOrder,
-        isActive: values.isActive,
-      });
-      if (result.success) {
-        toast.success("Category created");
-        await loadCategories();
-      } else {
-        toast.error(result.error.message);
-      }
+  async function handleCreate(values: CategoryFormValues) {
+    const result = await createCategoryAction({
+      name: values.name,
+      slug: values.slug || undefined,
+      imageUrl: values.imageUrl || null,
+      sortOrder: values.sortOrder,
+      isActive: values.isActive,
     });
+
+    if (result.success) {
+      toast.success("Category created");
+      router.refresh();
+    } else {
+      toast.error(result.error.message);
+    }
+
+    return result;
   }
 
-  function handleUpdate(id: string, values: CategoryFormValues) {
-    startTransition(async () => {
-      const result = await updateCategoryAction({
-        id,
-        name: values.name,
-        slug: values.slug || undefined,
-        imageUrl: values.imageUrl || null,
-        sortOrder: values.sortOrder,
-        isActive: values.isActive,
-      });
-      if (result.success) {
-        toast.success("Category updated");
-        await loadCategories();
-      } else {
-        toast.error(result.error.message);
-      }
+  async function handleUpdate(id: string, values: CategoryFormValues) {
+    const result = await updateCategoryAction({
+      id,
+      name: values.name,
+      slug: values.slug || undefined,
+      imageUrl: values.imageUrl || null,
+      sortOrder: values.sortOrder,
+      isActive: values.isActive,
     });
+
+    if (result.success) {
+      toast.success("Category updated");
+      router.refresh();
+    } else {
+      toast.error(result.error.message);
+    }
+
+    return result;
   }
 
   function handleDelete(id: string, name: string) {
@@ -360,7 +364,7 @@ export default function CategoriesPage() {
       const result = await deleteCategoryAction(id);
       if (result.success) {
         toast.success("Category deleted");
-        await loadCategories();
+        router.refresh();
       } else {
         toast.error(result.error.message);
       }
@@ -372,7 +376,7 @@ export default function CategoriesPage() {
       const result = await toggleCategoryStatusAction(id, newValue);
       if (result.success) {
         toast.success(newValue ? "Category enabled" : "Category disabled");
-        await loadCategories();
+        router.refresh();
       } else {
         toast.error(result.error.message);
       }
@@ -382,8 +386,7 @@ export default function CategoriesPage() {
   // ── Search form ───────────────────────────────────────
   function handleSearchSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    updateQuery({ search: fd.get("search") as string });
+    updateQuery({ search: searchInput });
   }
 
   // ── Render ────────────────────────────────────────────
@@ -415,7 +418,8 @@ export default function CategoriesPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               name="search"
-              defaultValue={search}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search by name or slug…"
               className="pl-9"
             />
@@ -511,6 +515,7 @@ export default function CategoriesPage() {
                   <td className="px-4 py-3 text-center">
                     <Switch
                       checked={cat.isActive}
+                      aria-label={`Toggle active status for ${cat.name}`}
                       disabled={isPending}
                       onCheckedChange={(v) => handleToggle(cat.id, v)}
                     />
@@ -535,7 +540,7 @@ export default function CategoriesPage() {
                           isActive: cat.isActive,
                         }}
                         trigger={
-                          <Button size="sm" variant="ghost" disabled={isPending}>
+                          <Button size="sm" variant="ghost" disabled={isPending} aria-label={`Edit ${cat.name} category`}>
                             <Pencil className="h-4 w-4" />
                           </Button>
                         }
@@ -546,6 +551,7 @@ export default function CategoriesPage() {
                         size="sm"
                         variant="ghost"
                         disabled={isPending}
+                        aria-label={`Delete ${cat.name} category`}
                         className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         onClick={() => handleDelete(cat.id, cat.name)}
                       >
@@ -571,6 +577,7 @@ export default function CategoriesPage() {
               size="sm"
               variant="outline"
               disabled={page <= 1 || isPending}
+              aria-label="Previous page"
               onClick={() => setPage(page - 1)}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -579,6 +586,7 @@ export default function CategoriesPage() {
               size="sm"
               variant="outline"
               disabled={page >= totalPages || isPending}
+              aria-label="Next page"
               onClick={() => setPage(page + 1)}
             >
               <ChevronRight className="h-4 w-4" />

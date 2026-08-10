@@ -13,7 +13,7 @@ import {
   type CategoryRecord,
   type CustomerCategoryRecord,
 } from "@/repositories/category.repository";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import {
   slugify,
   type CreateCategoryInput,
