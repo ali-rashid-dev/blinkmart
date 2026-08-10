@@ -31,7 +31,7 @@ function hasSessionCookie(request: NextRequest): boolean {
   return SESSION_COOKIE_NAMES.some((name) => Boolean(request.cookies.get(name)?.value));
 }
 
-export function middleware(request: NextRequest) {
+export function Proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Always pass through public paths

@@ -102,8 +102,45 @@ model Category {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  products  Product[]
+
   @@map("category")
 }
+
+model Brand {
+  id        String    @id @default(cuid())
+  name      String    @unique @db.Citext
+  origin    String?
+  enabled   Boolean   @default(true)
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("brand")
+  @@index([enabled])
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique @db.Citext
+  description String?
+  price       Decimal   @db.Decimal(10, 2)
+  imageUrl    String?
+  enabled     Boolean   @default(true)
+  brandId     String?
+  brand       Brand?    @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("product")
+  @@index([brandId])
+  @@index([categoryId])
+  @@index([enabled])
+}
+
 
 
 

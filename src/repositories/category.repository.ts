@@ -121,12 +121,9 @@ export async function checkDuplicateSlug(slug: string, excludeId?: string): Prom
 }
 
 export async function countProductsByCategory(categoryId: string): Promise<number> {
-  // Guard: only query if product model exists in schema
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const p = prisma as any;
-  if (!p.product) return 0;
-  return p.product.count({ where: { categoryId } });
+  return prisma.product.count({ where: { categoryId } });
 }
+
 
 // ──────────────────────────────────────────────────────────
 //  Admin listing
