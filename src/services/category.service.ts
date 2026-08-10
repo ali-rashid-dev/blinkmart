@@ -13,7 +13,7 @@ import {
   type CategoryRecord,
   type CustomerCategoryRecord,
 } from "@/repositories/category.repository";
-import { Prisma } from "@/generated/prisma/client";
+import type { Prisma } from "@/generated/prisma/client";
 import {
   slugify,
   type CreateCategoryInput,
@@ -108,9 +108,14 @@ export async function createCategory(input: CreateCategoryInput): Promise<Catego
       sortOrder: input.sortOrder ?? 0,
       isActive: input.isActive ?? true,
     });
-  } catch (err) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
-      const target = (err.meta as any)?.target;
+  } catch (err: unknown) {
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "code" in err &&
+      err.code === "P2002"
+    ) {
+      const target = (err as { meta?: { target?: string[] } }).meta?.target;
       if (Array.isArray(target)) {
         if (target.includes("name")) throw new CategoryNameConflictError(input.name);
         if (target.includes("slug")) throw new CategorySlugConflictError(slug);
@@ -153,9 +158,14 @@ export async function updateCategory(input: UpdateCategoryInput): Promise<Catego
       ...(input.sortOrder !== undefined && { sortOrder: input.sortOrder }),
       ...(input.isActive !== undefined && { isActive: input.isActive }),
     });
-  } catch (err) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
-      const target = (err.meta as any)?.target;
+  } catch (err: unknown) {
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "code" in err &&
+      err.code === "P2002"
+    ) {
+      const target = (err as { meta?: { target?: string[] } }).meta?.target;
       if (Array.isArray(target)) {
         if (target.includes("name")) throw new CategoryNameConflictError(input.name ?? "");
         if (target.includes("slug")) throw new CategorySlugConflictError(slug ?? "");

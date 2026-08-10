@@ -73,22 +73,27 @@ function buildError<T = never>(
 }
 
 async function requireAdmin(): Promise<{ userId: string } | CategoryActionResult<never>> {
-  const session = await getSession();
+  try {
+    const session = await getSession();
 
-  if (!session?.user) {
-    return buildError("UNAUTHORIZED", "You must be signed in to perform this action.");
+    if (!session?.user) {
+      return buildError("UNAUTHORIZED", "You must be signed in to perform this action.");
+    }
+
+    const dbUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { role: true },
+    });
+
+    if (!dbUser || dbUser.role !== "ADMIN") {
+      return buildError("FORBIDDEN", "You do not have permission to perform this action.");
+    }
+
+    return { userId: session.user.id };
+  } catch (error) {
+    console.error("[CategoryAction Auth Error]", error);
+    return buildError("DATABASE_ERROR", "Authentication check failed. Please try again.");
   }
-
-  const dbUser = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { role: true },
-  });
-
-  if (!dbUser || dbUser.role !== "ADMIN") {
-    return buildError("FORBIDDEN", "You do not have permission to perform this action.");
-  }
-
-  return { userId: session.user.id };
 }
 
 function isAuthError(result: unknown): result is CategoryActionResult<never> {
