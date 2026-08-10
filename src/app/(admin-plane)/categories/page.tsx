@@ -77,7 +77,7 @@ function CategoryFormDialog({
   const [open, setOpen] = useState(false);
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
 
-  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } =
+  const { register, handleSubmit, watch, setValue, reset, formState: { errors, isSubmitting } } =
     useForm<CategoryFormValues>({
       defaultValues: {
         name: defaultValues?.name ?? "",
@@ -211,11 +211,11 @@ function CategoryFormDialog({
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => setOpen(false)} disabled={isPending}>
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)} disabled={isPending || isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" disabled={isPending || isSubmitting}>
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save
             </Button>
           </DialogFooter>

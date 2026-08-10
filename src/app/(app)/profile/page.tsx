@@ -109,7 +109,9 @@ export default function ProfilePage() {
   const postalError = getPostalError(form.postal);
   const completion = useMemo(() => getCompletion(form), [form]);
 
-  const dirty = (Object.keys(form) as (keyof ProfileForm)[]).some((k) => form[k] !== savedForm[k]);
+  const dirty = (Object.keys(form) as (keyof ProfileForm)[])
+    .filter((key) => key !== "email")
+    .some((k) => form[k] !== savedForm[k]);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();

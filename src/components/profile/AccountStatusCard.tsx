@@ -69,7 +69,7 @@ function formatRelativeTime(value?: Date | string | null) {
 export function AccountStatusCard({ status }: { status?: AccountStatusInfo }) {
   const isEmailVerified = status?.emailVerified ?? false;
   const hasPhone = Boolean(status?.phone && status.phone.trim().length > 0);
-  const roleDisplay = status?.role === "ADMIN" ? "Administrator" : status?.role ? "Customer" : "Customer";
+  const roleDisplay = status?.role === "ADMIN" ? "Administrator" : "Customer";
   const createdAtDisplay = formatDate(status?.createdAt);
   const updatedAtDisplay = formatRelativeTime(status?.updatedAt);
 
@@ -85,7 +85,7 @@ export function AccountStatusCard({ status }: { status?: AccountStatusInfo }) {
         />
         <StatusRow
           label="Phone number"
-          value={hasPhone ? "Verified" : "Unverified"}
+          value={hasPhone ? "Present" : "Not added"}
           tone={hasPhone ? "success" : "warning"}
           icon={hasPhone ? <ShieldCheck /> : <CircleAlert />}
         />

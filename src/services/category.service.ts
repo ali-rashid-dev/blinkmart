@@ -70,15 +70,19 @@ export type PaginatedCategories = {
 // ──────────────────────────────────────────────────────────
 async function generateUniqueSlug(name: string, excludeId?: string): Promise<string> {
   const base = slugify(name);
-  let attempt = 0;
+  if (!base) {
+    throw new Error("Could not generate a valid slug from the provided name.");
+  }
 
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
+  const maxAttempts = 20;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     const candidate = attempt === 0 ? base : `${base}-${attempt}`;
     const isDuplicate = await checkDuplicateSlug(candidate, excludeId);
     if (!isDuplicate) return candidate;
-    attempt += 1;
   }
+
+  throw new Error("Unable to generate a unique slug after multiple attempts.");
 }
 
 // ──────────────────────────────────────────────────────────

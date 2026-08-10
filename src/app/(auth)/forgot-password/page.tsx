@@ -15,15 +15,14 @@ export default function ForgotPassword() {
     const [sent, setSent] = useState(false);
     const [formError, setFormError] = useState("");
 
-    const validation = getFieldErrors(forgotPasswordSchema, { email });
+    const trimmedEmail = email.trim();
+    const validation = getFieldErrors(forgotPasswordSchema, { email: trimmedEmail });
     const emailError = touched ? validation.email ?? "" : "";
-    const ready = forgotPasswordSchema.safeParse({ email }).success;
+    const ready = forgotPasswordSchema.safeParse({ email: trimmedEmail }).success;
 
     const onSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!ready || loading) return;
-
-        const trimmedEmail = email.trim();
 
         setLoading(true);
         setFormError("");
@@ -66,7 +65,7 @@ export default function ForgotPassword() {
                     <div className="flex items-start gap-2 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
                         <Check className="mt-0.5 size-4 shrink-0" />
                         <span>
-                            If an account exists for <span className="font-semibold">{email}</span>, a reset link
+                            If an account exists for <span className="font-semibold">{trimmedEmail}</span>, a reset link
                             is on its way.
                         </span>
                     </div>
@@ -92,7 +91,7 @@ export default function ForgotPassword() {
                         onChange={(e) => setEmail(e.target.value)}
                         onBlur={() => setTouched(true)}
                         error={emailError}
-                        success={isValidEmail(email) ? "Looks good" : ""}
+                        success={isValidEmail(trimmedEmail) ? "Looks good" : ""}
                     />
                     <SubmitButton loading={loading} disabled={!ready}>
                         {loading ? "Sending link…" : "Send reset link"}

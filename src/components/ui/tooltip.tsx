@@ -66,35 +66,11 @@ function mergeRefs<T>(...refs: Array<React.Ref<T> | undefined>) {
 
 function TooltipTrigger({ children, asChild, ...props }: TooltipTriggerProps) {
   if (asChild) {
-    const child = React.Children.only(children) as React.ReactElement<{
-      className?: string;
-      onClick?: React.MouseEventHandler<HTMLElement>;
-      ref?: React.Ref<HTMLElement>;
-      [key: string]: unknown;
-    }>;
-    const childProps = child.props as Record<string, unknown>;
-
     return (
       <TooltipPrimitive.Trigger
         data-slot="tooltip-trigger"
         {...(props as Record<string, unknown>)}
-        render={(triggerProps) => {
-          const mergedProps = {
-            ...childProps,
-            ...triggerProps,
-            className: [childProps.className, triggerProps.className].filter(Boolean).join(" "),
-            onClick: composeEventHandlers(
-              childProps.onClick as React.MouseEventHandler<HTMLElement> | undefined,
-              triggerProps.onClick as React.MouseEventHandler<HTMLElement> | undefined
-            ),
-            ref: mergeRefs(
-              childProps.ref as React.Ref<HTMLElement> | undefined,
-              triggerProps.ref as React.Ref<HTMLElement> | undefined
-            ),
-          };
-
-          return React.cloneElement(child, mergedProps);
-        }}
+        render={children as React.ReactElement}
       />
     )
   }

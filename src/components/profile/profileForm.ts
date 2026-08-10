@@ -4,13 +4,12 @@ export const profileFormSchema = z.object({
   fullName: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
   email: z.string().trim().email("Please enter a valid email address"),
   phone: z
-    .union([
-      z.string()
-        .trim()
-        .transform((v) => v.replace(/\s+/g, ""))
-        .refine((v) => /^(?:\+92|92|0)3[0-9]{9}$/.test(v), { message: "Enter a valid Pakistani phone number" }),
-      z.literal("")
-    ])
+    .string()
+    .trim()
+    .transform((value) => value.replace(/\s+/g, ""))
+    .refine((value) => value === "" || /^(?:\+92|92|0)3[0-9]{9}$/.test(value), {
+      message: "Enter a valid Pakistani phone number",
+    })
     .optional()
     .default(""),
   house: z.string().trim().max(50).optional().default(""),
@@ -34,9 +33,11 @@ export const initialProfileForm: ProfileForm = {
 };
 
 export function getPhoneError(phone: string) {
-  if (!phone) return "";
+  const trimmed = phone.trim();
 
-  const result = profileFormSchema.shape.phone.safeParse(phone);
+  if (!trimmed) return "";
+
+  const result = profileFormSchema.shape.phone.safeParse(trimmed);
   return result.success ? "" : result.error.issues[0]?.message ?? "";
 }
 

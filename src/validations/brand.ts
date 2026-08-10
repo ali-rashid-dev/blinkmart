@@ -3,7 +3,7 @@ import { z } from "zod";
 const optionalOrigin = z
   .union([z.string(), z.null(), z.undefined()])
   .transform((val) => {
-    if (!val) return null;
+    if (val === null || val === undefined) return null;
     const trimmed = val.trim();
     return trimmed.length > 0 ? trimmed : null;
   })
@@ -43,7 +43,7 @@ export type UpdateBrandInput = z.infer<typeof updateBrandSchema>;
 
 export const toggleBrandStatusSchema = z.object({
   id: z.string().min(1, "Brand ID is required"),
-  enabled: z.boolean({ required_error: "Enabled status is required" }),
+  enabled: z.boolean({ message: "Enabled status is required" }),
 });
 
 export type ToggleBrandStatusInput = z.infer<typeof toggleBrandStatusSchema>;

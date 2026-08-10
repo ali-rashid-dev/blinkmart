@@ -31,8 +31,8 @@ function hasSessionCookie(request: NextRequest): boolean {
   return SESSION_COOKIE_NAMES.some((name) => Boolean(request.cookies.get(name)?.value));
 }
 
-export function Proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+export function proxy(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
 
   // Always pass through public paths
   if (isPublicPath(pathname)) {
@@ -41,8 +41,9 @@ export function Proxy(request: NextRequest) {
 
   // If no session cookie, redirect to login
   if (!hasSessionCookie(request)) {
+    const callbackUrl = `${pathname}${search}`;
     const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("callbackUrl", pathname);
+    loginUrl.searchParams.set("callbackUrl", callbackUrl);
     return NextResponse.redirect(loginUrl);
   }
 

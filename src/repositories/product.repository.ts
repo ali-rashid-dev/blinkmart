@@ -31,18 +31,23 @@ export async function listCustomerProducts(params?: {
   take?: number;
   skip?: number;
 }): Promise<ProductWithBrandAndCategory[]> {
+  const searchValue = params?.search?.trim();
+  const searchPredicate: Prisma.ProductWhereInput = searchValue
+    ? {
+        OR: [
+          { name: { contains: searchValue, mode: "insensitive" as const } },
+          { description: { contains: searchValue, mode: "insensitive" as const } },
+        ],
+      }
+    : {};
+
   const where: Prisma.ProductWhereInput = {
-    ...customerProductVisibilityWhere,
-    ...(params?.categoryId ? { categoryId: params.categoryId } : {}),
-    ...(params?.brandId ? { brandId: params.brandId } : {}),
-    ...(params?.search
-      ? {
-          OR: [
-            { name: { contains: params.search.trim(), mode: "insensitive" } },
-            { description: { contains: params.search.trim(), mode: "insensitive" } },
-          ],
-        }
-      : {}),
+    AND: [
+      customerProductVisibilityWhere,
+      ...(params?.categoryId ? [{ categoryId: params.categoryId }] : []),
+      ...(params?.brandId ? [{ brandId: params.brandId }] : []),
+      ...(searchValue ? [searchPredicate] : []),
+    ],
   };
 
   return prisma.product.findMany({

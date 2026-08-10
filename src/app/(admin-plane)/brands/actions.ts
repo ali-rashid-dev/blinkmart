@@ -118,7 +118,6 @@ function handleServiceError(error: unknown): BrandActionResult<never> {
 
 function revalidateBrandPaths() {
   revalidatePath("/brands");
-  revalidatePath("/admin/brands");
   revalidatePath("/products");
   revalidatePath("/", "layout");
 }
@@ -210,16 +209,18 @@ export async function toggleBrandStatusAction(
 //  Queries
 // ──────────────────────────────────────────────────────────
 export async function getBrandsAction(
-  params: BrandQueryParams = {}
+  params: Partial<BrandQueryParams> = {}
 ): Promise<BrandActionResult<PaginatedBrands>> {
   try {
     const authResult = await requireAdmin();
     if (isAuthError(authResult)) return authResult;
 
     const parsed = brandQuerySchema.safeParse(params);
-    const validParams = parsed.success ? parsed.data : {};
+    if (!parsed.success) {
+      return buildError("VALIDATION_ERROR", "Invalid query parameters.", getFieldErrors(brandQuerySchema, params));
+    }
 
-    const result = await getBrands(validParams);
+    const result = await getBrands(parsed.data);
     return { success: true, data: result };
   } catch (error) {
     return handleServiceError(error);

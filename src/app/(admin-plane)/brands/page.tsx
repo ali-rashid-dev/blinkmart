@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition, useCallback } from "react";
+import { useState, useEffect, useTransition, useCallback, useRef } from "react";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -149,26 +149,61 @@ export default function BrandsPage() {
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
+  const requestIdRef = useRef(0);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadBrands = useCallback(async (searchQuery?: string) => {
+    const requestId = ++requestIdRef.current;
     setIsLoading(true);
-    const res = await getBrandsAction({ search: searchQuery ?? "" });
-    if (res.success) {
-      setBrands(res.data.items);
-    } else {
-      toast.error(res.error.message);
+
+    try {
+      const res = await getBrandsAction({ search: searchQuery ?? "" });
+      if (requestId !== requestIdRef.current) return;
+
+      if (res.success) {
+        setBrands(res.data.items);
+      } else {
+        toast.error(res.error.message);
+      }
+    } catch (error) {
+      if (requestId !== requestIdRef.current) return;
+      toast.error((error as Error).message || "Unable to load brands.");
+    } finally {
+      if (requestId === requestIdRef.current) {
+        setIsLoading(false);
+      }
     }
-    setIsLoading(false);
   }, []);
 
   useEffect(() => {
-    loadBrands(search);
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      void loadBrands(search);
+    }, 250);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
   }, [search, loadBrands]);
+
+  useEffect(() => {
+    return () => {
+      requestIdRef.current += 1;
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
 
   const handleCreate = async (values: BrandFormValues): Promise<BrandActionResult<BrandRecord>> => {
     const res = await createBrandAction({
       name: values.name,
-      origin: values.origin || undefined,
+      origin: values.origin.trim() ? values.origin : null,
       enabled: true,
     });
 
@@ -186,7 +221,7 @@ export default function BrandsPage() {
     const res = await updateBrandAction({
       id,
       name: values.name,
-      origin: values.origin || undefined,
+      origin: values.origin.trim() ? values.origin : null,
     });
 
     if (res.success) {

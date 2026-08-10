@@ -22,6 +22,7 @@ import {
 import {
   createCategorySchema,
   updateCategorySchema,
+  toggleCategoryStatusSchema,
   categoryQuerySchema,
   customerCategoryQuerySchema,
   getFieldErrors,
@@ -198,11 +199,12 @@ export async function toggleCategoryStatusAction(
     const authResult = await requireAdmin();
     if (isAuthError(authResult)) return authResult;
 
-    if (!id || typeof id !== "string") {
-      return buildError("VALIDATION_ERROR", "A valid category ID is required.");
+    const parsed = toggleCategoryStatusSchema.safeParse({ id, isActive });
+    if (!parsed.success) {
+      return buildError("VALIDATION_ERROR", "Invalid input for status toggle.");
     }
 
-    const category = await toggleCategoryStatus(id, isActive);
+    const category = await toggleCategoryStatus(parsed.data.id, parsed.data.isActive);
     revalidateCategoryPaths();
     return { success: true, data: category };
   } catch (error) {

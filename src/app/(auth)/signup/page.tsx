@@ -21,18 +21,17 @@ export default function SignupPage() {
   const [done, setDone] = useState(false);
   const [formError, setFormError] = useState("");
 
-  const validation = getFieldErrors(signupSchema, { name, email, password });
+  const trimmedEmail = email.trim();
+  const validation = getFieldErrors(signupSchema, { name, email: trimmedEmail, password });
   const nameError = touched.name ? validation.name ?? "" : "";
   const emailError = touched.email ? validation.email ?? "" : "";
   const passwordError = touched.password ? validation.password ?? "" : "";
-  const ready = signupSchema.safeParse({ name, email, password }).success;
+  const ready = signupSchema.safeParse({ name, email: trimmedEmail, password }).success;
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setTouched({ name: true, email: true, password: true });
     if (!ready || loading) return;
-
-    const trimmedEmail = email.trim();
 
     setFormError("");
     setLoading(true);
@@ -101,7 +100,7 @@ export default function SignupPage() {
           onChange={(e) => setEmail(e.target.value)}
           onBlur={() => setTouched((t) => ({ ...t, email: true }))}
           error={emailError}
-          success={isValidEmail(email) ? "Looks good" : ""}
+          success={isValidEmail(trimmedEmail) ? "Looks good" : ""}
         />
         <FloatingInput
           label="Password"

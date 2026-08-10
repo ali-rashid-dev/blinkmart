@@ -149,7 +149,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="flex-1 flex flex-col min-w-0">
           <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-background/85 backdrop-blur px-4 md:px-6 h-16 print:hidden">
             <Sheet open={open} onOpenChange={setOpen}>
-                <SheetTrigger render={<Button variant="ghost" size="icon" className="lg:hidden"><Menu className="h-5 w-5" /></Button>} />
+                <SheetTrigger aria-label="Open navigation menu" render={<Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open navigation menu"><Menu className="h-5 w-5" /></Button>} />
               <SheetContent side="left" className="w-72 p-0 bg-sidebar overflow-y-auto">
                 <SheetTitle className="sr-only">Navigation</SheetTitle>
                 <Brand />
