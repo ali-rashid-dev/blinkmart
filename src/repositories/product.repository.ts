@@ -105,20 +105,29 @@ export async function listAdminProducts(params?: {
   categoryId?: string;
   brandId?: string;
   search?: string;
+  enabled?: boolean;
   take?: number;
   skip?: number;
 }): Promise<ProductWithBrandAndCategory[]> {
+  const searchValue = params?.search?.trim();
+  const searchPredicate: Prisma.ProductWhereInput = searchValue
+    ? {
+        OR: [
+          { name: { contains: searchValue, mode: "insensitive" } },
+          { description: { contains: searchValue, mode: "insensitive" } },
+          { slug: { contains: searchValue, mode: "insensitive" } },
+          { brand: { name: { contains: searchValue, mode: "insensitive" } } },
+        ],
+      }
+    : {};
+
   const where: Prisma.ProductWhereInput = {
-    ...(params?.categoryId ? { categoryId: params.categoryId } : {}),
-    ...(params?.brandId ? { brandId: params.brandId } : {}),
-    ...(params?.search
-      ? {
-          OR: [
-            { name: { contains: params.search.trim(), mode: "insensitive" } },
-            { description: { contains: params.search.trim(), mode: "insensitive" } },
-          ],
-        }
-      : {}),
+    AND: [
+      ...(params?.categoryId ? [{ categoryId: params.categoryId }] : []),
+      ...(params?.brandId ? [{ brandId: params.brandId }] : []),
+      ...(params?.enabled !== undefined ? [{ enabled: params.enabled }] : []),
+      ...(searchValue ? [searchPredicate] : []),
+    ],
   };
 
   return prisma.product.findMany({
@@ -133,6 +142,36 @@ export async function listAdminProducts(params?: {
   });
 }
 
+export async function countAdminProducts(params?: {
+  categoryId?: string;
+  brandId?: string;
+  search?: string;
+  enabled?: boolean;
+}): Promise<number> {
+  const searchValue = params?.search?.trim();
+  const searchPredicate: Prisma.ProductWhereInput = searchValue
+    ? {
+        OR: [
+          { name: { contains: searchValue, mode: "insensitive" } },
+          { description: { contains: searchValue, mode: "insensitive" } },
+          { slug: { contains: searchValue, mode: "insensitive" } },
+          { brand: { name: { contains: searchValue, mode: "insensitive" } } },
+        ],
+      }
+    : {};
+
+  const where: Prisma.ProductWhereInput = {
+    AND: [
+      ...(params?.categoryId ? [{ categoryId: params.categoryId }] : []),
+      ...(params?.brandId ? [{ brandId: params.brandId }] : []),
+      ...(params?.enabled !== undefined ? [{ enabled: params.enabled }] : []),
+      ...(searchValue ? [searchPredicate] : []),
+    ],
+  };
+
+  return prisma.product.count({ where });
+}
+
 export async function findAdminProductById(id: string): Promise<ProductWithBrandAndCategory | null> {
   return prisma.product.findUnique({
     where: { id },
@@ -143,8 +182,22 @@ export async function findAdminProductById(id: string): Promise<ProductWithBrand
   });
 }
 
+export async function checkDuplicateProductSlug(
+  slug: string,
+  excludeId?: string
+): Promise<boolean> {
+  const existing = await prisma.product.findFirst({
+    where: {
+      slug: { equals: slug, mode: "insensitive" },
+      ...(excludeId ? { NOT: { id: excludeId } } : {}),
+    },
+    select: { id: true },
+  });
+  return Boolean(existing);
+}
+
 // ──────────────────────────────────────────────────────────
-//  Product Mutations (for completeness and testing)
+//  Product Mutations
 // ──────────────────────────────────────────────────────────
 export async function createProduct(data: {
   name: string;
@@ -173,3 +226,74 @@ export async function createProduct(data: {
     },
   });
 }
+
+export async function updateProduct(
+  id: string,
+  data: {
+    name?: string;
+    slug?: string;
+    description?: string | null;
+    price?: number | Prisma.Decimal;
+    imageUrl?: string | null;
+    enabled?: boolean;
+    brandId?: string | null;
+    categoryId?: string | null;
+  }
+): Promise<ProductWithBrandAndCategory> {
+  return prisma.product.update({
+    where: { id },
+    data: {
+      ...(data.name !== undefined && { name: data.name }),
+      ...(data.slug !== undefined && { slug: data.slug }),
+      ...(data.description !== undefined && { description: data.description }),
+      ...(data.price !== undefined && { price: data.price }),
+      ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
+      ...(data.enabled !== undefined && { enabled: data.enabled }),
+      ...(data.brandId !== undefined && { brandId: data.brandId }),
+      ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
+    },
+    include: {
+      brand: true,
+      category: true,
+    },
+  });
+}
+
+export async function deleteProduct(id: string): Promise<ProductWithBrandAndCategory> {
+  return prisma.product.delete({
+    where: { id },
+    include: {
+      brand: true,
+      category: true,
+    },
+  });
+}
+
+export async function toggleProductStatus(
+  id: string,
+  enabled: boolean
+): Promise<ProductWithBrandAndCategory> {
+  return prisma.product.update({
+    where: { id },
+    data: { enabled },
+    include: {
+      brand: true,
+      category: true,
+    },
+  });
+}
+
+export async function getAdminProductStats(): Promise<{
+  total: number;
+  active: number;
+  inactive: number;
+}> {
+  const [total, active, inactive] = await Promise.all([
+    prisma.product.count(),
+    prisma.product.count({ where: { enabled: true } }),
+    prisma.product.count({ where: { enabled: false } }),
+  ]);
+
+  return { total, active, inactive };
+}
+
