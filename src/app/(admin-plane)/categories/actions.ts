@@ -1,9 +1,7 @@
 "use server";
 
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import { requireAdmin, isAuthError, type AuthActionResult } from "@/lib/authz";
 import {
   createCategory,
   updateCategory,
@@ -60,11 +58,6 @@ export type CategoryActionResult<T> =
 // ──────────────────────────────────────────────────────────
 //  Internal helpers
 // ──────────────────────────────────────────────────────────
-async function getSession() {
-  const requestHeaders = await headers();
-  return auth.api.getSession({ headers: requestHeaders });
-}
-
 function buildError<T = never>(
   code: CategoryActionErrorCode,
   message: string,
@@ -73,38 +66,8 @@ function buildError<T = never>(
   return { success: false, error: { code, message, details } };
 }
 
-async function requireAdmin(): Promise<{ userId: string } | CategoryActionResult<never>> {
-  try {
-    const session = await getSession();
-
-    if (!session?.user) {
-      return buildError("UNAUTHORIZED", "You must be signed in to perform this action.");
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true },
-    });
-
-    if (!dbUser || dbUser.role !== "ADMIN") {
-      return buildError("FORBIDDEN", "You do not have permission to perform this action.");
-    }
-
-    return { userId: session.user.id };
-  } catch (error) {
-    console.error("[CategoryAction Auth Error]", error);
-    return buildError("DATABASE_ERROR", "Authentication check failed. Please try again.");
-  }
-}
-
-function isAuthError(result: unknown): result is CategoryActionResult<never> {
-  return (
-    typeof result === "object" &&
-    result !== null &&
-    "success" in result &&
-    (result as CategoryActionResult<never>).success === false
-  );
-}
+const requireCategoryAdmin = () =>
+  requireAdmin<CategoryActionErrorCode, CategoryActionResult<never>>(buildError);
 
 function handleServiceError(error: unknown): CategoryActionResult<never> {
   if (error instanceof CategoryNameConflictError) {
@@ -136,7 +99,7 @@ export async function createCategoryAction(
   input: CreateCategoryInput
 ): Promise<CategoryActionResult<CategoryRecord>> {
   try {
-    const authResult = await requireAdmin();
+    const authResult = await requireCategoryAdmin();
     if (isAuthError(authResult)) return authResult;
 
     const parsed = createCategorySchema.safeParse(input);
@@ -156,7 +119,7 @@ export async function updateCategoryAction(
   input: UpdateCategoryInput
 ): Promise<CategoryActionResult<CategoryRecord>> {
   try {
-    const authResult = await requireAdmin();
+    const authResult = await requireCategoryAdmin();
     if (isAuthError(authResult)) return authResult;
 
     const parsed = updateCategorySchema.safeParse(input);
@@ -176,7 +139,7 @@ export async function deleteCategoryAction(
   id: string
 ): Promise<CategoryActionResult<CategoryRecord>> {
   try {
-    const authResult = await requireAdmin();
+    const authResult = await requireCategoryAdmin();
     if (isAuthError(authResult)) return authResult;
 
     if (!id || typeof id !== "string") {
@@ -196,7 +159,7 @@ export async function toggleCategoryStatusAction(
   isActive: boolean
 ): Promise<CategoryActionResult<CategoryRecord>> {
   try {
-    const authResult = await requireAdmin();
+    const authResult = await requireCategoryAdmin();
     if (isAuthError(authResult)) return authResult;
 
     const parsed = toggleCategoryStatusSchema.safeParse({ id, isActive });
@@ -219,7 +182,7 @@ export async function getCategoriesAction(
   params?: Partial<CategoryQueryParams>
 ): Promise<CategoryActionResult<PaginatedCategories>> {
   try {
-    const authResult = await requireAdmin();
+    const authResult = await requireCategoryAdmin();
     if (isAuthError(authResult)) return authResult;
 
     const parsed = categoryQuerySchema.safeParse(params ?? {});
@@ -238,7 +201,7 @@ export async function getCategoryByIdAction(
   id: string
 ): Promise<CategoryActionResult<CategoryRecord>> {
   try {
-    const authResult = await requireAdmin();
+    const authResult = await requireCategoryAdmin();
     if (isAuthError(authResult)) return authResult;
 
     const category = await getCategoryById(id);
@@ -252,7 +215,7 @@ export async function getCategoryBySlugAction(
   slug: string
 ): Promise<CategoryActionResult<CategoryRecord>> {
   try {
-    const authResult = await requireAdmin();
+    const authResult = await requireCategoryAdmin();
     if (isAuthError(authResult)) return authResult;
 
     const category = await getCategoryBySlug(slug);

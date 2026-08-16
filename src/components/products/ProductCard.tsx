@@ -99,7 +99,7 @@ export function ProductCard({
         {/* Price */}
         <div className="flex flex-wrap items-baseline gap-x-2">
           <span className="font-display text-lg text-foreground">
-            ${product.price.toFixed(2)}
+            Rs {Math.round(product.price)}
           </span>
         </div>
 

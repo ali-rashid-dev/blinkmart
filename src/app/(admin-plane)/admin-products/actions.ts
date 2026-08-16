@@ -1,9 +1,7 @@
 "use server";
 
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import { requireAdmin, isAuthError, type AuthActionResult } from "@/lib/authz";
 import {
   getAdminProducts,
   getProductStats,
@@ -26,6 +24,24 @@ import {
   type ProductQueryParams,
 } from "@/validations/product";
 import type { ProductWithBrandAndCategory } from "@/repositories/product.repository";
+
+// ──────────────────────────────────────────────────────────
+//  Serialization helper
+// ──────────────────────────────────────────────────────────
+/**
+ * Prisma returns `price` as a `Decimal` object which cannot be passed
+ * from Server Components / Server Actions to Client Components.
+ * This helper converts it to a plain `number`.
+ */
+/** Prisma's Decimal serialized to a plain number for the client boundary. */
+export type SerializedProduct = Omit<ProductWithBrandAndCategory, "price"> & { price: number };
+
+/** Paginated list with price already serialized. */
+export type SerializedPaginatedProducts = Omit<import("@/services/product.service").PaginatedProducts, "items"> & { items: SerializedProduct[] };
+
+function serializeProduct(p: ProductWithBrandAndCategory): SerializedProduct {
+  return { ...p, price: Number(p.price) };
+}
 
 // ──────────────────────────────────────────────────────────
 //  Result types
@@ -52,11 +68,6 @@ export type ProductActionResult<T> =
 // ──────────────────────────────────────────────────────────
 //  Internal helpers
 // ──────────────────────────────────────────────────────────
-async function getSession() {
-  const requestHeaders = await headers();
-  return auth.api.getSession({ headers: requestHeaders });
-}
-
 function buildError<T = never>(
   code: ProductActionErrorCode,
   message: string,
@@ -65,38 +76,8 @@ function buildError<T = never>(
   return { success: false, error: { code, message, details } };
 }
 
-async function requireAdmin(): Promise<{ userId: string } | ProductActionResult<never>> {
-  try {
-    const session = await getSession();
-
-    if (!session?.user) {
-      return buildError("UNAUTHORIZED", "You must be signed in to perform this action.");
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true },
-    });
-
-    if (!dbUser || dbUser.role !== "ADMIN") {
-      return buildError("FORBIDDEN", "You do not have permission to perform this action.");
-    }
-
-    return { userId: session.user.id };
-  } catch (error) {
-    console.error("[ProductAction Auth Error]", error);
-    return buildError("DATABASE_ERROR", "Authentication check failed. Please try again.");
-  }
-}
-
-function isAuthError(result: unknown): result is ProductActionResult<never> {
-  return (
-    typeof result === "object" &&
-    result !== null &&
-    "success" in result &&
-    (result as ProductActionResult<never>).success === false
-  );
-}
+const requireProductAdmin = () =>
+  requireAdmin<ProductActionErrorCode, ProductActionResult<never>>(buildError);
 
 function handleServiceError(error: unknown): ProductActionResult<never> {
   if (error instanceof ProductSlugConflictError) {
@@ -122,9 +103,9 @@ function revalidateProductPaths() {
 // ──────────────────────────────────────────────────────────
 export async function createProductAction(
   input: CreateProductInput
-): Promise<ProductActionResult<ProductWithBrandAndCategory>> {
+): Promise<ProductActionResult<SerializedProduct>> {
   try {
-    const authResult = await requireAdmin();
+    const authResult = await requireProductAdmin();
     if (isAuthError(authResult)) return authResult;
 
     const parsed = createProductSchema.safeParse(input);
@@ -138,7 +119,7 @@ export async function createProductAction(
 
     const product = await createProductService(parsed.data);
     revalidateProductPaths();
-    return { success: true, data: product };
+    return { success: true, data: serializeProduct(product) };
   } catch (error) {
     return handleServiceError(error);
   }
@@ -146,9 +127,9 @@ export async function createProductAction(
 
 export async function updateProductAction(
   input: UpdateProductInput
-): Promise<ProductActionResult<ProductWithBrandAndCategory>> {
+): Promise<ProductActionResult<SerializedProduct>> {
   try {
-    const authResult = await requireAdmin();
+    const authResult = await requireProductAdmin();
     if (isAuthError(authResult)) return authResult;
 
     const parsed = updateProductSchema.safeParse(input);
@@ -162,7 +143,7 @@ export async function updateProductAction(
 
     const product = await updateProductService(parsed.data);
     revalidateProductPaths();
-    return { success: true, data: product };
+    return { success: true, data: serializeProduct(product) };
   } catch (error) {
     return handleServiceError(error);
   }
@@ -170,9 +151,9 @@ export async function updateProductAction(
 
 export async function deleteProductAction(
   id: string
-): Promise<ProductActionResult<ProductWithBrandAndCategory>> {
+): Promise<ProductActionResult<SerializedProduct>> {
   try {
-    const authResult = await requireAdmin();
+    const authResult = await requireProductAdmin();
     if (isAuthError(authResult)) return authResult;
 
     if (!id || typeof id !== "string") {
@@ -181,7 +162,7 @@ export async function deleteProductAction(
 
     const product = await deleteProductService(id);
     revalidateProductPaths();
-    return { success: true, data: product };
+    return { success: true, data: serializeProduct(product) };
   } catch (error) {
     return handleServiceError(error);
   }
@@ -190,9 +171,9 @@ export async function deleteProductAction(
 export async function toggleProductStatusAction(
   id: string,
   enabled: boolean
-): Promise<ProductActionResult<ProductWithBrandAndCategory>> {
+): Promise<ProductActionResult<SerializedProduct>> {
   try {
-    const authResult = await requireAdmin();
+    const authResult = await requireProductAdmin();
     if (isAuthError(authResult)) return authResult;
 
     const parsed = toggleProductStatusSchema.safeParse({ id, enabled });
@@ -202,7 +183,7 @@ export async function toggleProductStatusAction(
 
     const product = await toggleProductStatusService(parsed.data.id, parsed.data.enabled);
     revalidateProductPaths();
-    return { success: true, data: product };
+    return { success: true, data: serializeProduct(product) };
   } catch (error) {
     return handleServiceError(error);
   }
@@ -213,9 +194,9 @@ export async function toggleProductStatusAction(
 // ──────────────────────────────────────────────────────────
 export async function getAdminProductsAction(
   params: Partial<ProductQueryParams> = {}
-): Promise<ProductActionResult<PaginatedProducts>> {
+): Promise<ProductActionResult<SerializedPaginatedProducts>> {
   try {
-    const authResult = await requireAdmin();
+    const authResult = await requireProductAdmin();
     if (isAuthError(authResult)) return authResult;
 
     const parsed = productQuerySchema.safeParse(params);
@@ -228,7 +209,13 @@ export async function getAdminProductsAction(
     }
 
     const result = await getAdminProducts(parsed.data);
-    return { success: true, data: result };
+    return {
+      success: true,
+      data: {
+        ...result,
+        items: result.items.map(serializeProduct),
+      },
+    };
   } catch (error) {
     return handleServiceError(error);
   }
@@ -238,7 +225,7 @@ export async function getAdminProductStatsAction(): Promise<
   ProductActionResult<{ total: number; active: number; inactive: number }>
 > {
   try {
-    const authResult = await requireAdmin();
+    const authResult = await requireProductAdmin();
     if (isAuthError(authResult)) return authResult;
 
     const stats = await getProductStats();

@@ -30,6 +30,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -67,6 +68,7 @@ import {
   getAdminProductsAction,
   getAdminProductStatsAction,
   type ProductActionResult,
+  type SerializedProduct,
 } from "./actions";
 import { getCategoriesAction } from "@/app/(admin-plane)/categories/actions";
 import { getBrandsAction } from "@/app/(admin-plane)/brands/actions";
@@ -102,15 +104,16 @@ function ProductFormDialog({
   onSave,
   isPending,
 }: {
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
   title: string;
   defaultValues?: Partial<ProductFormValues>;
   categories: CategoryRecord[];
   brands: BrandRecord[];
-  onSave: (values: ProductFormValues) => Promise<ProductActionResult<ProductWithBrandAndCategory>>;
+  onSave: (values: ProductFormValues) => Promise<ProductActionResult<SerializedProduct>>;
   isPending?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  // When no trigger is provided, open immediately on mount (controlled by parent's conditional render)
+  const [open, setOpen] = useState(!trigger);
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
 
   const {
@@ -177,9 +180,8 @@ function ProductFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
-
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card">
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-none bg-card">
         <DialogHeader>
           <DialogTitle className="font-serif text-xl">{title}</DialogTitle>
           <DialogDescription>
@@ -290,24 +292,24 @@ function ProductFormDialog({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="prod-price">
-                  Price ($) <span className="text-destructive">*</span>
+                  Price (Rs) <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground">
-                    $
+                    Rs
                   </span>
                   <Input
                     id="prod-price"
                     type="number"
-                    step="0.01"
-                    min="0.01"
-                    className="pl-7"
+                    step="1"
+                    min="1"
+                    className="pl-9"
                     {...register("price", {
                       required: "Price is required",
-                      min: { value: 0.01, message: "Price must be greater than $0" },
+                      min: { value: 1, message: "Price must be greater than Rs 0" },
                       setValueAs: (v) => (v === "" ? 0 : parseFloat(v)),
                     })}
-                    placeholder="4.99"
+                    placeholder="499"
                   />
                 </div>
                 {errors.price && (
@@ -417,12 +419,12 @@ function ProductDetailsDialog({
   onToggleStatus,
   onDelete,
 }: {
-  product: ProductWithBrandAndCategory | null;
+  product: SerializedProduct | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onEdit: (product: ProductWithBrandAndCategory) => void;
-  onToggleStatus: (product: ProductWithBrandAndCategory, enabled: boolean) => void;
-  onDelete: (product: ProductWithBrandAndCategory) => void;
+  onEdit: (product: SerializedProduct) => void;
+  onToggleStatus: (product: SerializedProduct, enabled: boolean) => void;
+  onDelete: (product: SerializedProduct) => void;
 }) {
   if (!product) return null;
 
@@ -462,7 +464,7 @@ function ProductDetailsDialog({
                   Price
                 </span>
                 <p className="font-serif text-2xl font-bold text-foreground">
-                  ${Number(product.price).toFixed(2)}
+                  Rs {Math.round(Number(product.price))}
                 </p>
               </div>
 
@@ -555,7 +557,7 @@ function DeleteConfirmDialog({
   onConfirm,
   isPending,
 }: {
-  product: ProductWithBrandAndCategory | null;
+  product: SerializedProduct | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
@@ -626,7 +628,7 @@ export default function AdminProductsPage() {
   const limit = [10, 20, 50].includes(rawLimit) ? rawLimit : 10;
 
   // Local state
-  const [products, setProducts] = useState<ProductWithBrandAndCategory[]>([]);
+  const [products, setProducts] = useState<SerializedProduct[]>([]);
   const [categories, setCategories] = useState<CategoryRecord[]>([]);
   const [brands, setBrands] = useState<BrandRecord[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -639,11 +641,11 @@ export default function AdminProductsPage() {
 
   // Dialog & Modal targets
   const [selectedInspectProduct, setSelectedInspectProduct] =
-    useState<ProductWithBrandAndCategory | null>(null);
+    useState<SerializedProduct | null>(null);
   const [selectedEditProduct, setSelectedEditProduct] =
-    useState<ProductWithBrandAndCategory | null>(null);
+    useState<SerializedProduct | null>(null);
   const [selectedDeleteProduct, setSelectedDeleteProduct] =
-    useState<ProductWithBrandAndCategory | null>(null);
+    useState<SerializedProduct | null>(null);
 
   // Search input state
   const [searchInput, setSearchInput] = useState(search);
@@ -760,7 +762,7 @@ export default function AdminProductsPage() {
   async function handleUpdateProduct(
     id: string,
     values: ProductFormValues
-  ): Promise<ProductActionResult<ProductWithBrandAndCategory>> {
+  ): Promise<ProductActionResult<SerializedProduct>> {
     const res = await updateProductAction({
       id,
       name: values.name,
@@ -784,7 +786,7 @@ export default function AdminProductsPage() {
     return res;
   }
 
-  function handleToggleStatus(product: ProductWithBrandAndCategory, enabled: boolean) {
+  function handleToggleStatus(product: SerializedProduct, enabled: boolean) {
     startTransition(async () => {
       const res = await toggleProductStatusAction(product.id, enabled);
       if (res.success) {
@@ -1087,7 +1089,7 @@ export default function AdminProductsPage() {
 
                       {/* Price */}
                       <td className="px-4 py-3 font-semibold text-foreground">
-                        ${Number(prod.price).toFixed(2)}
+                        Rs {Math.round(Number(prod.price))}
                       </td>
 
                       {/* Inventory */}
@@ -1128,37 +1130,39 @@ export default function AdminProductsPage() {
                             <MoreHorizontal className="h-4 w-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-40 bg-popover">
-                            <DropdownMenuLabel className="text-xs">Product Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
+                            <DropdownMenuGroup>
+                              <DropdownMenuLabel className="text-xs">Product Actions</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
 
-                            <DropdownMenuItem onClick={() => setSelectedInspectProduct(prod)}>
-                              <Eye className="mr-2 h-4 w-4 text-muted-foreground" /> View Details
-                            </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setSelectedInspectProduct(prod)}>
+                                <Eye className="mr-2 h-4 w-4 text-muted-foreground" /> View Details
+                              </DropdownMenuItem>
 
-                            <DropdownMenuItem onClick={() => setSelectedEditProduct(prod)}>
-                              <Pencil className="mr-2 h-4 w-4 text-muted-foreground" /> Edit
-                            </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setSelectedEditProduct(prod)}>
+                                <Pencil className="mr-2 h-4 w-4 text-muted-foreground" /> Edit
+                              </DropdownMenuItem>
 
-                            <DropdownMenuItem onClick={() => handleToggleStatus(prod, !prod.enabled)}>
-                              {prod.enabled ? (
-                                <>
-                                  <XCircle className="mr-2 h-4 w-4 text-amber-500" /> Disable
-                                </>
-                              ) : (
-                                <>
-                                  <CheckCircle2 className="mr-2 h-4 w-4 text-emerald-500" /> Enable
-                                </>
-                              )}
-                            </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleToggleStatus(prod, !prod.enabled)}>
+                                {prod.enabled ? (
+                                  <>
+                                    <XCircle className="mr-2 h-4 w-4 text-amber-500" /> Disable
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckCircle2 className="mr-2 h-4 w-4 text-emerald-500" /> Enable
+                                  </>
+                                )}
+                              </DropdownMenuItem>
 
-                            <DropdownMenuSeparator />
+                              <DropdownMenuSeparator />
 
-                            <DropdownMenuItem
-                              variant="destructive"
-                              onClick={() => setSelectedDeleteProduct(prod)}
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" /> Delete
-                            </DropdownMenuItem>
+                              <DropdownMenuItem
+                                variant="destructive"
+                                onClick={() => setSelectedDeleteProduct(prod)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuGroup>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </td>
@@ -1245,7 +1249,6 @@ export default function AdminProductsPage() {
             brandId: selectedEditProduct.brandId ?? "",
             categoryId: selectedEditProduct.categoryId ?? "",
           }}
-          trigger={<span className="hidden" />}
           onSave={(values) => handleUpdateProduct(selectedEditProduct.id, values)}
         />
       )}

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import { Check, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { getProfile, updateProfile } from "@/app/(app)/profile/actions";
 import { SummaryCard, type ProfileUser } from "@/components/profile/SummaryCard";
 import { AccountStatusCard, type AccountStatusInfo } from "@/components/profile/AccountStatusCard";
@@ -50,55 +51,46 @@ export default function ProfilePage() {
     tier: "Verified Customer",
   });
 
-  useEffect(() => {
-    let active = true;
+  const loadProfile = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-    async function loadProfile() {
-      setLoading(true);
-      setError(null);
+    try {
+      const result = await getProfile();
 
-      try {
-        const result = await getProfile();
-
-        if (!active) return;
-
-        if (result.success) {
-          const nextForm = buildFormFromProfile(result.data);
-          setForm(nextForm);
-          setSavedForm(nextForm);
-          setProfileUser({
-            name: result.data.name,
-            email: result.data.email,
-            avatarUrl: result.data.image ?? undefined,
-            memberSince: formatMemberSince(result.data.memberSince),
-            tier: result.data.role === "ADMIN" ? "Administrator" : "Verified Customer",
-          });
-          setAccountStatus({
-            emailVerified: result.data.emailVerified,
-            phone: result.data.phone,
-            role: result.data.role,
-            createdAt: result.data.memberSince,
-            updatedAt: result.data.updatedAt,
-          });
-        } else {
-          setError(result.error.message);
-        }
-      } catch {
-        if (!active) return;
-        setError("Unable to load your profile right now.");
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
+      if (result.success) {
+        const nextForm = buildFormFromProfile(result.data);
+        setForm(nextForm);
+        setSavedForm(nextForm);
+        setProfileUser({
+          name: result.data.name,
+          email: result.data.email,
+          avatarUrl: result.data.image ?? undefined,
+          memberSince: formatMemberSince(result.data.memberSince),
+          tier: result.data.role === "ADMIN" ? "Administrator" : "Verified Customer",
+        });
+        setAccountStatus({
+          emailVerified: result.data.emailVerified,
+          phone: result.data.phone,
+          role: result.data.role,
+          createdAt: result.data.memberSince,
+          updatedAt: result.data.updatedAt,
+        });
+      } else {
+        setError(result.error.message);
       }
+    } catch {
+      setError("Unable to load your profile right now.");
+    } finally {
+      setLoading(false);
     }
-
-    void loadProfile();
-
-    return () => {
-      active = false;
-    };
   }, []);
+
+  // This fetch is intentionally triggered on first mount to hydrate the profile form.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => {
+    void loadProfile();
+  }, [loadProfile]);
 
   const set = (key: keyof ProfileForm) => (e: ChangeEvent<HTMLInputElement>) => {
     setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -123,12 +115,12 @@ export default function ProfilePage() {
     try {
       const result = await updateProfile({
         name: form.fullName.trim(),
-        phone: form.phone.replace(/\s+/g, "") || undefined,
-        houseNo: form.house.trim() || undefined,
-        street: form.street.trim() || undefined,
-        area: form.area.trim() || undefined,
-        city: form.city.trim() || undefined,
-        postalCode: form.postal.trim() || undefined,
+        phone: form.phone.replace(/\s+/g, "") || null,
+        houseNo: form.house.trim() || null,
+        street: form.street.trim() || null,
+        area: form.area.trim() || null,
+        city: form.city.trim() || null,
+        postalCode: form.postal.trim() || null,
       });
 
       if (result.success) {
@@ -168,6 +160,27 @@ export default function ProfilePage() {
         <div className="flex items-center gap-3 rounded-2xl border border-border bg-card px-5 py-4 text-sm text-muted-foreground shadow-card">
           <Loader2 className="size-4 animate-spin text-primary" />
           Loading your profile…
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background px-5 py-10">
+        <div className="rounded-2xl border border-border bg-card p-6 text-center shadow-card">
+          <p className="text-sm font-medium text-destructive">{error}</p>
+          <Button
+            type="button"
+            className="mt-4"
+            onClick={() => {
+              setError(null);
+              setLoading(true);
+              void loadProfile();
+            }}
+          >
+            Retry
+          </Button>
         </div>
       </main>
     );

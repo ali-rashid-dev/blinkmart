@@ -19,7 +19,7 @@ export const initialFilters: Filters = {
   search: "",
   categories: [],
   brands: [],
-  priceRange: [0, 100],
+  priceRange: [0, 50000],
   inStockOnly: false,
 };
 

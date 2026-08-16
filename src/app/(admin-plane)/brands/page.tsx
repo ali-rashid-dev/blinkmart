@@ -157,7 +157,7 @@ export default function BrandsPage() {
     setIsLoading(true);
 
     try {
-      const res = await getBrandsAction({ search: searchQuery ?? "" });
+      const res = await getBrandsAction({ search: searchQuery ?? "", limit: 100 });
       if (requestId !== requestIdRef.current) return;
 
       if (res.success) {
@@ -232,6 +232,9 @@ export default function BrandsPage() {
   };
 
   const handleDelete = (id: string, name: string) => {
+    const confirmed = window.confirm(`Delete "${name}"? This cannot be undone.`);
+    if (!confirmed) return;
+
     startTransition(async () => {
       const res = await deleteBrandAction(id);
       if (res.success) {
@@ -394,7 +397,7 @@ export default function BrandsPage() {
                     onCheckedChange={(enabled) =>
                       handleToggleStatus(brand, enabled)
                     }
-                    aria-label={`Enable ${brand.name}`}
+                    aria-label={`Toggle brand status for ${brand.name}`}
                   />
                 </div>
               </div>

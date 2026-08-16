@@ -152,7 +152,7 @@ function CategoryFormDialog({
               placeholder="fruits-vegetables"
               onChange={(e) => {
                 setSlugManuallyEdited(true);
-                setValue("slug", e.target.value.toLowerCase().replace(/\s+/g, "-"));
+                setValue("slug", slugify(e.target.value));
               }}
             />
             {errors.slug && <p className="text-xs text-destructive">{errors.slug.message}</p>}
@@ -256,6 +256,8 @@ export default function CategoriesPage() {
   const [isPending, startTransition] = useTransition();
   const [searchInput, setSearchInput] = useState(search);
 
+  // The search box is a local mirror of the URL state and is intentionally synced from the route.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     setSearchInput(search);
   }, [search]);
@@ -316,6 +318,8 @@ export default function CategoriesPage() {
     }
   }, [search, status, sortBy, page, limit]);
 
+  // Data hydration for this filtered dashboard is intentionally tied to mount/query changes.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadCategories(); }, [loadCategories]);
 
   // ── Mutations ─────────────────────────────────────────
@@ -330,7 +334,7 @@ export default function CategoriesPage() {
 
     if (result.success) {
       toast.success("Category created");
-      router.refresh();
+      await loadCategories();
     } else {
       toast.error(result.error.message);
     }
@@ -350,7 +354,7 @@ export default function CategoriesPage() {
 
     if (result.success) {
       toast.success("Category updated");
-      router.refresh();
+      await loadCategories();
     } else {
       toast.error(result.error.message);
     }
@@ -364,7 +368,7 @@ export default function CategoriesPage() {
       const result = await deleteCategoryAction(id);
       if (result.success) {
         toast.success("Category deleted");
-        router.refresh();
+        await loadCategories();
       } else {
         toast.error(result.error.message);
       }
@@ -376,7 +380,7 @@ export default function CategoriesPage() {
       const result = await toggleCategoryStatusAction(id, newValue);
       if (result.success) {
         toast.success(newValue ? "Category enabled" : "Category disabled");
-        router.refresh();
+        await loadCategories();
       } else {
         toast.error(result.error.message);
       }

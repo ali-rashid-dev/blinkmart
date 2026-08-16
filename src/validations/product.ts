@@ -35,7 +35,8 @@ export const createProductSchema = z.object({
       z
         .number()
         .positive("Price must be greater than 0")
-        .max(100000, "Price is too high")
+        .min(1, "Price must be at least Rs 1")
+        .max(10000000, "Price cannot exceed Rs 10,000,000")
     ),
   imageUrl: z.string().nullable().optional(),
   enabled: z.boolean().optional().default(true),
@@ -68,7 +69,8 @@ export const updateProductSchema = z.object({
       z
         .number()
         .positive("Price must be greater than 0")
-        .max(100000, "Price is too high")
+        .min(1, "Price must be at least Rs 1")
+        .max(10000000, "Price cannot exceed Rs 10,000,000")
     )
     .optional(),
   imageUrl: z.string().nullable().optional(),

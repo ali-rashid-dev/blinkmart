@@ -4,6 +4,8 @@ import Link from "next/link";
 import { ChevronRight, Truck } from "lucide-react";
 import { ProductGallery } from "@/components/products/ProductGallery";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
+import { cart } from "@/components/products/cart";
+import { toCustomerProduct } from "@/components/products/data";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -20,26 +22,9 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   const categoryName = product.category?.name || "Groceries";
   const brandName = product.brand?.name || "BlinkMart";
   const price = Number(product.price);
-  const formattedPrice = `$${price.toFixed(2)}`;
+  const formattedPrice = `Rs ${Math.round(price)}`;
 
-  // Convert DB product into customer UI format
-  const customerProductData = {
-    id: product.id,
-    slug: product.slug,
-    name: product.name,
-    brand: brandName,
-    category: categoryName,
-    price,
-    originalPrice: price,
-    discountPercentage: 0,
-    unit: "item",
-    image: product.imageUrl || "🛒",
-    images: product.imageUrl ? [product.imageUrl] : [],
-    shortDescription: product.description || "Fresh grocery item available on BlinkMart.",
-    stock: product.enabled ? 50 : 0,
-    availability: product.enabled ? ("in-stock" as const) : ("out-of-stock" as const),
-    rating: 5,
-  };
+  const customerProductData = toCustomerProduct(product);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-background">
@@ -98,6 +83,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                     label={product.name}
                     disabled={!product.enabled}
                     size="lg"
+                    onAdd={() => cart.add(product.id, 1)}
                   />
                 </div>
               </div>

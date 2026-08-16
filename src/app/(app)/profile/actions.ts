@@ -58,12 +58,12 @@ export async function getProfile(): Promise<ProfileActionResult<ProfileData>> {
 }
 
 export async function updateProfile(input: ProfileUpdateInput & {
-  phone?: string;
-  houseNo?: string;
-  street?: string;
-  area?: string;
-  city?: string;
-  postalCode?: string;
+  phone?: string | null;
+  houseNo?: string | null;
+  street?: string | null;
+  area?: string | null;
+  city?: string | null;
+  postalCode?: string | null;
 }): Promise<ProfileActionResult<ProfileData>> {
   try {
     const userId = await getSessionUserId();

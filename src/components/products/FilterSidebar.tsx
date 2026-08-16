@@ -68,20 +68,20 @@ export function FilterSidebar({
         <Slider
           value={filters.priceRange}
           min={0}
-          max={100}
-          step={1}
+          max={50000}
+          step={500}
           onValueChange={(val) => {
             const v = Array.isArray(val) ? val : [val];
-            onChange((f) => ({ ...f, priceRange: [v[0] ?? 0, v[1] ?? 100] }));
+            onChange((f) => ({ ...f, priceRange: [v[0] ?? 0, v[1] ?? 50000] }));
           }}
           aria-label="Price range"
         />
         <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-          <span>Min $0</span>
+          <span>Min Rs 0</span>
           <span className="font-bold text-foreground">
-            ${filters.priceRange[0]} — ${filters.priceRange[1]}
+            Rs {filters.priceRange[0]} — Rs {filters.priceRange[1]}
           </span>
-          <span>Max $100</span>
+          <span>Max Rs 50,000</span>
         </div>
       </Section>
 

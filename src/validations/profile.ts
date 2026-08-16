@@ -2,9 +2,9 @@ import { z } from "zod";
 
 const optionalTrimmedString = (maxLength: number, fieldName: string) =>
   z
-    .union([z.string(), z.undefined()])
+    .union([z.string(), z.undefined(), z.null()])
     .transform((value) => {
-      if (value === undefined) {
+      if (value == null) {
         return undefined;
       }
 
