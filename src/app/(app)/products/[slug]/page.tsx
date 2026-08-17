@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ChevronRight, Truck } from "lucide-react";
 import { ProductGallery } from "@/components/products/ProductGallery";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
-import { cart } from "@/components/products/cart";
 import { toCustomerProduct } from "@/components/products/data";
 
 interface ProductPageProps {
@@ -80,10 +79,10 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex min-w-[12rem] flex-1">
                   <AddToCartButton
+                    productId={product.id}
                     label={product.name}
                     disabled={!product.enabled}
                     size="lg"
-                    onAdd={() => cart.add(product.id, 1)}
                   />
                 </div>
               </div>

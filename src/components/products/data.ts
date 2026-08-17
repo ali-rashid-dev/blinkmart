@@ -15,8 +15,12 @@ export type CustomerProduct = {
   imageUrl: string | null;
   /** true = Active / visible, false = disabled / hidden */
   enabled: boolean;
+  /** Brand ID */
+  brandId?: string | null;
   /** Brand name (resolved from relation) */
   brandName: string | null;
+  /** Category ID */
+  categoryId?: string | null;
   /** Category name (resolved from relation) */
   categoryName: string | null;
   createdAt: Date;
@@ -36,7 +40,9 @@ export function toCustomerProduct(p: ProductWithBrandAndCategory): CustomerProdu
     price: Number(p.price),
     imageUrl: p.imageUrl ?? null,
     enabled: p.enabled,
+    brandId: p.brandId ?? null,
     brandName: p.brand?.name ?? null,
+    categoryId: p.categoryId ?? null,
     categoryName: p.category?.name ?? null,
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,

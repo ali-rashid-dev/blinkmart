@@ -27,6 +27,33 @@ export function toggle<T>(list: T[], item: T): T[] {
   return list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
 }
 
+export function parseCategoryEmoji(name: string, slug?: string): { emoji: string; label: string } {
+  if (!name) return { emoji: "🛒", label: "" };
+
+  const emojiRegex = /^([\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}])\s*/u;
+  const match = name.match(emojiRegex);
+  if (match && match[1]) {
+    return {
+      emoji: match[1],
+      label: name.substring(match[0].length).trim(),
+    };
+  }
+
+  const lower = (name + " " + (slug || "")).toLowerCase();
+  if (lower.includes("produce") || lower.includes("fruit") || lower.includes("veg")) return { emoji: "🥦", label: name };
+  if (lower.includes("dairy") || lower.includes("milk") || lower.includes("egg")) return { emoji: "🥛", label: name };
+  if (lower.includes("bakery") || lower.includes("bread")) return { emoji: "🥖", label: name };
+  if (lower.includes("meat") || lower.includes("seafood") || lower.includes("fish")) return { emoji: "🥩", label: name };
+  if (lower.includes("pantry") || lower.includes("grain") || lower.includes("staple")) return { emoji: "🥫", label: name };
+  if (lower.includes("beverage") || lower.includes("drink") || lower.includes("juice")) return { emoji: "🥤", label: name };
+  if (lower.includes("snack") || lower.includes("sweet") || lower.includes("candy")) return { emoji: "🍿", label: name };
+  if (lower.includes("frozen") || lower.includes("ice")) return { emoji: "🧊", label: name };
+  if (lower.includes("house") || lower.includes("clean")) return { emoji: "🧼", label: name };
+  if (lower.includes("care") || lower.includes("beauty")) return { emoji: "💆", label: name };
+
+  return { emoji: "🛒", label: name };
+}
+
 export function buildChips(
   filters: Filters,
   getCategoryLabel: (id: string) => string
@@ -47,22 +74,63 @@ export function buildChips(
   return chips;
 }
 
-export function filterProducts<T extends { name: string; brand?: any; categoryId?: string | null }>(
+export function filterProducts<T extends {
+  name: string;
+  description?: string | null;
+  price: number;
+  enabled?: boolean;
+  brandName?: string | null;
+  categoryName?: string | null;
+  categoryId?: string | null;
+  brandId?: string | null;
+}>(
   products: T[],
   filters: Filters
 ): T[] {
   return products.filter((p) => {
-    if (filters.search && !p.name.toLowerCase().includes(filters.search.toLowerCase())) {
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      const nameMatch = p.name.toLowerCase().includes(q);
+      const descMatch = p.description?.toLowerCase().includes(q);
+      const brandMatch = p.brandName?.toLowerCase().includes(q);
+      const catMatch = p.categoryName?.toLowerCase().includes(q);
+      if (!nameMatch && !descMatch && !brandMatch && !catMatch) return false;
+    }
+
+    if (filters.categories.length > 0) {
+      const matchesCategory = filters.categories.some(
+        (catId) =>
+          p.categoryId === catId ||
+          p.categoryName?.toLowerCase() === catId.toLowerCase()
+      );
+      if (!matchesCategory) return false;
+    }
+
+    if (filters.brands.length > 0) {
+      const matchesBrand = filters.brands.some(
+        (b) =>
+          p.brandId === b ||
+          p.brandName?.toLowerCase() === b.toLowerCase()
+      );
+      if (!matchesBrand) return false;
+    }
+
+    if (filters.priceRange) {
+      const price = Number(p.price);
+      if (price < filters.priceRange[0] || price > filters.priceRange[1]) {
+        return false;
+      }
+    }
+
+    if (filters.inStockOnly && p.enabled === false) {
       return false;
     }
-    if (filters.categories.length > 0 && (!p.categoryId || !filters.categories.includes(p.categoryId))) {
-      return false;
-    }
+
     return true;
   });
 }
 
-export function sortProducts<T extends { price: number | any; name: string }>(
+export function sortProducts<T extends { price: number | any; name: string; createdAt?: Date }>(
   products: T[],
   sort: SortValue | string
 ): T[] {
@@ -75,6 +143,13 @@ export function sortProducts<T extends { price: number | any; name: string }>(
   }
   if (sort === "name-asc") {
     return list.sort((a, b) => a.name.localeCompare(b.name));
+  }
+  if (sort === "newest") {
+    return list.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
+    });
   }
   return list;
 }

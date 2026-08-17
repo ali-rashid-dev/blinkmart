@@ -121,9 +121,9 @@ export function ProductCard({
             />
           ) : (
             <AddToCartButton
+              productId={product.id}
               label={product.name}
               disabled={soldOut}
-              onAdd={() => cart.add(product.id, 1)}
               {...(compact ? { compact: true } : {})}
             />
           )}

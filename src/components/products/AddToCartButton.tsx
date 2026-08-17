@@ -3,18 +3,21 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, Loader2, ShoppingBasket } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { cart } from "./cart";
 
 export function AddToCartButton({
   label,
   disabled,
   compact,
   size = "md",
+  productId,
   onAdd,
 }: {
   label: string;
   disabled?: boolean;
   compact?: boolean;
   size?: "md" | "lg";
+  productId?: string;
   onAdd?: () => void;
 }) {
   const [state, setState] = useState<"idle" | "loading" | "done">("idle");
@@ -28,12 +31,14 @@ export function AddToCartButton({
     timers.current.push(
       setTimeout(() => {
         setState("done");
+        if (productId) {
+          cart.add(productId, 1);
+        }
         onAdd?.();
       }, 600),
       setTimeout(() => setState("idle"), 1600),
     );
   };
-
 
   return (
     <button

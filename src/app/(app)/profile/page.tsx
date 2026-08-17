@@ -115,12 +115,12 @@ export default function ProfilePage() {
     try {
       const result = await updateProfile({
         name: form.fullName.trim(),
-        phone: form.phone.replace(/\s+/g, "") || null,
-        houseNo: form.house.trim() || null,
-        street: form.street.trim() || null,
-        area: form.area.trim() || null,
-        city: form.city.trim() || null,
-        postalCode: form.postal.trim() || null,
+        phone: form.phone.replace(/\s+/g, "") || undefined,
+        houseNo: form.house.trim() || undefined,
+        street: form.street.trim() || undefined,
+        area: form.area.trim() || undefined,
+        city: form.city.trim() || undefined,
+        postalCode: form.postal.trim() || undefined,
       });
 
       if (result.success) {

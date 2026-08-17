@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:ts": "find src -name \"*.test.ts\" -print0 | xargs -0 -n1 -P4 npx tsx"
+    "test:ts": "find src -name \"*.test.ts\" -print0 | xargs -0 -n1 -P4 npx tsx",
+    "seed": "tsx prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
