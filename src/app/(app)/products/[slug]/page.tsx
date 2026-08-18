@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight, Truck } from "lucide-react";
 import { ProductGallery } from "@/components/products/ProductGallery";
-import { AddToCartButton } from "@/components/products/AddToCartButton";
+import { PurchasePanel } from "@/components/products/PurchasePanel";
 import { toCustomerProduct } from "@/components/products/data";
 
 interface ProductPageProps {
@@ -41,6 +41,10 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
             Home
           </Link>
           <ChevronRight className="size-3" />
+          <Link href="/products" className="hover:text-foreground">
+            Products
+          </Link>
+          <ChevronRight className="size-3" />
           <span>{categoryName}</span>
           <ChevronRight className="size-3" />
           <span className="font-semibold text-foreground">{product.name}</span>
@@ -75,18 +79,8 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               {product.description || "High quality grocery product."}
             </p>
 
-            <div className="mt-6 rounded-3xl border border-border bg-card p-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex min-w-[12rem] flex-1">
-                  <AddToCartButton
-                    productId={product.id}
-                    label={product.name}
-                    disabled={!product.enabled}
-                    size="lg"
-                  />
-                </div>
-              </div>
-            </div>
+            
+            <PurchasePanel product={customerProductData} />
 
             <div className="mt-5 flex items-start gap-3 rounded-2xl border border-border bg-card/70 p-3">
               <Truck className="mt-0.5 size-4 shrink-0 text-secondary" />

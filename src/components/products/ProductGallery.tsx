@@ -40,7 +40,7 @@ export function ProductGallery({ product }: ProductGalleryProps) {
             src={currentImage}
             alt={product.name}
             className={cn(
-              "relative h-full w-full object-contain p-4 transition-all duration-300",
+              "relative h-full w-full object-cover object-center transition-all duration-300",
               soldOut && "opacity-45 saturate-0"
             )}
             onError={(e) => {
@@ -87,7 +87,7 @@ export function ProductGallery({ product }: ProductGalleryProps) {
                 <img
                   src={img}
                   alt={`Image ${i + 1}`}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover object-center"
                 />
               ) : (
                 <ImageIcon className="h-6 w-6 text-muted-foreground" />

@@ -36,15 +36,21 @@ import {
 export type ProductsClientProps = {
   categories?: CustomerCategoryRecord[];
   brands?: CustomerBrandRecord[];
-  initialProducts?: CustomerProduct[];
+  // If `initialProducts` is `undefined`, the component will fall back to
+  // `fallbackProducts` (demo data). If an empty array (`[]`) is explicitly
+  // provided, the component will honor that and render the EmptyState.
+  initialProducts?: CustomerProduct[] | undefined;
 };
 
 export function ProductsClient({
   categories: rawCategories = [],
   brands: rawBrands = [],
-  initialProducts = [],
+  initialProducts,
 }: ProductsClientProps) {
-  const productList = initialProducts.length > 0 ? initialProducts : fallbackProducts;
+  // Treat an omitted `initialProducts` (undefined) as the signal to use
+  // demo `fallbackProducts`. If callers explicitly pass an empty array,
+  // preserve it so the EmptyState is reachable.
+  const productList = initialProducts !== undefined ? initialProducts : fallbackProducts;
 
   const priceBounds: [number, number] = useMemo(() => {
     if (productList.length === 0) return [0, 5000];

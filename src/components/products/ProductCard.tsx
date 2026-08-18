@@ -49,8 +49,7 @@ export function ProductCard({
             src={product.imageUrl!}
             alt={product.name}
             className={cn(
-              "relative h-full w-full transition-transform duration-500 ease-out group-hover:scale-105",
-              compact ? "object-cover" : "object-contain p-3",
+              "relative h-full w-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105",
               soldOut && "opacity-45 saturate-0",
             )}
             onError={(e) => {
