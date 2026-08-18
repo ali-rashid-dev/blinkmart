@@ -25,6 +25,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   profile       UserProfile?
+  cart          Cart?
 
   @@map("user")
 }
@@ -121,25 +122,58 @@ model Brand {
 }
 
 model Product {
-  id          String    @id @default(cuid())
+  id          String     @id @default(cuid())
   name        String
-  slug        String    @unique @db.Citext
+  slug        String     @unique @db.Citext
   description String?
-  price       Decimal   @db.Decimal(10, 2)
+  price       Decimal    @db.Decimal(10, 2)
   imageUrl    String?
-  enabled     Boolean   @default(true)
+  inventory   Int?       @default(100)
+  enabled     Boolean    @default(true)
   brandId     String?
-  brand       Brand?    @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  brand       Brand?     @relation(fields: [brandId], references: [id], onDelete: SetNull)
   categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  category    Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  cartItems   CartItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   @@map("product")
   @@index([brandId])
   @@index([categoryId])
   @@index([enabled])
 }
+
+model Cart {
+  id           String     @id @default(cuid())
+  userId       String?    @unique
+  user         User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionToken String?    @unique
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  items        CartItem[]
+
+  @@map("cart")
+  @@index([userId])
+  @@index([sessionToken])
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, productId])
+  @@map("cart_item")
+  @@index([cartId])
+  @@index([productId])
+}
+
 
 
 

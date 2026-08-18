@@ -5,7 +5,7 @@ import { ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AddToCartButton } from "./AddToCartButton";
 import { QuantitySelector } from "./QuantitySelector";
-import { cart, useCartQty } from "./cart";
+import { cartStore, useCartState } from "@/lib/cart/store";
 import type { CustomerProduct } from "./data";
 
 export function ProductCard({
@@ -15,7 +15,9 @@ export function ProductCard({
   product: CustomerProduct;
   view?: "grid" | "compact";
 }) {
-  const qty = useCartQty(product.id);
+  const { lines } = useCartState();
+  const cartLine = lines.find((l) => l.productId === product.id);
+  const qty = cartLine ? cartLine.quantity : 0;
   const soldOut = !product.enabled;
   const compact = view === "compact";
 
@@ -114,7 +116,7 @@ export function ProductCard({
           {qty > 0 && !soldOut ? (
             <QuantitySelector
               value={qty}
-              onChange={(n) => cart.set(product.id, n)}
+              onChange={(n) => void cartStore.updateQuantity(product.id, n)}
               max={99}
               label={product.name}
             />

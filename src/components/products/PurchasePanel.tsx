@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useState } from "react";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
 import { QuantitySelector } from "@/components/products/QuantitySelector";
-import { cart, useCartQty } from "@/components/products/cart";
+import { cartStore, useCartState } from "@/lib/cart/store";
 import type { CustomerProduct } from "@/components/products/data";
 
 export function PurchasePanel({ product }: { product: CustomerProduct }) {
-  const inCart = useCartQty(product.id);
+  const { lines } = useCartState();
+  const cartLine = lines.find((l) => l.productId === product.id);
+  const inCart = cartLine ? cartLine.quantity : 0;
   const [qty, setQty] = useState(1);
   const soldOut = !product.enabled;
 
@@ -18,7 +20,7 @@ export function PurchasePanel({ product }: { product: CustomerProduct }) {
         <div className="flex flex-wrap items-center gap-3">
           <QuantitySelector
             value={inCart}
-            onChange={(n) => cart.set(product.id, n)}
+            onChange={(n) => void cartStore.updateQuantity(product.id, n)}
             max={99}
             label={product.name}
           />
@@ -44,7 +46,8 @@ export function PurchasePanel({ product }: { product: CustomerProduct }) {
               label={product.name}
               disabled={soldOut}
               size="lg"
-              onAdd={() => cart.add(product.id, qty)}
+              productId={product.id}
+              quantity={qty}
             />
           </div>
         </div>
