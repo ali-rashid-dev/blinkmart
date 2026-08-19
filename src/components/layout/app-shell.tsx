@@ -21,11 +21,9 @@ const nav = [
   { href: "/customers", label: "Customers", icon: Users },
   { href: "/categories", label: "Categories", icon: Tag },
   { href: "/brands", label: "Brands", icon: Store },
-  { href: "/products", label: "Products", icon: Package },
-  { href: "/inventory", label: "Inventory", icon: Boxes },
-  { href: "/orders", label: "Orders", icon: ShoppingBag },
+  { href: "/admin/products", label: "Products", icon: Package },
+  { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/deliveries", label: "Deliveries", icon: Truck },
-  { href: "/reports", label: "Reports", icon: BarChart3 },
   { href: "/notifications", label: "Notifications", icon: Bell },
 ] as const;
 
