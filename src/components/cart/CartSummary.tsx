@@ -46,14 +46,13 @@ export function CartSummary({
       </dl>
 
       <div className="mt-5 flex flex-col gap-2.5">
-        <button
-          type="button"
-          onClick={() => alert("Checkout coming soon!")}
+        <Link
+          href="/checkout"
           className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-button)] transition-transform hover:scale-[1.01]"
         >
           <ShoppingBag className="size-4" aria-hidden="true" />
           Proceed to Checkout
-        </button>
+        </Link>
 
         <Link
           href="/products"

@@ -26,6 +26,7 @@ model User {
   sessions      Session[]
   profile       UserProfile?
   cart          Cart?
+  orders        Order[]
 
   @@map("user")
 }
@@ -135,6 +136,7 @@ model Product {
   categoryId  String?
   category    Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   cartItems   CartItem[]
+  orderItems  OrderItem[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
@@ -173,6 +175,68 @@ model CartItem {
   @@index([cartId])
   @@index([productId])
 }
+
+enum OrderStatus {
+  PLACED
+  CONFIRMED
+  PACKED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  code         String      @unique
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status       OrderStatus @default(PLACED)
+  subtotal     Decimal     @db.Decimal(10, 2)
+  deliveryFee  Decimal     @db.Decimal(10, 2) @default(0.00)
+  total        Decimal     @db.Decimal(10, 2)
+  deliveryDate DateTime
+  deliverySlot String      @default("7:00 PM – 10:00 PM")
+  cancelReason String?
+  cancelledAt  DateTime?
+
+  // Delivery Address Snapshot
+  fullName     String
+  phone        String
+  house        String
+  street       String
+  area         String
+  city         String
+  postal       String
+  notes        String?
+
+  items        OrderItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@map("order")
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  name      String
+  price     Decimal  @db.Decimal(10, 2)
+  quantity  Int
+  unit      String   @default("1 pack")
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("order_item")
+  @@index([orderId])
+  @@index([productId])
+}
+
 
 
 
