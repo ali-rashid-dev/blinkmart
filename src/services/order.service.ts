@@ -43,6 +43,7 @@ import {
   DEFAULT_DELIVERY_FEE,
 } from "@/lib/orders/eligibility";
 import { parseISO, isBefore, startOfDay, isAfter, format } from "date-fns";
+import { notifyOrderStatusChange } from "@/services/notification.service";
 
 export class InvalidDeliveryDateError extends Error {
   constructor(message: string) {
@@ -178,7 +179,9 @@ export async function placeOrder(
     deliveryDate: deliveryDateObj,
   });
 
-  return mapPrismaOrderToDomainOrder(dbOrder);
+  const domainOrder = mapPrismaOrderToDomainOrder(dbOrder);
+  void notifyOrderStatusChange(userId, domainOrder.id, domainOrder.code, "placed").catch(() => {});
+  return domainOrder;
 }
 
 export async function getUserOrders(userId: string): Promise<Order[]> {
@@ -201,7 +204,9 @@ export async function cancelUserOrder(
 ): Promise<Order> {
   const parsed = cancelOrderSchema.parse(input);
   const dbOrder = await cancelOrderInDb(userId, parsed.orderId, parsed.reason);
-  return mapPrismaOrderToDomainOrder(dbOrder);
+  const domainOrder = mapPrismaOrderToDomainOrder(dbOrder);
+  void notifyOrderStatusChange(userId, domainOrder.id, domainOrder.code, "cancelled").catch(() => {});
+  return domainOrder;
 }
 
 export async function reorderUserOrder(
@@ -292,7 +297,14 @@ export async function updateAdminOrderStatus(
     cancelReason,
     reinstate: reinstate || undefined,
   });
-  return mapPrismaOrderToDomainOrder(updatedDbOrder);
+  const domainOrder = mapPrismaOrderToDomainOrder(updatedDbOrder);
+  void notifyOrderStatusChange(
+    updatedDbOrder.userId,
+    domainOrder.id,
+    domainOrder.code,
+    domainOrder.status
+  ).catch(() => {});
+  return domainOrder;
 }
 
 export async function getAdminOrderDetail(orderId: string): Promise<Order | null> {

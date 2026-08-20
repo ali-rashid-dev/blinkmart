@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LIFECYCLE } from "@/lib/orders/types";
+import { LIFECYCLE, type OrderStatus } from "@/lib/orders/types";
 
 export function isRealCalendarDate(value: string): boolean {
   const [year, month, day] = value.split("-").map(Number);
@@ -76,7 +76,7 @@ export const updateOrderStatusSchema = z
 
     const lifecycle = LIFECYCLE;
     const currentIndex = lifecycle.indexOf(value.currentStatus);
-    const requestedIndex = lifecycle.indexOf(value.status.toLowerCase());
+    const requestedIndex = lifecycle.indexOf(value.status.toLowerCase() as OrderStatus);
 
     if (currentIndex === -1 || requestedIndex === -1 || requestedIndex < currentIndex) {
       ctx.addIssue({

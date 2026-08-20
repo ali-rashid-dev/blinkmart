@@ -24,7 +24,7 @@ const nav = [
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/deliveries", label: "Deliveries", icon: Truck },
-  { href: "/notifications", label: "Notifications", icon: Bell },
+  { href: "/admin/notification", label: "Notifications", icon: Bell },
 ] as const;
 
 function NavList({ collapsed, onNavigate }: { collapsed?: boolean; onNavigate?: () => void }) {

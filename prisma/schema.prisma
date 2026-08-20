@@ -14,12 +14,12 @@ enum Role {
 }
 
 model User {
-  id            String       @id
+  id            String         @id
   name          String
-  email         String       @unique
+  email         String         @unique
   emailVerified Boolean
   image         String?
-  role          Role         @default(USER)
+  role          Role           @default(USER)
   createdAt     DateTime
   updatedAt     DateTime
   accounts      Account[]
@@ -27,6 +27,7 @@ model User {
   profile       UserProfile?
   cart          Cart?
   orders        Order[]
+  notifications Notification[]
 
   @@map("user")
 }
@@ -208,9 +209,10 @@ model Order {
   postal       String
   notes        String?
 
-  items        OrderItem[]
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  items         OrderItem[]
+  notifications Notification[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   @@map("order")
   @@index([userId])
@@ -236,8 +238,29 @@ model OrderItem {
   @@index([productId])
 }
 
+enum NotificationKind {
+  PLACED
+  CONFIRMED
+  PACKED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+  PROMOTION
+}
 
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      NotificationKind
+  title     String
+  body      String
+  orderId   String?
+  order     Order?           @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
 
-
-
-
+  @@map("notification")
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([orderId])
+}

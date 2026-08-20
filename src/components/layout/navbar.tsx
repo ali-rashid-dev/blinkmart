@@ -5,6 +5,7 @@ import { Button } from "../ui/button";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { CartBadge } from "@/components/cart/CartBadge";
+import { NotificationBadge } from "@/components/notification/NotificationBadge";
 
 export const Navbar = () => {
   const router = useRouter();
@@ -35,6 +36,7 @@ export const Navbar = () => {
           </div>
 
           <nav className="flex items-center space-x-3">
+            <NotificationBadge />
             <CartBadge />
             <Link
               href="/login"
