@@ -50,3 +50,66 @@ export const updateOrderStatusSchema = z.object({
 
 export type UpdateOrderStatusInput = z.infer<typeof updateOrderStatusSchema>;
 
+export const getAdminOrdersSchema = z.object({
+  search: z
+    .preprocess(
+      (val) => (typeof val === "string" && val.trim() === "" ? undefined : val),
+      z.string().trim().min(1).max(200).optional()
+    ),
+  status: z
+    .preprocess(
+      (val) => {
+        if (val == null) return undefined;
+        if (typeof val === "string") {
+          const trimmed = val.trim().toUpperCase();
+          if (trimmed === "" || trimmed === "ALL") return undefined;
+          return trimmed;
+        }
+        return val;
+      },
+      z
+        .enum(["PLACED", "CONFIRMED", "PACKED", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED"])
+        .optional()
+    ),
+  deliveryDate: z
+    .preprocess(
+      (val) => (typeof val === "string" && val.trim() === "" ? undefined : val),
+      z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid deliveryDate format")
+        .refine((value) => {
+          const [year, month, day] = value.split("-").map(Number);
+          if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
+            return false;
+          }
+
+          const date = new Date(Date.UTC(year, month - 1, day));
+          return (
+            date.getUTCFullYear() === year &&
+            date.getUTCMonth() === month - 1 &&
+            date.getUTCDate() === day
+          );
+        }, "Invalid deliveryDate value")
+        .optional()
+    ),
+  page: z.preprocess((val) => {
+    if (val == null || val === "") return undefined;
+    if (typeof val === "string") {
+      if (!/^\d+$/.test(val.trim())) return Number.NaN;
+      return Number(val);
+    }
+    return val;
+  }, z.number().int().min(1).max(1000).optional()),
+  limit: z.preprocess((val) => {
+    if (val == null || val === "") return undefined;
+    if (typeof val === "string") {
+      if (!/^\d+$/.test(val.trim())) return Number.NaN;
+      return Number(val);
+    }
+    return val;
+  }, z.number().int().min(1).max(100).optional()),
+});
+
+export type GetAdminOrdersInput = z.infer<typeof getAdminOrdersSchema>;
+
+

@@ -9,7 +9,7 @@ import {
   updateAdminOrderStatus,
   getAdminOrderDetail,
 } from "@/services/order.service";
-import { updateOrderStatusSchema } from "@/validations/order";
+import { updateOrderStatusSchema, getAdminOrdersSchema } from "@/validations/order";
 import {
   OrderNotFoundError,
   EmptyCartError,
@@ -57,46 +57,6 @@ export async function getAdminOrdersAction(params: {
 }): Promise<AdminOrderActionResult<{ items: Order[]; totalItems: number; totalPages: number }>> {
   const authCheck = await requireAdmin<AdminOrderActionErrorCode, AdminOrderActionResult<never>>(buildError);
   if (isAuthError(authCheck)) return authCheck;
-
-  // Validate client-supplied params. Coerce string numbers when possible.
-  const getAdminOrdersSchema = z.object({
-    search: z.string().min(1).max(200).optional(),
-    status: z
-      .string()
-      .transform((s) => s?.toUpperCase())
-      .optional()
-      .refine(
-        (v) => v == null || v === "ALL" || ["PLACED", "CONFIRMED", "PACKED", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED"].includes(v),
-        { message: "Invalid status value" }
-      ),
-    deliveryDate: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid deliveryDate format")
-      .refine((value) => {
-        const [year, month, day] = value.split("-").map(Number);
-        if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
-          return false;
-        }
-
-        const date = new Date(Date.UTC(year, month - 1, day));
-        return (
-          date.getUTCFullYear() === year &&
-          date.getUTCMonth() === month - 1 &&
-          date.getUTCDate() === day
-        );
-      }, "Invalid deliveryDate value")
-      .optional(),
-    page: z.preprocess((val) => {
-      if (typeof val !== "string") return val;
-      if (!/^\d+$/.test(val.trim())) return Number.NaN;
-      return Number(val);
-    }, z.number().int().min(1).max(1000).optional()),
-    limit: z.preprocess((val) => {
-      if (typeof val !== "string") return val;
-      if (!/^\d+$/.test(val.trim())) return Number.NaN;
-      return Number(val);
-    }, z.number().int().min(1).max(100).optional()),
-  });
 
   const parsed = getAdminOrdersSchema.safeParse(params);
   if (!parsed.success) {

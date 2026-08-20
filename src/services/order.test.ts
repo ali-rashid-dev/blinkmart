@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { getAvailableDeliveryDates, canCancel, type Order } from "../lib/orders/types";
-import { placeOrderSchema, cancelOrderSchema } from "../validations/order";
+import { placeOrderSchema, cancelOrderSchema, getAdminOrdersSchema } from "../validations/order";
 import { InsufficientInventoryError } from "./order.errors";
 
 describe("Order Module Service & Utilities", () => {
@@ -112,5 +112,48 @@ describe("Order Module Service & Utilities", () => {
     const err2 = new InsufficientInventoryError("Organic Hass Avocados", "prod_123", 5, 2);
     assert.equal(err2.message, 'Insufficient inventory for product "Organic Hass Avocados" (2 available, 5 requested).');
   });
+
+  it("validates getAdminOrdersSchema with empty string defaults and sanitized filters", () => {
+    const emptyFilters = {
+      search: "",
+      status: "all",
+      deliveryDate: "",
+      page: 1,
+      limit: 10,
+    };
+    const parsedEmpty = getAdminOrdersSchema.safeParse(emptyFilters);
+    assert.equal(parsedEmpty.success, true);
+    if (parsedEmpty.success) {
+      assert.equal(parsedEmpty.data.search, undefined);
+      assert.equal(parsedEmpty.data.status, undefined);
+      assert.equal(parsedEmpty.data.deliveryDate, undefined);
+      assert.equal(parsedEmpty.data.page, 1);
+      assert.equal(parsedEmpty.data.limit, 10);
+    }
+
+    const validFilters = {
+      search: "  ORD-123  ",
+      status: "placed",
+      deliveryDate: "2026-08-20",
+      page: "2",
+      limit: "20",
+    };
+    const parsedValid = getAdminOrdersSchema.safeParse(validFilters);
+    assert.equal(parsedValid.success, true);
+    if (parsedValid.success) {
+      assert.equal(parsedValid.data.search, "ORD-123");
+      assert.equal(parsedValid.data.status, "PLACED");
+      assert.equal(parsedValid.data.deliveryDate, "2026-08-20");
+      assert.equal(parsedValid.data.page, 2);
+      assert.equal(parsedValid.data.limit, 20);
+    }
+
+    const invalidStatus = { status: "INVALID_STATUS" };
+    assert.equal(getAdminOrdersSchema.safeParse(invalidStatus).success, false);
+
+    const invalidDate = { deliveryDate: "2026-02-31" };
+    assert.equal(getAdminOrdersSchema.safeParse(invalidDate).success, false);
+  });
 });
+
 

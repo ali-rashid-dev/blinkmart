@@ -29,6 +29,21 @@ let currentState: OrdersState = {
 
 const listeners = new Set<() => void>();
 
+function getOrderRevision(order: Order): number {
+  const timestamps = [new Date(order.placedAt).getTime(), ...order.timeline.map((entry) => new Date(entry.at).getTime())];
+
+  if (order.cancelledAt) {
+    timestamps.push(new Date(order.cancelledAt).getTime());
+  }
+
+  return timestamps.reduce((latest, timestamp) => Math.max(latest, timestamp), 0);
+}
+
+function shouldAcceptOrderUpdate(existing: Order | null, incoming: Order): boolean {
+  if (!existing) return true;
+  return getOrderRevision(incoming) >= getOrderRevision(existing);
+}
+
 function emitChange() {
   for (const listener of listeners) {
     listener();
@@ -205,11 +220,24 @@ export function useOrder(idOrCode: string): {
       const res = await getOrderByIdAction(idOrCode);
       if (cancelled || currentRequestId !== detailRequestIdRef.current) return;
       if (res.success) {
+        const nextOrder = res.data;
+        const currentOrder = cachedOrder ?? state.byId[nextOrder.id] ?? state.orders?.find((existing) => existing.id === nextOrder.id || existing.code === nextOrder.code) ?? null;
+
+        if (!shouldAcceptOrderUpdate(currentOrder, nextOrder)) {
+          setLoading(false);
+          return;
+        }
+
         updateState((prev) => {
-          const nextById = { ...prev.byId, [res.data.id]: res.data, [res.data.code]: res.data };
+          const existingOrder = prev.byId[nextOrder.id] ?? prev.byId[nextOrder.code] ?? prev.orders?.find((existing) => existing.id === nextOrder.id || existing.code === nextOrder.code) ?? null;
+          if (!shouldAcceptOrderUpdate(existingOrder, nextOrder)) {
+            return prev;
+          }
+
+          const nextById = { ...prev.byId, [nextOrder.id]: nextOrder, [nextOrder.code]: nextOrder };
           const nextOrders = prev.orders
             ? prev.orders.map((existing) =>
-                existing.id === res.data.id || existing.code === res.data.code ? res.data : existing
+                existing.id === nextOrder.id || existing.code === nextOrder.code ? nextOrder : existing
               )
             : prev.orders;
 
@@ -219,7 +247,7 @@ export function useOrder(idOrCode: string): {
             orders: nextOrders,
           };
         });
-        setOrder(res.data);
+        setOrder(nextOrder);
       } else {
         // Distinguish genuine load errors from not-found (return null)
         setError(res.error?.message ?? "Failed to load order");
@@ -244,31 +272,51 @@ export function useOrder(idOrCode: string): {
       setLoading(true);
       setError(null);
 
-      void getOrderByIdAction(idOrCode).then((res) => {
-        if (currentRequestId !== detailRequestIdRef.current) return;
-        if (res.success) {
-          updateState((prev) => {
-            const nextById = { ...prev.byId, [res.data.id]: res.data, [res.data.code]: res.data };
-            const nextOrders = prev.orders
-              ? prev.orders.map((existing) =>
-                  existing.id === res.data.id || existing.code === res.data.code ? res.data : existing
-                )
-              : prev.orders;
+      void getOrderByIdAction(idOrCode)
+        .then((res) => {
+          if (currentRequestId !== detailRequestIdRef.current) return;
+          if (res.success) {
+            const nextOrder = res.data;
+            const currentOrder = cachedOrder ?? state.byId[nextOrder.id] ?? state.orders?.find((existing) => existing.id === nextOrder.id || existing.code === nextOrder.code) ?? null;
 
-            return {
-              ...prev,
-              byId: nextById,
-              orders: nextOrders,
-            };
-          });
-          setOrder(res.data);
-          setError(null);
-        } else {
-          setError(res.error?.message ?? "Failed to load order");
+            if (!shouldAcceptOrderUpdate(currentOrder, nextOrder)) {
+              setLoading(false);
+              return;
+            }
+
+            updateState((prev) => {
+              const existingOrder = prev.byId[nextOrder.id] ?? prev.byId[nextOrder.code] ?? prev.orders?.find((existing) => existing.id === nextOrder.id || existing.code === nextOrder.code) ?? null;
+              if (!shouldAcceptOrderUpdate(existingOrder, nextOrder)) {
+                return prev;
+              }
+
+              const nextById = { ...prev.byId, [nextOrder.id]: nextOrder, [nextOrder.code]: nextOrder };
+              const nextOrders = prev.orders
+                ? prev.orders.map((existing) =>
+                    existing.id === nextOrder.id || existing.code === nextOrder.code ? nextOrder : existing
+                  )
+                : prev.orders;
+
+              return {
+                ...prev,
+                byId: nextById,
+                orders: nextOrders,
+              };
+            });
+            setOrder(nextOrder);
+            setError(null);
+          } else {
+            setError(res.error?.message ?? "Failed to load order");
+            setOrder(null);
+          }
+          setLoading(false);
+        })
+        .catch(() => {
+          if (currentRequestId !== detailRequestIdRef.current) return;
+          setError("Failed to load order");
           setOrder(null);
-        }
-        setLoading(false);
-      });
+          setLoading(false);
+        });
     },
   };
 }
