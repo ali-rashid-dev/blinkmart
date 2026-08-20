@@ -183,14 +183,14 @@ export function useOrder(idOrCode: string): {
   const [order, setOrder] = useState<Order | null>(cachedOrder);
   const [loading, setLoading] = useState<boolean>(() => (!cachedOrder ? state.loading : false));
   const [error, setError] = useState<string | null>(null);
-  const requestIdRef = useRef(0);
+  const detailRequestIdRef = useRef(0);
 
   useEffect(() => {
     setOrder(cachedOrder);
   }, [cachedOrder]);
 
   useEffect(() => {
-    const currentRequestId = ++requestIdRef.current;
+    const currentRequestId = ++detailRequestIdRef.current;
     let cancelled = false;
 
     async function fetch() {
@@ -203,8 +203,22 @@ export function useOrder(idOrCode: string): {
       setLoading(true);
       setError(null);
       const res = await getOrderByIdAction(idOrCode);
-      if (cancelled || currentRequestId !== requestIdRef.current) return;
+      if (cancelled || currentRequestId !== detailRequestIdRef.current) return;
       if (res.success) {
+        updateState((prev) => {
+          const nextById = { ...prev.byId, [res.data.id]: res.data, [res.data.code]: res.data };
+          const nextOrders = prev.orders
+            ? prev.orders.map((existing) =>
+                existing.id === res.data.id || existing.code === res.data.code ? res.data : existing
+              )
+            : prev.orders;
+
+          return {
+            ...prev,
+            byId: nextById,
+            orders: nextOrders,
+          };
+        });
         setOrder(res.data);
       } else {
         // Distinguish genuine load errors from not-found (return null)
@@ -226,11 +240,34 @@ export function useOrder(idOrCode: string): {
     error,
     refetch: () => {
       void ordersStore.load(true);
-      const currentRequestId = ++requestIdRef.current;
+      const currentRequestId = ++detailRequestIdRef.current;
+      setLoading(true);
+      setError(null);
 
       void getOrderByIdAction(idOrCode).then((res) => {
-        if (currentRequestId !== requestIdRef.current) return;
-        if (res.success) setOrder(res.data);
+        if (currentRequestId !== detailRequestIdRef.current) return;
+        if (res.success) {
+          updateState((prev) => {
+            const nextById = { ...prev.byId, [res.data.id]: res.data, [res.data.code]: res.data };
+            const nextOrders = prev.orders
+              ? prev.orders.map((existing) =>
+                  existing.id === res.data.id || existing.code === res.data.code ? res.data : existing
+                )
+              : prev.orders;
+
+            return {
+              ...prev,
+              byId: nextById,
+              orders: nextOrders,
+            };
+          });
+          setOrder(res.data);
+          setError(null);
+        } else {
+          setError(res.error?.message ?? "Failed to load order");
+          setOrder(null);
+        }
+        setLoading(false);
       });
     },
   };
