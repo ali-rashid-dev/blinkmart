@@ -10,7 +10,12 @@ import {
   getAdminOrderDetail,
 } from "@/services/order.service";
 import { updateOrderStatusSchema } from "@/validations/order";
-import { OrderNotFoundError } from "@/services/order.service";
+import {
+  OrderNotFoundError,
+  EmptyCartError,
+  InvalidDeliveryDateError,
+} from "@/services/order.service";
+import { OrderCannotCancelError, InsufficientInventoryError } from "@/services/order.errors";
 import type { Order } from "@/lib/orders/types";
 import type { AdminOrderStats } from "@/repositories/order.repository";
 
@@ -64,24 +69,43 @@ export async function getAdminOrdersAction(params: {
         (v) => v == null || v === "ALL" || ["PLACED", "CONFIRMED", "PACKED", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED"].includes(v),
         { message: "Invalid status value" }
       ),
-    deliveryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid deliveryDate format").optional(),
+    deliveryDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid deliveryDate format")
+      .refine((value) => {
+        const [year, month, day] = value.split("-").map(Number);
+        if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
+          return false;
+        }
+
+        const date = new Date(Date.UTC(year, month - 1, day));
+        return (
+          date.getUTCFullYear() === year &&
+          date.getUTCMonth() === month - 1 &&
+          date.getUTCDate() === day
+        );
+      }, "Invalid deliveryDate value")
+      .optional(),
     page: z.preprocess((val) => {
-      if (typeof val === "string") return parseInt(val, 10);
-      return val;
+      if (typeof val !== "string") return val;
+      if (!/^\d+$/.test(val.trim())) return Number.NaN;
+      return Number(val);
     }, z.number().int().min(1).max(1000).optional()),
     limit: z.preprocess((val) => {
-      if (typeof val === "string") return parseInt(val, 10);
-      return val;
+      if (typeof val !== "string") return val;
+      if (!/^\d+$/.test(val.trim())) return Number.NaN;
+      return Number(val);
     }, z.number().int().min(1).max(100).optional()),
   });
 
   const parsed = getAdminOrdersSchema.safeParse(params);
   if (!parsed.success) {
-    return buildError(
-      "VALIDATION_ERROR",
-      "Invalid filters provided for orders.",
-      parsed.error.flatten().fieldErrors as unknown as Record<string, string>
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    const normalizedDetails = Object.fromEntries(
+      Object.entries(fieldErrors).map(([key, messages]) => [key, messages?.join("; ") ?? "Invalid value"])
     );
+
+    return buildError("VALIDATION_ERROR", "Invalid filters provided for orders.", normalizedDetails);
   }
 
   try {
@@ -116,11 +140,12 @@ export async function updateAdminOrderStatusAction(params: {
 
   const parsed = updateOrderStatusSchema.safeParse(params);
   if (!parsed.success) {
-    return buildError(
-      "VALIDATION_ERROR",
-      "Invalid order status update fields.",
-      parsed.error.flatten().fieldErrors as unknown as Record<string, string>
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    const normalizedDetails = Object.fromEntries(
+      Object.entries(fieldErrors).map(([key, messages]) => [key, messages?.join("; ") ?? "Invalid value"])
     );
+
+    return buildError("VALIDATION_ERROR", "Invalid order status update fields.", normalizedDetails);
   }
 
   try {
@@ -131,15 +156,24 @@ export async function updateAdminOrderStatusAction(params: {
     return { success: true, data: updatedOrder };
   } catch (error) {
     console.error("Failed to update order status:", error);
-    // Map known service errors to action error codes
+
     if (error instanceof OrderNotFoundError) {
       return buildError("NOT_FOUND", "Order not found.");
     }
+    if (error instanceof OrderCannotCancelError) {
+      return buildError("VALIDATION_ERROR", error.message);
+    }
+    if (error instanceof InsufficientInventoryError) {
+      return buildError("VALIDATION_ERROR", error.message);
+    }
+    if (error instanceof InvalidDeliveryDateError) {
+      return buildError("VALIDATION_ERROR", error.message);
+    }
+    if (error instanceof EmptyCartError) {
+      return buildError("VALIDATION_ERROR", error.message);
+    }
 
-    // No specific illegal-transition error type is exported by the service; skip mapping.
-
-    // For unknown failures, return a fixed safe message to avoid leaking internals.
-    return buildError("DATABASE_ERROR", "Failed to update order status.");
+    return buildError("UNKNOWN_ERROR", "An unexpected error occurred while updating order status.");
   }
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useSyncExternalStore } from "react";
+import { useState, useEffect, useSyncExternalStore, useRef } from "react";
 import type { Order } from "./types";
 import {
   getOrdersAction,
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 export interface OrdersState {
   loading: boolean;
   orders: Order[] | null;
+  byId: Record<string, Order>;
   error: string | null;
   pendingIds: string[];
 }
@@ -21,6 +22,7 @@ export interface OrdersState {
 let currentState: OrdersState = {
   loading: false,
   orders: null,
+  byId: {},
   error: null,
   pendingIds: [],
 };
@@ -64,10 +66,16 @@ export const ordersStore = {
     isInitialLoading = false;
 
     if (res.success) {
+      const byId = Object.fromEntries(res.data.map((order) => [order.id, order]));
+      for (const order of res.data) {
+        byId[order.code] = order;
+      }
+
       updateState((prev) => ({
         ...prev,
         loading: false,
         orders: res.data,
+        byId: { ...prev.byId, ...byId },
         error: null,
       }));
     } else {
@@ -95,10 +103,15 @@ export const ordersStore = {
 
     if (res.success) {
       toast.success("Order cancelled successfully");
-        updateState((prev) => ({
+      updateState((prev) => {
+        const nextById = { ...prev.byId, [res.data.id]: res.data, [res.data.code]: res.data };
+
+        return {
           ...prev,
-          orders: prev.orders ? prev.orders.map((o) => (o.id === orderId ? res.data : o)) : null,
-        }));
+          orders: prev.orders ? prev.orders.map((o) => (o.id === orderId ? res.data : o)) : prev.orders,
+          byId: nextById,
+        };
+      });
       return true;
     } else {
       toast.error("Failed to cancel order", { description: res.error.message });
@@ -134,6 +147,7 @@ export const ordersStore = {
 
 export function useOrdersState(): {
   orders: Order[] | null;
+  byId: Record<string, Order>;
   loading: boolean;
   error: string | null;
   pendingIds: string[];
@@ -147,6 +161,7 @@ export function useOrdersState(): {
 
   return {
     orders: state.orders,
+    byId: state.byId,
     loading: state.loading,
     error: state.error,
     pendingIds: state.pendingIds,
@@ -162,19 +177,22 @@ export function useOrder(idOrCode: string): {
 } {
   const state = useOrdersState();
 
-  // If already in list store, find it
-  const cachedOrder = state.orders?.find((o) => o.id === idOrCode || o.code === idOrCode) ?? null;
+  // If already in list or per-id store, find it
+  const cachedOrder = state.byId[idOrCode] ?? state.orders?.find((o) => o.id === idOrCode || o.code === idOrCode) ?? null;
 
   const [order, setOrder] = useState<Order | null>(cachedOrder);
   const [loading, setLoading] = useState<boolean>(() => (!cachedOrder ? state.loading : false));
   const [error, setError] = useState<string | null>(null);
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
     setOrder(cachedOrder);
   }, [cachedOrder]);
 
   useEffect(() => {
+    const currentRequestId = ++requestIdRef.current;
     let cancelled = false;
+
     async function fetch() {
       if (cachedOrder) {
         setLoading(false);
@@ -185,7 +203,7 @@ export function useOrder(idOrCode: string): {
       setLoading(true);
       setError(null);
       const res = await getOrderByIdAction(idOrCode);
-      if (cancelled) return;
+      if (cancelled || currentRequestId !== requestIdRef.current) return;
       if (res.success) {
         setOrder(res.data);
       } else {
@@ -196,7 +214,7 @@ export function useOrder(idOrCode: string): {
       setLoading(false);
     }
 
-    fetch();
+    void fetch();
     return () => {
       cancelled = true;
     };
@@ -208,8 +226,10 @@ export function useOrder(idOrCode: string): {
     error,
     refetch: () => {
       void ordersStore.load(true);
-      // also re-fetch single order
+      const currentRequestId = ++requestIdRef.current;
+
       void getOrderByIdAction(idOrCode).then((res) => {
+        if (currentRequestId !== requestIdRef.current) return;
         if (res.success) setOrder(res.data);
       });
     },
