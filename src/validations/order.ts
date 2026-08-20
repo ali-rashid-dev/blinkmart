@@ -61,6 +61,7 @@ export const updateOrderStatusSchema = z
     orderId: z.string().min(1, "Order ID is required"),
     status: z.enum(["PLACED", "CONFIRMED", "PACKED", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED"]),
     cancelReason: z.string().max(300, "Reason is too long").optional().nullable(),
+    reinstate: z.boolean().optional(),
     currentStatus: z
       .enum(["placed", "confirmed", "packed", "out_for_delivery", "delivered", "cancelled"])
       .optional(),

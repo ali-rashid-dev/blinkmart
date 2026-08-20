@@ -161,15 +161,6 @@ export async function placeOrder(
     );
   }
 
-  // Calculate totals
-  let subtotal = 0;
-  for (const item of validItems) {
-    subtotal += Number(item.product.price) * item.quantity;
-  }
-  subtotal = Math.round(subtotal * 100) / 100;
-  const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DEFAULT_DELIVERY_FEE;
-  const total = Math.round((subtotal + deliveryFee) * 100) / 100;
-
   const deliveryDateObj = parseISO(parsed.deliveryDate);
 
   const dbOrder = await createOrderInDb({
@@ -288,8 +279,8 @@ export async function updateAdminOrderStatus(
 
   const parsed = updateOrderStatusSchema.parse({ ...input, currentStatus });
 
-  const reinstate = parsed.cancelReason === "__REINSTATE__";
-  const cancelReason = reinstate ? undefined : parsed.cancelReason ?? undefined;
+  const reinstate = parsed.reinstate ?? false;
+  const cancelReason = parsed.cancelReason ?? undefined;
 
   const updatedDbOrder = await updateAdminOrderStatusInDb({
     orderId: parsed.orderId,

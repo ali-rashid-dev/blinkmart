@@ -53,24 +53,33 @@ export const notificationsStore = {
     if (isInitialLoading && !force) return;
 
     isInitialLoading = true;
-    updateState((prev) => ({ ...prev, loading: true, error: null }));
+    // If forcing a load, clear the cached list so we don't show another user's data
+    updateState((prev) => ({ ...prev, loading: true, error: null, list: force ? [] : prev.list }));
 
-    const res = await getNotificationsAction();
-    isInitialLoading = false;
+    try {
+      const res = await getNotificationsAction();
 
-    if (res.success) {
-      updateState((prev) => ({
-        ...prev,
-        loading: false,
-        list: res.data,
-        error: null,
-      }));
-    } else {
-      updateState((prev) => ({
-        ...prev,
-        loading: false,
-        error: res.error.message,
-      }));
+      if (res.success) {
+        updateState((prev) => ({
+          ...prev,
+          loading: false,
+          list: res.data,
+          error: null,
+        }));
+      } else {
+        // If unauthorized, clear any cached list and report the auth error
+        if (res.error.code === "UNAUTHORIZED") {
+          updateState((prev) => ({ ...prev, loading: false, list: [], error: res.error.message }));
+        } else {
+          updateState((prev) => ({ ...prev, loading: false, error: res.error.message }));
+        }
+      }
+    } catch (err: any) {
+      // Network or unexpected error while loading — surface message and clear list on auth failure
+      const message = err?.message ?? "Failed to load notifications";
+      updateState((prev) => ({ ...prev, loading: false, error: message }));
+    } finally {
+      isInitialLoading = false;
     }
   },
 

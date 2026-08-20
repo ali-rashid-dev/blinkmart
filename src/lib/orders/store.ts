@@ -144,6 +144,9 @@ export const ordersStore = {
         toast.error("Failed to cancel order", { description: res.error.message });
         return false;
       }
+    } catch (err) {
+      toast.error("Failed to cancel order");
+      return false;
     } finally {
       updateState((prev) => ({
         ...prev,
@@ -171,6 +174,9 @@ export const ordersStore = {
         toast.error("Failed to reorder", { description: res.error.message });
         return false;
       }
+    } catch (err) {
+      toast.error("Failed to reorder");
+      return false;
     } finally {
       updateState((prev) => ({
         ...prev,

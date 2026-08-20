@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import { BellRing, Megaphone, Send, ShoppingBasket, Loader2 } from "lucide-react";
+import { Megaphone, Send, ShoppingBasket, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { Switch } from "@/components/ui/switch";
+// Switch removed: push controls are not persisted server-side
 import {
   sendPromotionAction,
   getAdminOrderFeedAction,
@@ -12,12 +12,11 @@ import {
 import { formatRelative, KIND_LABEL } from "@/lib/notifications/types";
 import type { AdminOrderNotificationRow, AdminCampaignRow } from "@/repositories/notification.repository";
 
-type Tab = "promotional" | "orders" | "push";
+type Tab = "promotional" | "orders";
 
 const tabs: { value: Tab; label: string; icon: typeof Megaphone }[] = [
   { value: "promotional", label: "Promotional", icon: Megaphone },
   { value: "orders", label: "Orders", icon: ShoppingBasket },
-  { value: "push", label: "Push notifications", icon: BellRing },
 ];
 
 export default function AdminNotificationsPage() {
@@ -25,7 +24,7 @@ export default function AdminNotificationsPage() {
   const [headline, setHeadline] = useState("");
   const [body, setBody] = useState("");
   const [audience, setAudience] = useState<"all" | "active" | "lapsed">("all");
-  const [push, setPush] = useState({ orders: true, promos: true, quiet: false });
+  const [error, setError] = useState<string | null>(null);
 
   const [isPending, startTransition] = useTransition();
   const [orderFeed, setOrderFeed] = useState<AdminOrderNotificationRow[]>([]);
@@ -34,18 +33,32 @@ export default function AdminNotificationsPage() {
 
   const fetchFeeds = async () => {
     setLoadingData(true);
-    const [feedRes, campRes] = await Promise.all([
-      getAdminOrderFeedAction(),
-      getAdminCampaignsAction(),
-    ]);
+    setError(null);
+    try {
+      const [feedRes, campRes] = await Promise.all([getAdminOrderFeedAction(), getAdminCampaignsAction()]);
 
-    if (feedRes.success) {
-      setOrderFeed(feedRes.data);
+      // Preserve successful data and collect errors from unsuccessful siblings
+      let collectedError: string | null = null;
+
+      if (feedRes && feedRes.success) {
+        setOrderFeed(feedRes.data);
+      } else if (feedRes && !feedRes.success) {
+        collectedError = feedRes.error.message;
+      }
+
+      if (campRes && campRes.success) {
+        setCampaigns(campRes.data);
+      } else if (campRes && !campRes.success) {
+        collectedError = collectedError ? `${collectedError}; ${campRes.error.message}` : campRes.error.message;
+      }
+
+      if (collectedError) setError(collectedError);
+    } catch (err: any) {
+      // Unexpected failure (e.g., network) — show a fallback message
+      setError(err?.message ?? "Failed to load feeds");
+    } finally {
+      setLoadingData(false);
     }
-    if (campRes.success) {
-      setCampaigns(campRes.data);
-    }
-    setLoadingData(false);
   };
 
   useEffect(() => {
@@ -89,8 +102,20 @@ export default function AdminNotificationsPage() {
     <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
       <h1 className="font-display text-3xl font-bold text-foreground">Notifications</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Compose promotional campaigns, watch order updates and control push delivery settings.
+        Compose promotional campaigns and watch order updates.
       </p>
+
+      {error && (
+        <div className="mt-4 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive flex items-center justify-between">
+          <div>Failed to load notification feeds: {error}</div>
+          <button
+            onClick={() => void fetchFeeds()}
+            className="ml-4 inline-flex h-8 items-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-semibold text-foreground"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       <div role="tablist" aria-label="Notification sections" className="mt-6 flex flex-wrap gap-2">
         {tabs.map((t) => {
@@ -250,45 +275,8 @@ export default function AdminNotificationsPage() {
         </div>
       )}
 
-      {tab === "push" && (
-        <div className="mt-6 rounded-2xl border border-border bg-card p-6">
-          <h2 className="font-display text-xl font-semibold text-foreground">Push notifications</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Control which push messages leave the store.
-          </p>
-          <ul className="mt-4 divide-y divide-border">
-            {[
-              {
-                key: "orders" as const,
-                label: "Order lifecycle pushes",
-                hint: "Placed, confirmed, packed, out for delivery, delivered, and cancelled.",
-              },
-              {
-                key: "promos" as const,
-                label: "Promotional pushes",
-                hint: "Deals, discounts and seasonal campaigns.",
-              },
-              {
-                key: "quiet" as const,
-                label: "Quiet hours (10:00 PM – 8:00 AM)",
-                hint: "Hold non-urgent pushes until morning.",
-              },
-            ].map((row) => (
-              <li key={row.key} className="flex items-center justify-between gap-4 py-4">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">{row.label}</p>
-                  <p className="text-xs text-muted-foreground">{row.hint}</p>
-                </div>
-                <Switch
-                  checked={push[row.key]}
-                  onCheckedChange={(v) => setPush((p) => ({ ...p, [row.key]: v }))}
-                  aria-label={row.label}
-                />
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {/* Push controls removed: persistent server-side storage not available in this codebase */}
     </main>
   );
 }
+    

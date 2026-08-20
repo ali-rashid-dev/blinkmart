@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import type { NotificationKind as PrismaNotificationKind } from "@/generated/prisma/enums";
 import type { AppNotification, NotificationKind } from "@/lib/notifications/types";
 
@@ -112,7 +112,6 @@ export async function createNotificationsForMany(
       title: params.title,
       body: params.body,
     })),
-    skipDuplicates: true,
   });
 
   return result.count;
@@ -203,35 +202,20 @@ export interface AdminCampaignRow {
 }
 
 export async function findRecentCampaigns(limit = 5): Promise<AdminCampaignRow[]> {
-  // Group promotion notifications by (title, body) — each unique group = 1 campaign send
-  // We approximate by finding the most recent promotion notification per unique title+body pair
-  const rows = await prisma.notification.findMany({
+  // Aggregate promotion notifications by title+body in the database
+  const groups = await prisma.notification.groupBy({
+    by: ["title", "body"],
     where: { kind: "PROMOTION" },
-    orderBy: { createdAt: "desc" },
-    select: {
-      title: true,
-      body: true,
-      createdAt: true,
-    },
-    take: 1000, // cap to avoid unbounded scan
+    _count: { _all: true },
+    _max: { createdAt: true },
+    orderBy: { _max: { createdAt: "desc" } },
+    take: limit,
   });
 
-  // Deduplicate: keep first occurrence (newest) per title
-  const seen = new Map<string, AdminCampaignRow>();
-  for (const row of rows) {
-    if (seen.has(row.title)) {
-      // Increment reach count for the existing campaign
-      seen.get(row.title)!.reach += 1;
-    } else {
-      seen.set(row.title, {
-        title: row.title,
-        body: row.body,
-        sentAt: row.createdAt,
-        reach: 1,
-      });
-    }
-    if (seen.size >= limit) break;
-  }
-
-  return Array.from(seen.values()).slice(0, limit);
+  return groups.map((g) => ({
+    title: g.title,
+    body: g.body,
+    sentAt: g._max.createdAt!,
+    reach: g._count._all,
+  }));
 }

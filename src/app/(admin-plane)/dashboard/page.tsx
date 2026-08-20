@@ -41,7 +41,7 @@ export default function DashboardPage() {
           <div className="mt-6 space-y-4">
             {[
               ["Orders shipped today", "143 / 180 scheduled"],
-              ["Active product catalog", "All catalog items available"],
+              ["Active product catalog", "Products currently marked active in the catalog"],
               ["Categories live", "18 active collections"],
             ].map(([title, detail]) => (
               <div key={title} className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-3">

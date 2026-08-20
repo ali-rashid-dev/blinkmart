@@ -9,7 +9,7 @@ import { notificationsStore, useNotifications } from "@/lib/notifications/store"
 import { matchesFilter, type NotificationFilter } from "@/lib/notifications/types";
 
 export default function NotificationsPage() {
-  const { list, unread, loading } = useNotifications();
+  const { list, unread, loading, error, refresh } = useNotifications();
   const [filter, setFilter] = useState<NotificationFilter>("all");
 
   const counts = useMemo(
@@ -57,7 +57,19 @@ export default function NotificationsPage() {
         </div>
       ) : rows.length === 0 ? (
         <div className="mt-6">
-          <EmptyNotifications message="Order updates and promotions will appear here as soon as they arrive." />
+          {error ? (
+            <div className="space-y-3">
+              <p className="text-sm text-destructive">Failed to load notifications: {error}</p>
+              <button
+                onClick={() => refresh()}
+                className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-foreground"
+              >
+                Retry
+              </button>
+            </div>
+          ) : (
+            <EmptyNotifications message="Order updates and promotions will appear here as soon as they arrive." />
+          )}
         </div>
       ) : (
         <ul className="mt-6 space-y-3">
