@@ -846,7 +846,7 @@ export default function AdminProductsPage() {
       />
 
       {/* Product Statistics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="rounded-2xl border border-border bg-card p-4 shadow-xs">
           <div className="flex items-center justify-between text-muted-foreground mb-1">
             <span className="text-xs font-medium uppercase tracking-wider">Total Products</span>
@@ -877,15 +877,6 @@ export default function AdminProductsPage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-xs">
-          <div className="flex items-center justify-between text-muted-foreground mb-1">
-            <span className="text-xs font-medium uppercase tracking-wider">In Stock</span>
-            <Tag className="h-4 w-4 text-primary" />
-          </div>
-          <p className="font-serif text-2xl font-bold text-foreground">
-            {loading ? "..." : stats.active}
-          </p>
-        </div>
       </div>
 
       {/* Search and Filters Toolbar */}

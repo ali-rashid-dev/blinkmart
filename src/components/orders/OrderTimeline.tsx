@@ -19,7 +19,7 @@ export function OrderTimeline({ order }: { order: Order }) {
   return (
     <ol aria-label="Order progress" className="relative space-y-5">
       {steps.map((status, i) => {
-        const at = reached.get(status);
+        const at = status === "cancelled" ? order.cancelledAt ?? reached.get(status) ?? null : reached.get(status);
         const done = Boolean(at);
         const isCurrent = !cancelled && i === currentIndex;
         const isCancelStep = status === "cancelled";

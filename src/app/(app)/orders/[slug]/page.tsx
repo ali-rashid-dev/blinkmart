@@ -29,7 +29,7 @@ export default function OrderDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = use(params);
-  const { order, loading } = useOrder(slug);
+  const { order, loading, error, refetch } = useOrder(slug);
 
   useEffect(() => {
     void ordersStore.load();
@@ -47,6 +47,17 @@ export default function OrderDetailPage({
 
       {loading && !order ? (
         <DetailSkeleton />
+      ) : error && !order ? (
+        <div className="mt-10 rounded-2xl border border-dashed border-border bg-card/60 px-6 py-14 text-center">
+          <p className="text-sm text-muted-foreground">{error}</p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="mt-4 inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
+          >
+            Retry
+          </button>
+        </div>
       ) : !order ? (
         <div className="mt-10 rounded-2xl border border-dashed border-border bg-card/60 px-6 py-14 text-center">
           <p className="text-sm text-muted-foreground">We couldn&apos;t find that order.</p>

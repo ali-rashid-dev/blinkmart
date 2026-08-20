@@ -82,14 +82,14 @@ export const ordersStore = {
 
     if (res.success) {
       updateState((prev) => {
-        const nextById = { ...prev.byId };
-        const nextOrders = prev.orders ? [...prev.orders] : [];
+        const nextById: Record<string, Order> = {};
+        const nextOrders: Order[] = [];
 
         for (const incoming of res.data) {
           const existingOrder =
-            nextById[incoming.id] ??
-            nextById[incoming.code] ??
-            nextOrders.find((existing) => existing.id === incoming.id || existing.code === incoming.code) ??
+            prev.byId[incoming.id] ??
+            prev.byId[incoming.code] ??
+            prev.orders?.find((existing) => existing.id === incoming.id || existing.code === incoming.code) ??
             null;
 
           if (!shouldAcceptOrderUpdate(existingOrder, incoming)) {
@@ -98,22 +98,13 @@ export const ordersStore = {
 
           nextById[incoming.id] = incoming;
           nextById[incoming.code] = incoming;
-
-          const orderIndex = nextOrders.findIndex(
-            (existing) => existing.id === incoming.id || existing.code === incoming.code
-          );
-
-          if (orderIndex >= 0) {
-            nextOrders[orderIndex] = incoming;
-          } else {
-            nextOrders.push(incoming);
-          }
+          nextOrders.push(incoming);
         }
 
         return {
           ...prev,
           loading: false,
-          orders: nextOrders.length > 0 ? nextOrders : res.data,
+          orders: nextOrders,
           byId: nextById,
           error: null,
         };
@@ -134,28 +125,30 @@ export const ordersStore = {
       pendingIds: [...prev.pendingIds, orderId],
     }));
 
-    const res = await cancelOrderAction(orderId, reason);
+    try {
+      const res = await cancelOrderAction(orderId, reason);
 
-    updateState((prev) => ({
-      ...prev,
-      pendingIds: prev.pendingIds.filter((id) => id !== orderId),
-    }));
+      if (res.success) {
+        toast.success("Order cancelled successfully");
+        updateState((prev) => {
+          const nextById = { ...prev.byId, [res.data.id]: res.data, [res.data.code]: res.data };
 
-    if (res.success) {
-      toast.success("Order cancelled successfully");
-      updateState((prev) => {
-        const nextById = { ...prev.byId, [res.data.id]: res.data, [res.data.code]: res.data };
-
-        return {
-          ...prev,
-          orders: prev.orders ? prev.orders.map((o) => (o.id === orderId ? res.data : o)) : prev.orders,
-          byId: nextById,
-        };
-      });
-      return true;
-    } else {
-      toast.error("Failed to cancel order", { description: res.error.message });
-      return false;
+          return {
+            ...prev,
+            orders: prev.orders ? prev.orders.map((o) => (o.id === orderId ? res.data : o)) : prev.orders,
+            byId: nextById,
+          };
+        });
+        return true;
+      } else {
+        toast.error("Failed to cancel order", { description: res.error.message });
+        return false;
+      }
+    } finally {
+      updateState((prev) => ({
+        ...prev,
+        pendingIds: prev.pendingIds.filter((id) => id !== orderId),
+      }));
     }
   },
 
@@ -165,22 +158,24 @@ export const ordersStore = {
       pendingIds: [...prev.pendingIds, orderId],
     }));
 
-    const res = await reorderAction(orderId);
+    try {
+      const res = await reorderAction(orderId);
 
-    updateState((prev) => ({
-      ...prev,
-      pendingIds: prev.pendingIds.filter((id) => id !== orderId),
-    }));
-
-    if (res.success) {
-      toast.success("Items added to your cart", {
-        description: `Reordered ${res.data.itemCount} items into your cart.`,
-      });
-      void cartStore.load(true);
-      return true;
-    } else {
-      toast.error("Failed to reorder", { description: res.error.message });
-      return false;
+      if (res.success) {
+        toast.success("Items added to your cart", {
+          description: `Reordered ${res.data.itemCount} items into your cart.`,
+        });
+        void cartStore.load(true);
+        return true;
+      } else {
+        toast.error("Failed to reorder", { description: res.error.message });
+        return false;
+      }
+    } finally {
+      updateState((prev) => ({
+        ...prev,
+        pendingIds: prev.pendingIds.filter((id) => id !== orderId),
+      }));
     }
   },
 };

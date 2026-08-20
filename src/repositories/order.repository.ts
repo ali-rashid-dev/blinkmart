@@ -28,83 +28,98 @@ export async function createOrderInDb(params: {
   userId: string;
   cart: CartWithItems;
   address: PlaceOrderInput;
-  subtotal: number;
-  deliveryFee: number;
-  total: number;
   deliveryDate: Date;
 }): Promise<OrderWithItems> {
-  const { userId, cart, address, subtotal, deliveryFee, total, deliveryDate } = params;
+  const { userId, cart, address, deliveryDate } = params;
 
   // Retry the whole transaction if we hit a unique constraint collision on `code` (P2002)
   let attempts = 0;
   while (true) {
     try {
       return await prisma.$transaction(async (tx) => {
-        // Generate code (db constraint will protect uniqueness)
         const code = generateOrderCode();
-
-        // Filter enabled cart items
-    const validItems = cart.items.filter(
-      (item) => item.product.enabled && (!item.product.brand || item.product.brand.enabled)
-    );
-
-    if (validItems.length === 0) {
-      throw new Error("No available items in cart to place order.");
-    }
-
-    // Create Order
-    const order = await tx.order.create({
-      data: {
-        code,
-        userId,
-        status: "PLACED",
-        subtotal,
-        deliveryFee,
-        total,
-        deliveryDate,
-        deliverySlot: "7:00 PM – 10:00 PM",
-        fullName: address.fullName,
-        phone: address.phone,
-        house: address.house,
-        street: address.street,
-        area: address.area,
-        city: address.city,
-        postal: address.postal,
-        notes: address.notes ?? null,
-        items: {
-          create: validItems.map((item) => {
-            const priceNum = Number(item.product.price);
-            const categoryName = item.product.category?.name;
-            const unit = categoryName ? `1 ${categoryName.toLowerCase()}` : "1 pack";
-            return {
-              productId: item.productId,
-              name: item.product.name,
-              price: priceNum,
-              quantity: item.quantity,
-              unit,
-              imageUrl: item.product.imageUrl ?? null,
-            };
-          }),
-        },
-      },
-      include: {
-        items: {
+        const txCart = await tx.cart.findUnique({
+          where: { id: cart.id },
           include: {
-            product: {
+            items: {
               include: {
-                brand: true,
-                category: true,
+                product: {
+                  include: {
+                    brand: true,
+                    category: true,
+                  },
+                },
               },
             },
           },
-        },
-      },
-    });
+        });
 
-    // Clear cart items
-    await tx.cartItem.deleteMany({
-      where: { cartId: cart.id },
-    });
+        const validItems = (txCart?.items ?? []).filter(
+          (item) => item.product.enabled && (!item.product.brand || item.product.brand.enabled)
+        );
+
+        if (validItems.length === 0) {
+          throw new Error("No available items in cart to place order.");
+        }
+
+        const subtotal = validItems.reduce(
+          (sum, item) => sum + Number(item.product.price) * item.quantity,
+          0
+        );
+        const deliveryFee = subtotal >= 30 ? 0 : 2.99;
+        const total = Math.round((subtotal + deliveryFee) * 100) / 100;
+        const itemIds = validItems.map((item) => item.id);
+        const order = await tx.order.create({
+          data: {
+            code,
+            userId,
+            status: "PLACED",
+            subtotal: Math.round(subtotal * 100) / 100,
+            deliveryFee,
+            total,
+            deliveryDate,
+            deliverySlot: "7:00 PM – 10:00 PM",
+            fullName: address.fullName,
+            phone: address.phone,
+            house: address.house,
+            street: address.street,
+            area: address.area,
+            city: address.city,
+            postal: address.postal,
+            notes: address.notes ?? null,
+            items: {
+              create: validItems.map((item) => {
+                const priceNum = Number(item.product.price);
+                const categoryName = item.product.category?.name;
+                const unit = categoryName ? `1 ${categoryName.toLowerCase()}` : "1 pack";
+                return {
+                  productId: item.productId,
+                  name: item.product.name,
+                  price: priceNum,
+                  quantity: item.quantity,
+                  unit,
+                  imageUrl: item.product.imageUrl ?? null,
+                };
+              }),
+            },
+          },
+          include: {
+            items: {
+              include: {
+                product: {
+                  include: {
+                    brand: true,
+                    category: true,
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        await tx.cartItem.deleteMany({
+          where: { id: { in: itemIds }, cartId: cart.id },
+        });
 
         return order;
       });
@@ -198,7 +213,13 @@ export async function cancelOrderInDb(
   });
 
   if (updateResult.count === 0) {
-    throw new Error(`Order cannot be cancelled in status ${existing.status}`);
+    const current = await prisma.order.findUnique({
+      where: { id: existing.id },
+      select: { status: true },
+    });
+    throw new OrderCannotCancelError(
+      `Order cannot be cancelled in status ${current?.status ?? existing.status}`
+    );
   }
 
   return prisma.order.findUnique({
@@ -372,16 +393,25 @@ export async function updateAdminOrderStatusInDb(params: {
   if (status === "CANCELLED") {
     data.cancelReason = cancelReason || "Cancelled by store administrator";
     data.cancelledAt = new Date();
-  }
-  else {
-    // Clear cancellation metadata when transitioning away from CANCELLED
+  } else if (existing.status === "CANCELLED" && cancelReason === "__REINSTATE__") {
     data.cancelReason = null;
     data.cancelledAt = null;
+  } else {
+    data.cancelReason = existing.cancelReason ?? null;
+    data.cancelledAt = existing.cancelledAt ?? null;
   }
 
-  return prisma.order.update({
-    where: { id: orderId },
+  const updateResult = await prisma.order.updateMany({
+    where: { id: orderId, status: existing.status },
     data,
+  });
+
+  if (updateResult.count === 0) {
+    throw new Error(`Order "${orderId}" was updated by another administrator.`);
+  }
+
+  return prisma.order.findUniqueOrThrow({
+    where: { id: orderId },
     include: {
       items: {
         include: {

@@ -20,6 +20,7 @@ import {
   placeOrderSchema,
   cancelOrderSchema,
   updateOrderStatusSchema,
+  getAdminOrdersSchema,
   type PlaceOrderInput,
   type CancelOrderInput,
   type UpdateOrderStatusInput,
@@ -30,8 +31,14 @@ import {
   type OrderItem,
   type OrderTimelineEvent,
   getAvailableDeliveryDates,
+  LIFECYCLE,
 } from "@/lib/orders/types";
-import { parseISO, isBefore, startOfDay, isAfter } from "date-fns";
+import {
+  filterOrderableCartItems,
+  FREE_DELIVERY_THRESHOLD,
+  DEFAULT_DELIVERY_FEE,
+} from "@/lib/orders/eligibility";
+import { parseISO, isBefore, startOfDay, isAfter, format } from "date-fns";
 
 export class EmptyCartError extends Error {
   constructor() {
@@ -95,7 +102,7 @@ export function mapPrismaOrderToDomainOrder(dbOrder: OrderWithItems): Order {
     code: dbOrder.code,
     status,
     placedAt: dbOrder.createdAt.toISOString(),
-    deliveryDate: dbOrder.deliveryDate.toISOString().split("T")[0]!,
+    deliveryDate: format(dbOrder.deliveryDate, "yyyy-MM-dd"),
     deliverySlot: dbOrder.deliverySlot,
     cancelReason: dbOrder.cancelReason ?? null,
     cancelledAt: dbOrder.cancelledAt ? dbOrder.cancelledAt.toISOString() : null,
@@ -129,9 +136,7 @@ export async function placeOrder(
     throw new EmptyCartError();
   }
 
-  const validItems = cart.items.filter(
-    (item) => item.product.enabled && (!item.product.brand || item.product.brand.enabled)
-  );
+  const validItems = filterOrderableCartItems(cart.items);
 
   if (validItems.length === 0) {
     throw new EmptyCartError();
@@ -164,7 +169,7 @@ export async function placeOrder(
     subtotal += Number(item.product.price) * item.quantity;
   }
   subtotal = Math.round(subtotal * 100) / 100;
-  const deliveryFee = subtotal >= 30 ? 0 : 2.99;
+  const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DEFAULT_DELIVERY_FEE;
   const total = Math.round((subtotal + deliveryFee) * 100) / 100;
 
   const deliveryDateObj = parseISO(parsed.deliveryDate);
@@ -173,9 +178,6 @@ export async function placeOrder(
     userId,
     cart,
     address: parsed,
-    subtotal,
-    deliveryFee,
-    total,
     deliveryDate: deliveryDateObj,
   });
 
@@ -236,24 +238,22 @@ export async function getAdminOrders(params: {
   totalItems: number;
   totalPages: number;
 }> {
+  const parsed = getAdminOrdersSchema.safeParse(params);
+  if (!parsed.success) {
+    return { items: [], totalItems: 0, totalPages: 1 };
+  }
+
   let dbStatus: PrismaOrderStatus | undefined = undefined;
-  if (params.status && params.status.toUpperCase() !== "ALL") {
-    const uppercase = params.status.toUpperCase();
-    const allowed = Object.values(PrismaOrderStatusEnum) as string[];
-    if (allowed.includes(uppercase)) {
-      dbStatus = uppercase as PrismaOrderStatus;
-    } else {
-      // Unrecognized non-ALL status - return empty result to avoid accidental full scans
-      return { items: [], totalItems: 0, totalPages: 1 };
-    }
+  if (parsed.data.status) {
+    dbStatus = parsed.data.status as PrismaOrderStatus;
   }
 
   const result = await findAdminOrdersInDb({
-    search: params.search,
+    search: parsed.data.search,
     status: dbStatus,
-    deliveryDate: params.deliveryDate,
-    page: params.page,
-    limit: params.limit,
+    deliveryDate: parsed.data.deliveryDate,
+    page: parsed.data.page,
+    limit: parsed.data.limit,
   });
 
   return {
@@ -270,7 +270,25 @@ export async function getAdminOrderStats(): Promise<AdminOrderStats> {
 export async function updateAdminOrderStatus(
   input: UpdateOrderStatusInput
 ): Promise<Order> {
-  const parsed = updateOrderStatusSchema.parse(input);
+  const existing = await findAdminOrderByIdInDb(input.orderId);
+
+  if (!existing) {
+    throw new OrderNotFoundError(input.orderId);
+  }
+
+  const currentStatus = DB_STATUS_TO_DOMAIN[existing.status] ?? "placed";
+  const targetStatus = DB_STATUS_TO_DOMAIN[input.status] ?? "placed";
+
+  if (targetStatus !== "cancelled") {
+    const currentIndex = LIFECYCLE.indexOf(currentStatus);
+    const targetIndex = LIFECYCLE.indexOf(targetStatus);
+    if (currentIndex !== -1 && targetIndex !== -1 && targetIndex < currentIndex) {
+      throw new InvalidDeliveryDateError(`Status ${input.status} is not allowed from ${existing.status}.`);
+    }
+  }
+
+  const parsed = updateOrderStatusSchema.parse({ ...input, currentStatus });
+
   const updatedDbOrder = await updateAdminOrderStatusInDb({
     orderId: parsed.orderId,
     status: parsed.status,

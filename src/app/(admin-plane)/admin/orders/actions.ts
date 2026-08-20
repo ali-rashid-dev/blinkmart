@@ -18,6 +18,7 @@ import {
 import { OrderCannotCancelError } from "@/services/order.errors";
 import type { Order } from "@/lib/orders/types";
 import type { AdminOrderStats } from "@/repositories/order.repository";
+import { sanitizeOrderUpdateError } from "@/components/admin/orders/admin-orders-config";
 
 export type AdminOrderActionErrorCode =
   | "UNAUTHORIZED"
@@ -37,46 +38,6 @@ export type AdminOrderActionResult<T> =
   | { success: true; data: T }
   | { success: false; error: AdminOrderActionError };
 
-const SAFE_ORDER_UPDATE_ERROR_CODES = new Set<AdminOrderActionErrorCode>([
-  "NOT_FOUND",
-  "VALIDATION_ERROR",
-  "UNKNOWN_ERROR",
-]);
-
-const SAFE_ORDER_UPDATE_ERROR_MESSAGES = [
-  "Order not found.",
-  "Order cannot be cancelled in status ",
-  "Invalid delivery date",
-  "Invalid order status update fields.",
-  "An unexpected error occurred while updating order status.",
-  "Failed to update order status.",
-];
-
-function sanitizeOrderUpdateActionError(
-  error?: Partial<AdminOrderActionError>
-): AdminOrderActionError {
-  if (!error) {
-    return { code: "UNKNOWN_ERROR", message: "Failed to update order status." };
-  }
-
-  const message = typeof error.message === "string" ? error.message.trim() : "";
-  const code = typeof error.code === "string" ? error.code : "";
-
-  if (code && SAFE_ORDER_UPDATE_ERROR_CODES.has(code as AdminOrderActionErrorCode)) {
-    return { ...error, code: code as AdminOrderActionErrorCode, message: message || "Failed to update order status." };
-  }
-
-  if (message && SAFE_ORDER_UPDATE_ERROR_MESSAGES.some((allowed) => message === allowed || message.startsWith(allowed))) {
-    return {
-      code: (code as AdminOrderActionErrorCode) || "UNKNOWN_ERROR",
-      message,
-      details: error.details,
-    };
-  }
-
-  return { code: "UNKNOWN_ERROR", message: "Failed to update order status." };
-}
-
 function buildError(
   code: AdminOrderActionErrorCode,
   message: string,
@@ -84,7 +45,32 @@ function buildError(
 ): AdminOrderActionResult<never> {
   return {
     success: false,
-    error: sanitizeOrderUpdateActionError({ code, message, details }),
+    error: { code, message, details },
+  };
+}
+
+function buildStatusUpdateError(
+  code: AdminOrderActionErrorCode,
+  message: string,
+  details?: Record<string, string>
+): AdminOrderActionResult<never> {
+  if (code === "UNAUTHORIZED" || code === "FORBIDDEN" || code === "DATABASE_ERROR") {
+    return {
+      success: false,
+      error: { code, message, details },
+    };
+  }
+
+  const sanitizedMessage = sanitizeOrderUpdateError({ code, message });
+  const safeCode = ["NOT_FOUND", "VALIDATION_ERROR", "UNKNOWN_ERROR"].includes(code) ? code : "UNKNOWN_ERROR";
+
+  return {
+    success: false,
+    error: {
+      code: safeCode,
+      message: sanitizedMessage,
+      details,
+    },
   };
 }
 
@@ -135,7 +121,7 @@ export async function updateAdminOrderStatusAction(params: {
   status: "PLACED" | "CONFIRMED" | "PACKED" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
   cancelReason?: string | null;
 }): Promise<AdminOrderActionResult<Order>> {
-  const authCheck = await requireAdmin<AdminOrderActionErrorCode, AdminOrderActionResult<never>>(buildError);
+  const authCheck = await requireAdmin<AdminOrderActionErrorCode, AdminOrderActionResult<never>>(buildStatusUpdateError);
   if (isAuthError(authCheck)) return authCheck;
 
   const parsed = updateOrderStatusSchema.safeParse(params);
@@ -158,19 +144,19 @@ export async function updateAdminOrderStatusAction(params: {
     console.error("Failed to update order status:", error);
 
     if (error instanceof OrderNotFoundError) {
-      return buildError("NOT_FOUND", "Order not found.");
+      return buildStatusUpdateError("NOT_FOUND", "Order not found.");
     }
     if (error instanceof OrderCannotCancelError) {
-      return buildError("VALIDATION_ERROR", error.message);
+      return buildStatusUpdateError("VALIDATION_ERROR", error.message);
     }
     if (error instanceof InvalidDeliveryDateError) {
-      return buildError("VALIDATION_ERROR", error.message);
+      return buildStatusUpdateError("VALIDATION_ERROR", error.message);
     }
     if (error instanceof EmptyCartError) {
-      return buildError("VALIDATION_ERROR", error.message);
+      return buildStatusUpdateError("VALIDATION_ERROR", error.message);
     }
 
-    return buildError("UNKNOWN_ERROR", "An unexpected error occurred while updating order status.");
+    return buildStatusUpdateError("UNKNOWN_ERROR", "An unexpected error occurred while updating order status.");
   }
 }
 

@@ -4,11 +4,11 @@ import type { OrderItem } from "@/lib/orders/types";
 export function OrderItemsList({ items }: { items: OrderItem[] }) {
   return (
     <ul aria-label="Order items" className="divide-y divide-border">
-      {items.map((item) => {
+      {items.map((item, index) => {
         const isImageUrl =
           item.image && (item.image.startsWith("http") || item.image.startsWith("/"));
         return (
-          <li key={item.productId} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+          <li key={`${item.productId}-${index}`} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
             {isImageUrl ? (
               <div className="relative size-11 shrink-0 overflow-hidden rounded-xl bg-accent/70">
                 <img src={item.image} alt={item.name} className="h-full w-full object-cover" />

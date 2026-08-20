@@ -188,7 +188,7 @@ model Order {
   id           String      @id @default(cuid())
   code         String      @unique
   userId       String
-  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User        @relation(fields: [userId], references: [id], onDelete: Restrict)
   status       OrderStatus @default(PLACED)
   subtotal     Decimal     @db.Decimal(10, 2)
   deliveryFee  Decimal     @db.Decimal(10, 2) @default(0.00)

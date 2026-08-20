@@ -1,26 +1,27 @@
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool } from "pg"; // 1. Import pg's Pool helper
+import { Pool } from "pg";
 
-const globalForPrisma = globalThis as unknown as {
+const globalForPrisma = globalThis as typeof globalThis & {
   prisma?: PrismaClient;
+  pool?: Pool;
 };
 
-// 2. Instantiate a Pool with explicit timeout settings
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  connectionTimeoutMillis: 30000, // Wait up to 30 seconds for Neon to wake up
-  idleTimeoutMillis: 10000,       // Close idle connections after 10 seconds
-  max: 10,                         // Clamp max connections to prevent pool saturation
-});
+const pool =
+  globalForPrisma.pool ??
+  new Pool({
+    connectionString: process.env.DATABASE_URL,
+    connectionTimeoutMillis: 30000,
+    idleTimeoutMillis: 10000,
+    max: 10,
+  });
 
-// 3. Pass the configured pool into the PrismaPg adapter
-const adapter = new PrismaPg(pool);
+globalForPrisma.pool = pool;
 
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    adapter,
+    adapter: new PrismaPg(pool),
   });
 
 if (process.env.NODE_ENV !== "production") {

@@ -52,6 +52,7 @@ import {
   NEXT_STATUS,
   NEXT_STATUS_LABEL,
   DB_STATUS_MAP,
+  sanitizeOrderUpdateError,
 } from "@/components/admin/orders/admin-orders-config";
 
 export function AdminOrdersPage() {
@@ -151,31 +152,6 @@ export function AdminOrdersPage() {
     loadData();
   }, [loadData]);
 
-  function sanitizeOrderUpdateError(error?: { message?: string; code?: string }): string {
-    const allowedCodes = new Set(["NOT_FOUND", "VALIDATION_ERROR", "UNKNOWN_ERROR"]);
-    const allowedMessages = [
-      "Order not found.",
-      "Order cannot be cancelled in status ",
-      "Invalid delivery date",
-      "Invalid order status update fields.",
-      "An unexpected error occurred while updating order status.",
-      "Failed to update order status.",
-    ];
-
-    const message = typeof error?.message === "string" ? error.message.trim() : "";
-    const code = typeof error?.code === "string" ? error.code : "";
-
-    if (code && allowedCodes.has(code)) {
-      return message || "Failed to update order status.";
-    }
-
-    if (message && allowedMessages.some((allowed) => message === allowed || message.startsWith(allowed))) {
-      return message;
-    }
-
-    return "Failed to update order status.";
-  }
-
   async function handleUpdateOrderStatus(
     orderId: string,
     newStatus: OrderStatus,
@@ -193,6 +169,7 @@ export function AdminOrdersPage() {
 
       setOrders((prevOrders) => {
         if (statusParam && statusParam !== "all" && statusParam.toLowerCase() !== newStatus.toLowerCase()) {
+          void loadData();
           return prevOrders.filter((o) => o.id !== orderId);
         }
         return prevOrders.map((o) => (o.id === orderId ? updatedOrder : o));

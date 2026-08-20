@@ -16,7 +16,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cartStore, cartTotals, formatPrice, useCartState } from "@/lib/cart/store";
+import { formatMoney } from "@/lib/orders/store";
 import { getAvailableDeliveryDates, DELIVERY_WINDOW, type DeliveryDateOption } from "@/lib/orders/types";
+import { DEFAULT_DELIVERY_FEE, FREE_DELIVERY_THRESHOLD } from "@/lib/orders/eligibility";
 import { placeOrderAction } from "./actions";
 import { getProfile } from "../profile/actions";
 
@@ -26,7 +28,7 @@ export default function CheckoutPage() {
   const activeLines = lines.filter((l) => l.enabled);
   const { subtotal, itemCount } = cartTotals(activeLines);
 
-  const deliveryFee = subtotal >= 30 ? 0 : 2.99;
+  const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DEFAULT_DELIVERY_FEE;
   const total = Math.round((subtotal + deliveryFee) * 100) / 100;
 
   // Delivery dates based on 5:00 PM cutoff rule
@@ -413,7 +415,7 @@ export default function CheckoutPage() {
                 <dt className="text-muted-foreground">
                   Subtotal ({itemCount} {itemCount === 1 ? "item" : "items"})
                 </dt>
-                <dd className="font-semibold tabular-nums text-foreground">{formatPrice(subtotal)}</dd>
+                <dd className="font-semibold tabular-nums text-foreground">{formatMoney(subtotal)}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Evening Delivery Fee</dt>
@@ -421,21 +423,21 @@ export default function CheckoutPage() {
                   {deliveryFee === 0 ? (
                     <span className="text-success font-bold">FREE</span>
                   ) : (
-                    formatPrice(deliveryFee)
+                    formatMoney(deliveryFee)
                   )}
                 </dd>
               </div>
 
               {deliveryFee > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  Add {formatPrice(30 - subtotal)} more for FREE evening delivery!
+                  Add {formatMoney(FREE_DELIVERY_THRESHOLD - subtotal)} more for FREE evening delivery!
                 </p>
               )}
 
               <div className="flex items-baseline justify-between border-t border-border pt-3">
                 <dt className="font-bold text-foreground">Total</dt>
                 <dd className="font-display text-xl font-bold tabular-nums text-foreground">
-                  {formatPrice(total)}
+                  {formatMoney(total)}
                 </dd>
               </div>
             </dl>

@@ -1,7 +1,12 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { getAvailableDeliveryDates, canCancel, type Order } from "../lib/orders/types";
-import { placeOrderSchema, cancelOrderSchema, getAdminOrdersSchema } from "../validations/order";
+import {
+  placeOrderSchema,
+  cancelOrderSchema,
+  getAdminOrdersSchema,
+  updateOrderStatusSchema,
+} from "../validations/order";
 
 describe("Order Module Service & Utilities", () => {
   it("computes delivery date options before 5:00 PM cutoff", () => {
@@ -26,6 +31,67 @@ describe("Order Module Service & Utilities", () => {
     assert.equal(options[0]?.isDefault, true);
     assert.equal(options[0]?.dateIso, "2026-08-20");
     assert.match(options[0]?.label || "", /Tomorrow/);
+  });
+
+  it("treats the 5:00 PM cutoff as inclusive", () => {
+    const mockTimeAtCutoff = new Date(2026, 7, 19, 17, 0, 0);
+    const options = getAvailableDeliveryDates(mockTimeAtCutoff);
+
+    assert.equal(options.length, 2);
+    assert.equal(options[0]?.dateIso, "2026-08-20");
+    assert.equal(options[0]?.isDefault, true);
+  });
+
+  it("trims address fields before validation and rejects whitespace-only values", () => {
+    const validData = {
+      fullName: "John Doe",
+      phone: "+15551234567",
+      house: "  42  ",
+      street: "  Maple Street  ",
+      area: "  Central  ",
+      city: "  Lahore  ",
+      postal: " 54000 ",
+      deliveryDate: "2026-08-20",
+    };
+
+    const parsed = placeOrderSchema.safeParse(validData);
+    assert.equal(parsed.success, true);
+
+    if (parsed.success) {
+      assert.equal(parsed.data.house, "42");
+      assert.equal(parsed.data.street, "Maple Street");
+      assert.equal(parsed.data.area, "Central");
+      assert.equal(parsed.data.city, "Lahore");
+      assert.equal(parsed.data.postal, "54000");
+    }
+
+    const invalid = {
+      ...validData,
+      house: "   ",
+      street: "\t",
+      area: "\n",
+      city: " ",
+      postal: "  ",
+    };
+
+    assert.equal(placeOrderSchema.safeParse(invalid).success, false);
+  });
+
+  it("rejects invalid lifecycle status transitions", () => {
+    const res = updateOrderStatusSchema.safeParse({
+      orderId: "ord_123",
+      status: "PLACED",
+    });
+
+    assert.equal(res.success, true);
+
+    const invalidTransition = updateOrderStatusSchema.safeParse({
+      orderId: "ord_123",
+      status: "PLACED",
+      currentStatus: "DELIVERED",
+    } as any);
+
+    assert.equal(invalidTransition.success, false);
   });
 
   it("evaluates canCancel correctly for order statuses", () => {

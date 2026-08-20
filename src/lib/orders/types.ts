@@ -1,4 +1,4 @@
-import { format, parseISO, isAfter, setHours, setMinutes, addDays } from "date-fns";
+import { format, parseISO, isBefore, addDays } from "date-fns";
 
 export type OrderStatus =
   | "placed"
@@ -124,7 +124,7 @@ export function getAvailableDeliveryDates(now: Date = new Date()): DeliveryDateO
   // Build an exact cutoff at cutoffHour:00:00.000 in local time
   const cutoff = new Date(now);
   cutoff.setHours(DELIVERY_WINDOW.cutoffHour, 0, 0, 0);
-  const pastCutoff = isAfter(now, cutoff);
+  const pastCutoff = !isBefore(now, cutoff);
 
   const options: DeliveryDateOption[] = [];
 
