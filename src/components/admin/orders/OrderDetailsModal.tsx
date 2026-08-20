@@ -54,7 +54,6 @@ export function OrderDetailsModal({
     const allowedMessages = [
       "Order not found.",
       "Order cannot be cancelled in status ",
-      "Insufficient inventory for product ",
       "Invalid delivery date",
       "Invalid order status update fields.",
       "An unexpected error occurred while updating order status.",

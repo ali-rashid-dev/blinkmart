@@ -89,7 +89,6 @@ export const productQuerySchema = z.object({
   categoryId: z.string().optional().default(""),
   brandId: z.string().optional().default(""),
   status: z.enum(["all", "active", "inactive"]).optional().default("all"),
-  stock: z.enum(["all", "in-stock", "out-of-stock"]).optional().default("all"),
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(100).optional().default(10),
 });

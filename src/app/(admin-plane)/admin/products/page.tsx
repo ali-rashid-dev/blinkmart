@@ -573,7 +573,7 @@ function DeleteConfirmDialog({
             <AlertTriangle className="h-5 w-5" /> Delete Product
           </DialogTitle>
           <DialogDescription className="pt-2 text-foreground">
-            Are you sure you want to delete <strong>"{product.name}"</strong>? This product will be permanently removed from your inventory and catalog.
+            Are you sure you want to delete <strong>"{product.name}"</strong>? This product will be permanently removed from your store catalog.
           </DialogDescription>
         </DialogHeader>
 
@@ -619,9 +619,7 @@ export default function AdminProductsPage() {
   const categoryId = searchParams.get("categoryId") ?? "";
   const brandId = searchParams.get("brandId") ?? "";
   const rawStatus = searchParams.get("status");
-  const rawStock = searchParams.get("stock");
   const status = rawStatus === "active" || rawStatus === "inactive" ? rawStatus : "all";
-  const stock = rawStock === "in-stock" || rawStock === "out-of-stock" ? rawStock : "all";
   const rawPage = Number(searchParams.get("page") ?? "");
   const rawLimit = Number(searchParams.get("limit") ?? "");
   const page = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
@@ -823,14 +821,14 @@ export default function AdminProductsPage() {
     updateQuery({ search: searchInput });
   }
 
-  const hasActiveFilters = Boolean(search || categoryId || brandId || status !== "all" || stock !== "all");
+  const hasActiveFilters = Boolean(search || categoryId || brandId || status !== "all");
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <PageHeader
         title="Products"
-        description="Manage grocery catalog items, pricing, inventory, and visibility."
+        description="Manage grocery catalog items, pricing, and visibility."
         actions={
           <ProductFormDialog
             title="Add New Product"
@@ -979,7 +977,6 @@ export default function AdminProductsPage() {
                 <th className="px-4 py-3 font-semibold hidden sm:table-cell">Category</th>
                 <th className="px-4 py-3 font-semibold hidden lg:table-cell">Brand</th>
                 <th className="px-4 py-3 font-semibold">Price</th>
-                <th className="px-4 py-3 font-semibold text-center">Inventory</th>
                 <th className="px-4 py-3 font-semibold text-center">Status</th>
                 <th className="px-4 py-3 font-semibold hidden xl:table-cell">Updated</th>
                 <th className="px-4 py-3 font-semibold text-right">Actions</th>
@@ -988,13 +985,13 @@ export default function AdminProductsPage() {
             <tbody className="divide-y divide-border">
               {loading ? (
                 <tr>
-                  <td colSpan={9} className="py-16 text-center text-muted-foreground">
+                  <td colSpan={8} className="py-16 text-center text-muted-foreground">
                     <Loader2 className="inline h-5 w-5 animate-spin mr-2" /> Loading products...
                   </td>
                 </tr>
               ) : products.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-16 text-center text-muted-foreground">
+                  <td colSpan={8} className="py-16 text-center text-muted-foreground">
                     <Boxes className="mx-auto mb-3 h-10 w-10 opacity-25" />
                     <p className="text-base font-semibold text-foreground">
                       {hasActiveFilters ? "No products match your search or filters." : "No products found"}
@@ -1090,19 +1087,6 @@ export default function AdminProductsPage() {
                       {/* Price */}
                       <td className="px-4 py-3 font-semibold text-foreground">
                         Rs {Math.round(Number(prod.price))}
-                      </td>
-
-                      {/* Inventory */}
-                      <td className="px-4 py-3 text-center">
-                        {prod.enabled ? (
-                          <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 border-0 font-medium text-xs">
-                            <CheckCircle2 className="mr-1 h-3 w-3 inline" /> In Stock
-                          </Badge>
-                        ) : (
-                          <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 border-0 font-medium text-xs">
-                            <XCircle className="mr-1 h-3 w-3 inline" /> Disabled
-                          </Badge>
-                        )}
                       </td>
 
                       {/* Status Switch */}

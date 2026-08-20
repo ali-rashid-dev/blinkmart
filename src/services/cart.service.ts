@@ -103,10 +103,7 @@ function mapCartToDetails(cart: CartWithItems): CartDetails {
       quantity: item.quantity,
       unit: item.product.category?.name ? `1 ${item.product.category.name.toLowerCase()}` : "1 pack",
       image: item.product.imageUrl || "🛒",
-      maxQuantity:
-        item.product.inventory !== null
-          ? Math.max(0, Math.min(99, item.product.inventory))
-          : 99,
+      maxQuantity: 99,
       total: lineTotal,
       enabled: isProductEnabled,
     };

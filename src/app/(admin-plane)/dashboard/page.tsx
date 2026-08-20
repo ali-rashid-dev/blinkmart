@@ -3,7 +3,7 @@ import { Activity, ArrowUpRight, Boxes, ShoppingBag, Users } from "lucide-react"
 const stats = [
   { label: "Total orders", value: "1,284", change: "+12.4%", icon: ShoppingBag },
   { label: "Active customers", value: "8,420", change: "+8.1%", icon: Users },
-  { label: "Inventory items", value: "3,960", change: "+4.8%", icon: Boxes },
+  { label: "Catalog products", value: "3,960", change: "+4.8%", icon: Boxes },
   { label: "Conversion rate", value: "4.7%", change: "+0.9%", icon: Activity },
 ] as const;
 
@@ -41,7 +41,7 @@ export default function DashboardPage() {
           <div className="mt-6 space-y-4">
             {[
               ["Orders shipped today", "143 / 180 scheduled"],
-              ["Low-stock alerts", "9 SKUs need replenishment"],
+              ["Active product catalog", "All catalog items available"],
               ["Categories live", "18 active collections"],
             ].map(([title, detail]) => (
               <div key={title} className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-3">

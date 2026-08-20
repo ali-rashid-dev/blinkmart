@@ -10,8 +10,8 @@ import {
   type OrderWithItems,
   type AdminOrderStats,
 } from "@/repositories/order.repository";
-import { OrderCannotCancelError, InsufficientInventoryError } from "@/services/order.errors";
-export { OrderCannotCancelError, InsufficientInventoryError };
+import { OrderCannotCancelError } from "@/services/order.errors";
+export { OrderCannotCancelError };
 import type { OrderStatus as PrismaOrderStatus } from "@/generated/prisma/client";
 import { OrderStatus as PrismaOrderStatusEnum } from "@/generated/prisma/enums";
 import { findCartByIdentifier } from "@/repositories/cart.repository";
@@ -135,18 +135,6 @@ export async function placeOrder(
 
   if (validItems.length === 0) {
     throw new EmptyCartError();
-  }
-
-  // Validate inventory before proceeding to checkout
-  for (const item of validItems) {
-    if (item.product.inventory !== null && item.product.inventory < item.quantity) {
-      throw new InsufficientInventoryError(
-        item.product.name,
-        item.productId,
-        item.quantity,
-        item.product.inventory
-      );
-    }
   }
 
   // Validate delivery date against available windows (cutoff rule)

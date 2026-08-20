@@ -15,7 +15,7 @@ import {
   EmptyCartError,
   InvalidDeliveryDateError,
 } from "@/services/order.service";
-import { OrderCannotCancelError, InsufficientInventoryError } from "@/services/order.errors";
+import { OrderCannotCancelError } from "@/services/order.errors";
 import type { Order } from "@/lib/orders/types";
 import type { AdminOrderStats } from "@/repositories/order.repository";
 
@@ -46,7 +46,6 @@ const SAFE_ORDER_UPDATE_ERROR_CODES = new Set<AdminOrderActionErrorCode>([
 const SAFE_ORDER_UPDATE_ERROR_MESSAGES = [
   "Order not found.",
   "Order cannot be cancelled in status ",
-  "Insufficient inventory for product ",
   "Invalid delivery date",
   "Invalid order status update fields.",
   "An unexpected error occurred while updating order status.",
@@ -162,9 +161,6 @@ export async function updateAdminOrderStatusAction(params: {
       return buildError("NOT_FOUND", "Order not found.");
     }
     if (error instanceof OrderCannotCancelError) {
-      return buildError("VALIDATION_ERROR", error.message);
-    }
-    if (error instanceof InsufficientInventoryError) {
       return buildError("VALIDATION_ERROR", error.message);
     }
     if (error instanceof InvalidDeliveryDateError) {

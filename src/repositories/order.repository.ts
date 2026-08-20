@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { OrderCannotCancelError, InsufficientInventoryError } from "@/services/order.errors";
+import { OrderCannotCancelError } from "@/services/order.errors";
 import type { Prisma, OrderStatus } from "@/generated/prisma/client";
 import type { CartWithItems } from "@/repositories/cart.repository";
 import type { PlaceOrderInput } from "@/validations/order";
@@ -100,25 +100,6 @@ export async function createOrderInDb(params: {
         },
       },
     });
-
-            // Update product inventories in-transaction with conditional update
-            for (const item of validItems) {
-              if (item.product.inventory === null) continue; // unlimited stock
-
-              const result = await tx.product.updateMany({
-                where: { id: item.productId, inventory: { gte: item.quantity } },
-                data: { inventory: { decrement: item.quantity } },
-              });
-
-              if (result.count === 0) {
-                throw new InsufficientInventoryError(
-                  item.product.name,
-                  item.productId,
-                  item.quantity,
-                  item.product.inventory
-                );
-              }
-            }
 
     // Clear cart items
     await tx.cartItem.deleteMany({

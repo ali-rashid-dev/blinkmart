@@ -129,7 +129,6 @@ model Product {
   description String?
   price       Decimal    @db.Decimal(10, 2)
   imageUrl    String?
-  inventory   Int?       @default(100)
   enabled     Boolean    @default(true)
   brandId     String?
   brand       Brand?     @relation(fields: [brandId], references: [id], onDelete: SetNull)

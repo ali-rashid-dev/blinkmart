@@ -87,7 +87,6 @@ export async function getAdminProducts(
     categoryId: "",
     brandId: "",
     status: "all",
-    stock: "all",
     page: 1,
     limit: 10,
   }
