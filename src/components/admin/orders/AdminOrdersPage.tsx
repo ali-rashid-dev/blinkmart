@@ -151,6 +151,20 @@ export function AdminOrdersPage() {
     loadData();
   }, [loadData]);
 
+  function sanitizeOrderUpdateError(error?: { message?: string; code?: string }): string {
+    const rawMessage = typeof error?.message === "string" ? error.message.trim() : "";
+    if (!rawMessage) return "Failed to update order status.";
+
+    const internalErrorPattern =
+      /prisma|p20\d{2}|transport|timeout|network|database|connection|econn|fetch failed|internal server error/i;
+
+    if (internalErrorPattern.test(rawMessage)) {
+      return "Failed to update order status.";
+    }
+
+    return rawMessage;
+  }
+
   async function handleUpdateOrderStatus(
     orderId: string,
     newStatus: OrderStatus,
@@ -187,7 +201,13 @@ export function AdminOrdersPage() {
       return { success: true, data: updatedOrder };
     }
 
-    return { success: false, error: res.error };
+    return {
+      success: false,
+      error: {
+        ...res.error,
+        message: sanitizeOrderUpdateError(res.error),
+      },
+    };
   }
 
   function handleAdvanceStatus(order: Order) {
@@ -200,9 +220,7 @@ export function AdminOrdersPage() {
       if (res.success) {
         toast.success(`Order ${order.code} updated to ${STATUS_CONFIG[next].label}`);
       } else {
-        toast.error(
-          res.error?.message || `Failed to update order ${order.code} to ${STATUS_CONFIG[next].label}.`
-        );
+        toast.error(sanitizeOrderUpdateError(res.error));
       }
     });
   }

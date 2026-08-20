@@ -49,6 +49,20 @@ export function OrderDetailsModal({
   const [isUpdating, setIsUpdating] = useState(false);
   const [showPrintSlip, setShowPrintSlip] = useState(false);
 
+  function sanitizeOrderUpdateError(error?: { message?: string }): string {
+    const rawMessage = typeof error?.message === "string" ? error.message.trim() : "";
+    if (!rawMessage) return "Failed to update order status.";
+
+    const internalErrorPattern =
+      /prisma|p20\d{2}|transport|timeout|network|database|connection|econn|fetch failed|internal server error/i;
+
+    if (internalErrorPattern.test(rawMessage)) {
+      return "Failed to update order status.";
+    }
+
+    return rawMessage;
+  }
+
   useEffect(() => {
     if (order) {
       setSelectedStatus(order.status);
@@ -79,10 +93,10 @@ export function OrderDetailsModal({
       if (res && res.success) {
         toast.success(`Order ${order.code} updated to ${STATUS_CONFIG[selectedStatus].label}`);
       } else if (res && res.error) {
-        toast.error(res.error.message || "Failed to update order status.");
+        toast.error(sanitizeOrderUpdateError(res.error));
       }
-    } catch (error) {
-      toast.error((error as Error)?.message || "Failed to update order status.");
+    } catch {
+      toast.error("Failed to update order status.");
     } finally {
       setIsUpdating(false);
     }
