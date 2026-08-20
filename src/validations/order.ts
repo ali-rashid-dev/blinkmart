@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LIFECYCLE } from "@/lib/orders/types";
 
 export function isRealCalendarDate(value: string): boolean {
   const [year, month, day] = value.split("-").map(Number);
@@ -67,14 +68,15 @@ export const updateOrderStatusSchema = z
   .superRefine((value, ctx) => {
     if (!value.currentStatus) return;
 
-    const currentIndex = ["placed", "confirmed", "packed", "out_for_delivery", "delivered"].indexOf(
-      value.currentStatus
-    );
-    const requestedIndex = ["placed", "confirmed", "packed", "out_for_delivery", "delivered"].indexOf(
-      value.status.toLowerCase().replace(/_/g, "_")
-    );
-
+    // Allow cancellation from any state
     if (value.status === "CANCELLED") return;
+
+    // Allow reinstatement from `cancelled` so administrators can move orders back into the lifecycle
+    if (value.currentStatus === "cancelled") return;
+
+    const lifecycle = LIFECYCLE;
+    const currentIndex = lifecycle.indexOf(value.currentStatus);
+    const requestedIndex = lifecycle.indexOf(value.status.toLowerCase());
 
     if (currentIndex === -1 || requestedIndex === -1 || requestedIndex < currentIndex) {
       ctx.addIssue({

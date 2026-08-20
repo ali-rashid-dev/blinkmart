@@ -7,16 +7,27 @@ const globalForPrisma = globalThis as typeof globalThis & {
   pool?: Pool;
 };
 
-const pool =
-  globalForPrisma.pool ??
-  new Pool({
+let pool: Pool;
+if (globalForPrisma.pool) {
+  pool = globalForPrisma.pool;
+} else {
+  pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     connectionTimeoutMillis: 30000,
     idleTimeoutMillis: 10000,
     max: 10,
   });
 
-globalForPrisma.pool = pool;
+  // Attach a single error listener to avoid duplicate handlers across hot reloads
+  pool.on("error", (err) => {
+    // Log unexpected idle client errors. Keep behavior simple and non-throwing.
+    // This listener is intentionally attached once on the cached pool.
+    // eslint-disable-next-line no-console
+    console.error("Unexpected idle client error on Postgres pool:", err);
+  });
+
+  globalForPrisma.pool = pool;
+}
 
 export const prisma =
   globalForPrisma.prisma ??

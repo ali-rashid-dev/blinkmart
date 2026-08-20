@@ -88,10 +88,14 @@ describe("Order Module Service & Utilities", () => {
     const invalidTransition = updateOrderStatusSchema.safeParse({
       orderId: "ord_123",
       status: "PLACED",
-      currentStatus: "DELIVERED",
-    } as any);
+      currentStatus: "delivered",
+    });
 
     assert.equal(invalidTransition.success, false);
+    if (!invalidTransition.success) {
+      const msg = invalidTransition.error.issues[0]?.message || "";
+      assert.match(msg, /Status PLACED is not allowed from delivered/);
+    }
   });
 
   it("evaluates canCancel correctly for order statuses", () => {

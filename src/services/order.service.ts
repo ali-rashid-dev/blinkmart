@@ -10,8 +10,12 @@ import {
   type OrderWithItems,
   type AdminOrderStats,
 } from "@/repositories/order.repository";
-import { OrderCannotCancelError } from "@/services/order.errors";
-export { OrderCannotCancelError };
+import {
+  OrderCannotCancelError,
+  EmptyCartError,
+  InvalidStatusTransitionError,
+} from "@/services/order.errors";
+export { OrderCannotCancelError, EmptyCartError, InvalidStatusTransitionError };
 import type { OrderStatus as PrismaOrderStatus } from "@/generated/prisma/client";
 import { OrderStatus as PrismaOrderStatusEnum } from "@/generated/prisma/enums";
 import { findCartByIdentifier } from "@/repositories/cart.repository";
@@ -39,13 +43,6 @@ import {
   DEFAULT_DELIVERY_FEE,
 } from "@/lib/orders/eligibility";
 import { parseISO, isBefore, startOfDay, isAfter, format } from "date-fns";
-
-export class EmptyCartError extends Error {
-  constructor() {
-    super("Your cart is empty. Add items to cart before placing an order.");
-    this.name = "EmptyCartError";
-  }
-}
 
 export class InvalidDeliveryDateError extends Error {
   constructor(message: string) {
@@ -238,22 +235,19 @@ export async function getAdminOrders(params: {
   totalItems: number;
   totalPages: number;
 }> {
-  const parsed = getAdminOrdersSchema.safeParse(params);
-  if (!parsed.success) {
-    return { items: [], totalItems: 0, totalPages: 1 };
-  }
+  const parsed = getAdminOrdersSchema.parse(params);
 
   let dbStatus: PrismaOrderStatus | undefined = undefined;
-  if (parsed.data.status) {
-    dbStatus = parsed.data.status as PrismaOrderStatus;
+  if (parsed.status) {
+    dbStatus = parsed.status as PrismaOrderStatus;
   }
 
   const result = await findAdminOrdersInDb({
-    search: parsed.data.search,
+    search: parsed.search,
     status: dbStatus,
-    deliveryDate: parsed.data.deliveryDate,
-    page: parsed.data.page,
-    limit: parsed.data.limit,
+    deliveryDate: parsed.deliveryDate,
+    page: parsed.page,
+    limit: parsed.limit,
   });
 
   return {
@@ -283,16 +277,20 @@ export async function updateAdminOrderStatus(
     const currentIndex = LIFECYCLE.indexOf(currentStatus);
     const targetIndex = LIFECYCLE.indexOf(targetStatus);
     if (currentIndex !== -1 && targetIndex !== -1 && targetIndex < currentIndex) {
-      throw new InvalidDeliveryDateError(`Status ${input.status} is not allowed from ${existing.status}.`);
+      throw new InvalidStatusTransitionError(`Status ${input.status} is not allowed from ${existing.status}.`);
     }
   }
 
   const parsed = updateOrderStatusSchema.parse({ ...input, currentStatus });
 
+  const reinstate = parsed.cancelReason === "__REINSTATE__";
+  const cancelReason = reinstate ? undefined : parsed.cancelReason ?? undefined;
+
   const updatedDbOrder = await updateAdminOrderStatusInDb({
     orderId: parsed.orderId,
     status: parsed.status,
-    cancelReason: parsed.cancelReason ?? undefined,
+    cancelReason,
+    reinstate: reinstate || undefined,
   });
   return mapPrismaOrderToDomainOrder(updatedDbOrder);
 }

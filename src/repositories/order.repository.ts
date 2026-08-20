@@ -1,5 +1,10 @@
 import prisma from "@/lib/prisma";
-import { OrderCannotCancelError } from "@/services/order.errors";
+import { OrderCannotCancelError, EmptyCartError } from "@/services/order.errors";
+import {
+  filterOrderableCartItems,
+  FREE_DELIVERY_THRESHOLD,
+  DEFAULT_DELIVERY_FEE,
+} from "@/lib/orders/eligibility";
 import type { Prisma, OrderStatus } from "@/generated/prisma/client";
 import type { CartWithItems } from "@/repositories/cart.repository";
 import type { PlaceOrderInput } from "@/validations/order";
@@ -54,19 +59,19 @@ export async function createOrderInDb(params: {
           },
         });
 
-        const validItems = (txCart?.items ?? []).filter(
-          (item) => item.product.enabled && (!item.product.brand || item.product.brand.enabled)
-        );
+        const validItems = filterOrderableCartItems(txCart?.items ?? []);
 
         if (validItems.length === 0) {
-          throw new Error("No available items in cart to place order.");
+          throw new EmptyCartError();
         }
 
-        const subtotal = validItems.reduce(
+        // Compute subtotal then round to cents before using threshold and total calculations
+        const rawSubtotal = validItems.reduce(
           (sum, item) => sum + Number(item.product.price) * item.quantity,
           0
         );
-        const deliveryFee = subtotal >= 30 ? 0 : 2.99;
+        const subtotal = Math.round(rawSubtotal * 100) / 100;
+        const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DEFAULT_DELIVERY_FEE;
         const total = Math.round((subtotal + deliveryFee) * 100) / 100;
         const itemIds = validItems.map((item) => item.id);
         const order = await tx.order.create({
@@ -74,7 +79,7 @@ export async function createOrderInDb(params: {
             code,
             userId,
             status: "PLACED",
-            subtotal: Math.round(subtotal * 100) / 100,
+            subtotal,
             deliveryFee,
             total,
             deliveryDate,
@@ -375,8 +380,9 @@ export async function updateAdminOrderStatusInDb(params: {
   orderId: string;
   status: OrderStatus;
   cancelReason?: string;
+  reinstate?: boolean;
 }): Promise<OrderWithItems> {
-  const { orderId, status, cancelReason } = params;
+  const { orderId, status, cancelReason, reinstate } = params;
 
   const existing = await prisma.order.findUnique({
     where: { id: orderId },
@@ -391,9 +397,11 @@ export async function updateAdminOrderStatusInDb(params: {
   };
 
   if (status === "CANCELLED") {
+    // Treat cancelReason as user-visible data; do not persist internal sentinels.
     data.cancelReason = cancelReason || "Cancelled by store administrator";
     data.cancelledAt = new Date();
-  } else if (existing.status === "CANCELLED" && cancelReason === "__REINSTATE__") {
+  } else if (existing.status === "CANCELLED" && reinstate) {
+    // Explicit reinstatement: clear cancellation metadata
     data.cancelReason = null;
     data.cancelledAt = null;
   } else {
