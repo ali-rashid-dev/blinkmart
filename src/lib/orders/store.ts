@@ -81,18 +81,43 @@ export const ordersStore = {
     isInitialLoading = false;
 
     if (res.success) {
-      const byId = Object.fromEntries(res.data.map((order) => [order.id, order]));
-      for (const order of res.data) {
-        byId[order.code] = order;
-      }
+      updateState((prev) => {
+        const nextById = { ...prev.byId };
+        const nextOrders = prev.orders ? [...prev.orders] : [];
 
-      updateState((prev) => ({
-        ...prev,
-        loading: false,
-        orders: res.data,
-        byId: { ...prev.byId, ...byId },
-        error: null,
-      }));
+        for (const incoming of res.data) {
+          const existingOrder =
+            nextById[incoming.id] ??
+            nextById[incoming.code] ??
+            nextOrders.find((existing) => existing.id === incoming.id || existing.code === incoming.code) ??
+            null;
+
+          if (!shouldAcceptOrderUpdate(existingOrder, incoming)) {
+            continue;
+          }
+
+          nextById[incoming.id] = incoming;
+          nextById[incoming.code] = incoming;
+
+          const orderIndex = nextOrders.findIndex(
+            (existing) => existing.id === incoming.id || existing.code === incoming.code
+          );
+
+          if (orderIndex >= 0) {
+            nextOrders[orderIndex] = incoming;
+          } else {
+            nextOrders.push(incoming);
+          }
+        }
+
+        return {
+          ...prev,
+          loading: false,
+          orders: nextOrders.length > 0 ? nextOrders : res.data,
+          byId: nextById,
+          error: null,
+        };
+      });
     } else {
       updateState((prev) => ({
         ...prev,

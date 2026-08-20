@@ -81,8 +81,8 @@ export function OrderDetailsModal({
       } else if (res && res.error) {
         toast.error(res.error.message || "Failed to update order status.");
       }
-    } catch {
-      // Error handled by parent
+    } catch (error) {
+      toast.error((error as Error)?.message || "Failed to update order status.");
     } finally {
       setIsUpdating(false);
     }
@@ -221,7 +221,7 @@ export function OrderDetailsModal({
 
                   {order.address.notes && (
                     <div className="mt-2 text-xs bg-muted/40 p-2 rounded-md italic text-muted-foreground">
-                      "{order.address.notes}"
+                      &ldquo;{order.address.notes}&rdquo;
                     </div>
                   )}
                 </div>
@@ -275,7 +275,7 @@ export function OrderDetailsModal({
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>Delivery Fee</span>
-                  <span>{order.deliveryFee === 0 ? "FREE" : `Rs ${order.deliveryFee}`}</span>
+                  <span>{order.deliveryFee === 0 ? "FREE" : `Rs ${Math.round(order.deliveryFee)}`}</span>
                 </div>
                 <div className="flex justify-between text-base font-bold text-foreground pt-2 border-t border-border">
                   <span>Total Order Amount</span>
@@ -379,7 +379,7 @@ export function OrderDetailsModal({
 
             <div className="border-t border-gray-300 pt-3 text-xs space-y-1 text-right">
               <p>Subtotal: Rs {Math.round(order.subtotal)}</p>
-              <p>Delivery: {order.deliveryFee === 0 ? "FREE" : `Rs ${order.deliveryFee}`}</p>
+              <p>Delivery: {order.deliveryFee === 0 ? "FREE" : `Rs ${Math.round(order.deliveryFee)}`}</p>
               <p className="text-sm font-bold text-gray-900 pt-1">Total: Rs {Math.round(order.total)}</p>
             </div>
 

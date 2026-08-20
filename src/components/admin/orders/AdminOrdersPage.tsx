@@ -134,6 +134,8 @@ export function AdminOrdersPage() {
 
       if (statsRes.success) {
         setStats(statsRes.data);
+      } else {
+        toast.error(statsRes.error.message || "Failed to load order statistics.");
       }
     } catch (error) {
       if (requestId !== requestIdRef.current) return;
@@ -163,8 +165,6 @@ export function AdminOrdersPage() {
 
     if (res.success) {
       const updatedOrder = res.data;
-      const oldOrder = orders.find((o) => o.id === orderId);
-      const oldStatus = oldOrder ? oldOrder.status : null;
 
       setOrders((prevOrders) => {
         if (statusParam && statusParam !== "all" && statusParam.toLowerCase() !== newStatus.toLowerCase()) {
@@ -173,35 +173,15 @@ export function AdminOrdersPage() {
         return prevOrders.map((o) => (o.id === orderId ? updatedOrder : o));
       });
 
-      if (stats && oldStatus && oldStatus !== newStatus) {
-        setStats((prevStats) => {
-          if (!prevStats) return prevStats;
-          const nextStats = { ...prevStats };
-          const statusKeyMap: Record<OrderStatus, keyof AdminOrderStats> = {
-            placed: "placedCount",
-            confirmed: "confirmedCount",
-            packed: "packedCount",
-            out_for_delivery: "outForDeliveryCount",
-            delivered: "deliveredCount",
-            cancelled: "cancelledCount",
-          };
-
-          const oldKey = statusKeyMap[oldStatus];
-          const newKey = statusKeyMap[newStatus];
-
-          if (oldKey && (nextStats[oldKey] as number) > 0) {
-            (nextStats[oldKey] as number) -= 1;
-          }
-          if (newKey) {
-            (nextStats[newKey] as number) += 1;
-          }
-
-          return nextStats;
-        });
-      }
-
       if (selectedInspectOrder && selectedInspectOrder.id === orderId) {
         setSelectedInspectOrder(updatedOrder);
+      }
+
+      const statsRes = await getAdminOrderStatsAction();
+      if (statsRes.success) {
+        setStats(statsRes.data);
+      } else {
+        toast.error(statsRes.error.message || "Failed to refresh order stats.");
       }
 
       return { success: true, data: updatedOrder };
@@ -215,7 +195,15 @@ export function AdminOrdersPage() {
     if (!next) return;
 
     startTransition(async () => {
-      await handleUpdateOrderStatus(order.id, next);
+      const res = await handleUpdateOrderStatus(order.id, next);
+
+      if (res.success) {
+        toast.success(`Order ${order.code} updated to ${STATUS_CONFIG[next].label}`);
+      } else {
+        toast.error(
+          res.error?.message || `Failed to update order ${order.code} to ${STATUS_CONFIG[next].label}.`
+        );
+      }
     });
   }
 
@@ -618,15 +606,14 @@ export function AdminOrdersPage() {
         }}
         onConfirm={(reason) => {
           if (!selectedCancelOrder) return;
-          startTransition(() => {
-            void handleUpdateOrderStatus(selectedCancelOrder.id, "cancelled", reason).then((res) => {
-              if (res.success) {
-                toast.success(`Order ${selectedCancelOrder.code} cancelled`);
-              } else {
-                toast.error(res.error?.message || "Failed to cancel order.");
-              }
-              setSelectedCancelOrder(null);
-            });
+          startTransition(async () => {
+            const res = await handleUpdateOrderStatus(selectedCancelOrder.id, "cancelled", reason);
+            if (res.success) {
+              toast.success(`Order ${selectedCancelOrder.code} cancelled`);
+            } else {
+              toast.error(res.error?.message || "Failed to cancel order.");
+            }
+            setSelectedCancelOrder(null);
           });
         }}
         isPending={isPending}
