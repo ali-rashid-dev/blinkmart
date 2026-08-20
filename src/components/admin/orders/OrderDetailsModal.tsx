@@ -49,18 +49,30 @@ export function OrderDetailsModal({
   const [isUpdating, setIsUpdating] = useState(false);
   const [showPrintSlip, setShowPrintSlip] = useState(false);
 
-  function sanitizeOrderUpdateError(error?: { message?: string }): string {
-    const rawMessage = typeof error?.message === "string" ? error.message.trim() : "";
-    if (!rawMessage) return "Failed to update order status.";
+  function sanitizeOrderUpdateError(error?: { message?: string; code?: string }): string {
+    const allowedCodes = new Set(["NOT_FOUND", "VALIDATION_ERROR", "UNKNOWN_ERROR"]);
+    const allowedMessages = [
+      "Order not found.",
+      "Order cannot be cancelled in status ",
+      "Insufficient inventory for product ",
+      "Invalid delivery date",
+      "Invalid order status update fields.",
+      "An unexpected error occurred while updating order status.",
+      "Failed to update order status.",
+    ];
 
-    const internalErrorPattern =
-      /prisma|p20\d{2}|transport|timeout|network|database|connection|econn|fetch failed|internal server error/i;
+    const message = typeof error?.message === "string" ? error.message.trim() : "";
+    const code = typeof error?.code === "string" ? error.code : "";
 
-    if (internalErrorPattern.test(rawMessage)) {
-      return "Failed to update order status.";
+    if (code && allowedCodes.has(code)) {
+      return message || "Failed to update order status.";
     }
 
-    return rawMessage;
+    if (message && allowedMessages.some((allowed) => message === allowed || message.startsWith(allowed))) {
+      return message;
+    }
+
+    return "Failed to update order status.";
   }
 
   useEffect(() => {
@@ -94,6 +106,8 @@ export function OrderDetailsModal({
         toast.success(`Order ${order.code} updated to ${STATUS_CONFIG[selectedStatus].label}`);
       } else if (res && res.error) {
         toast.error(sanitizeOrderUpdateError(res.error));
+      } else {
+        toast.error("Failed to update order status.");
       }
     } catch {
       toast.error("Failed to update order status.");

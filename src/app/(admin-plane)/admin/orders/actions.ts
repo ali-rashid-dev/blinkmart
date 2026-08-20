@@ -37,6 +37,47 @@ export type AdminOrderActionResult<T> =
   | { success: true; data: T }
   | { success: false; error: AdminOrderActionError };
 
+const SAFE_ORDER_UPDATE_ERROR_CODES = new Set<AdminOrderActionErrorCode>([
+  "NOT_FOUND",
+  "VALIDATION_ERROR",
+  "UNKNOWN_ERROR",
+]);
+
+const SAFE_ORDER_UPDATE_ERROR_MESSAGES = [
+  "Order not found.",
+  "Order cannot be cancelled in status ",
+  "Insufficient inventory for product ",
+  "Invalid delivery date",
+  "Invalid order status update fields.",
+  "An unexpected error occurred while updating order status.",
+  "Failed to update order status.",
+];
+
+function sanitizeOrderUpdateActionError(
+  error?: Partial<AdminOrderActionError>
+): AdminOrderActionError {
+  if (!error) {
+    return { code: "UNKNOWN_ERROR", message: "Failed to update order status." };
+  }
+
+  const message = typeof error.message === "string" ? error.message.trim() : "";
+  const code = typeof error.code === "string" ? error.code : "";
+
+  if (code && SAFE_ORDER_UPDATE_ERROR_CODES.has(code as AdminOrderActionErrorCode)) {
+    return { ...error, code: code as AdminOrderActionErrorCode, message: message || "Failed to update order status." };
+  }
+
+  if (message && SAFE_ORDER_UPDATE_ERROR_MESSAGES.some((allowed) => message === allowed || message.startsWith(allowed))) {
+    return {
+      code: (code as AdminOrderActionErrorCode) || "UNKNOWN_ERROR",
+      message,
+      details: error.details,
+    };
+  }
+
+  return { code: "UNKNOWN_ERROR", message: "Failed to update order status." };
+}
+
 function buildError(
   code: AdminOrderActionErrorCode,
   message: string,
@@ -44,7 +85,7 @@ function buildError(
 ): AdminOrderActionResult<never> {
   return {
     success: false,
-    error: { code, message, details },
+    error: sanitizeOrderUpdateActionError({ code, message, details }),
   };
 }
 
