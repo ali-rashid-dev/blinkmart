@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { OrderCannotCancelError, InsufficientInventoryError } from "@/services/order.errors";
 import type { Prisma, OrderStatus } from "@/generated/prisma/client";
 import type { CartWithItems } from "@/repositories/cart.repository";
 import type { PlaceOrderInput } from "@/validations/order";
@@ -34,18 +35,15 @@ export async function createOrderInDb(params: {
 }): Promise<OrderWithItems> {
   const { userId, cart, address, subtotal, deliveryFee, total, deliveryDate } = params;
 
-  return prisma.$transaction(async (tx) => {
-    // Generate unique code
-    let code = generateOrderCode();
-    let attempts = 0;
-    while (attempts < 5) {
-      const existing = await tx.order.findUnique({ where: { code } });
-      if (!existing) break;
-      code = generateOrderCode();
-      attempts++;
-    }
+  // Retry the whole transaction if we hit a unique constraint collision on `code` (P2002)
+  let attempts = 0;
+  while (true) {
+    try {
+      return await prisma.$transaction(async (tx) => {
+        // Generate code (db constraint will protect uniqueness)
+        const code = generateOrderCode();
 
-    // Filter enabled cart items
+        // Filter enabled cart items
     const validItems = cart.items.filter(
       (item) => item.product.enabled && (!item.product.brand || item.product.brand.enabled)
     );
@@ -103,23 +101,44 @@ export async function createOrderInDb(params: {
       },
     });
 
-    // Update product inventories
-    for (const item of validItems) {
-      if (item.product.inventory !== null && item.product.inventory >= item.quantity) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { inventory: { decrement: item.quantity } },
-        });
-      }
-    }
+            // Update product inventories in-transaction with conditional update
+            for (const item of validItems) {
+              if (item.product.inventory === null) continue; // unlimited stock
+
+              const result = await tx.product.updateMany({
+                where: { id: item.productId, inventory: { gte: item.quantity } },
+                data: { inventory: { decrement: item.quantity } },
+              });
+
+              if (result.count === 0) {
+                throw new InsufficientInventoryError(
+                  item.product.name,
+                  item.productId,
+                  item.quantity,
+                  item.product.inventory
+                );
+              }
+            }
 
     // Clear cart items
     await tx.cartItem.deleteMany({
       where: { cartId: cart.id },
     });
 
-    return order;
-  });
+        return order;
+      });
+    } catch (err: any) {
+      // Detect Prisma unique constraint on code and retry a few times
+      const isP2002 = err && (err.code === "P2002" || err.code === "UniqueConstraintViolation");
+      const targetIncludesCode = err?.meta?.target && Array.isArray(err.meta.target) && err.meta.target.includes("code");
+      attempts++;
+      if (isP2002 && targetIncludesCode && attempts < 5) {
+        // try again with a fresh code
+        continue;
+      }
+      throw err;
+    }
+  }
 }
 
 export async function findOrdersByUserId(userId: string): Promise<OrderWithItems[]> {
@@ -183,16 +202,26 @@ export async function cancelOrderInDb(
     existing.status === "OUT_FOR_DELIVERY" ||
     existing.status === "CANCELLED"
   ) {
-    throw new Error(`Order cannot be cancelled in status ${existing.status}`);
+    throw new OrderCannotCancelError(`Order cannot be cancelled in status ${existing.status}`);
   }
 
-  return prisma.order.update({
-    where: { id: existing.id },
+  // Perform conditional update so concurrent state changes cannot overwrite cancellation data
+  const allowedStatuses: OrderStatus[] = ["PLACED", "CONFIRMED", "PACKED"];
+  const updateResult = await prisma.order.updateMany({
+    where: { id: existing.id, status: { in: allowedStatuses } },
     data: {
       status: "CANCELLED",
       cancelReason: reason,
       cancelledAt: new Date(),
     },
+  });
+
+  if (updateResult.count === 0) {
+    throw new Error(`Order cannot be cancelled in status ${existing.status}`);
+  }
+
+  return prisma.order.findUnique({
+    where: { id: existing.id },
     include: {
       items: {
         include: {
@@ -205,7 +234,7 @@ export async function cancelOrderInDb(
         },
       },
     },
-  });
+  }) as Promise<OrderWithItems>;
 }
 
 export type FindAdminOrdersParams = {
@@ -222,6 +251,9 @@ export async function findAdminOrdersInDb(params: FindAdminOrdersParams): Promis
   totalPages: number;
 }> {
   const { search, status, deliveryDate, page = 1, limit = 10 } = params;
+  // Clamp pagination values to safe bounds
+  const safePage = Math.max(1, Math.floor(page || 1));
+  const safeLimit = Math.min(100, Math.max(1, Math.floor(limit || 10)));
 
   const where: Prisma.OrderWhereInput = {};
 
@@ -230,14 +262,17 @@ export async function findAdminOrdersInDb(params: FindAdminOrdersParams): Promis
   }
 
   if (deliveryDate) {
-    const startDate = new Date(deliveryDate);
-    startDate.setHours(0, 0, 0, 0);
-    const endDate = new Date(deliveryDate);
-    endDate.setHours(23, 59, 59, 999);
-    where.deliveryDate = {
-      gte: startDate,
-      lte: endDate,
-    };
+    // Parse YYYY-MM-DD into local calendar day boundaries to avoid UTC parsing pitfalls
+    const parts = deliveryDate.split("-").map((p) => Number(p));
+    if (parts.length === 3) {
+      const [y, m, d] = parts;
+      const startDate = new Date(y, m - 1, d, 0, 0, 0, 0);
+      const endDate = new Date(y, m - 1, d, 23, 59, 59, 999);
+      where.deliveryDate = {
+        gte: startDate,
+        lte: endDate,
+      };
+    }
   }
 
   if (search && search.trim()) {
@@ -253,14 +288,14 @@ export async function findAdminOrdersInDb(params: FindAdminOrdersParams): Promis
   }
 
   const totalItems = await prisma.order.count({ where });
-  const totalPages = Math.ceil(totalItems / limit) || 1;
-  const skip = (page - 1) * limit;
+  const totalPages = Math.ceil(totalItems / safeLimit) || 1;
+  const skip = (safePage - 1) * safeLimit;
 
   const orders = await prisma.order.findMany({
     where,
     orderBy: { createdAt: "desc" },
     skip,
-    take: limit,
+    take: safeLimit,
     include: {
       items: {
         include: {
@@ -356,6 +391,11 @@ export async function updateAdminOrderStatusInDb(params: {
   if (status === "CANCELLED") {
     data.cancelReason = cancelReason || "Cancelled by store administrator";
     data.cancelledAt = new Date();
+  }
+  else {
+    // Clear cancellation metadata when transitioning away from CANCELLED
+    data.cancelReason = null;
+    data.cancelledAt = null;
   }
 
   return prisma.order.update({

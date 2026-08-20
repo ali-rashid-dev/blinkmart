@@ -56,15 +56,26 @@ export function OrderCard({ order, busy }: { order: Order; busy: boolean }) {
       </div>
 
       <div className="mt-4 flex items-center gap-2 overflow-hidden">
-        {order.items.slice(0, 5).map((item, idx) => (
-          <span
-            key={`${item.productId}-${idx}`}
-            aria-hidden="true"
-            className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent/70 text-2xl"
-          >
-            {item.image}
-          </span>
-        ))}
+        {order.items.slice(0, 5).map((item, idx) => {
+          const isImageUrl =
+            item.image && (item.image.startsWith("http") || item.image.startsWith("/"));
+          return isImageUrl ? (
+            <div
+              key={`${item.productId}-${idx}`}
+              className="relative size-11 shrink-0 overflow-hidden rounded-xl bg-accent/70"
+            >
+              <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+            </div>
+          ) : (
+            <span
+              key={`${item.productId}-${idx}`}
+              aria-hidden="true"
+              className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent/70 text-2xl"
+            >
+              {item.image || "🛒"}
+            </span>
+          );
+        })}
         <span className="truncate text-xs text-muted-foreground">
           {order.items.length} item{order.items.length === 1 ? "" : "s"} ·{" "}
           {order.items.map((i) => i.name).join(", ")}

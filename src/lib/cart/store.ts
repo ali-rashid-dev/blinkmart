@@ -216,8 +216,8 @@ export function cartTotals(lines: CartLine[]): CartTotals {
 }
 
 export function formatPrice(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
+  return `Rs ${amount.toLocaleString("en-PK", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 }

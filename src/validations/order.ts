@@ -30,7 +30,7 @@ export const placeOrderSchema = z.object({
     .min(1, "Postal code is required")
     .max(20, "Postal code is too long"),
   notes: z.string().max(500, "Notes cannot exceed 500 characters").optional().nullable(),
-  deliveryDate: z.string().min(10, "Delivery date is required"),
+  deliveryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Delivery date must be in YYYY-MM-DD format"),
 });
 
 export type PlaceOrderInput = z.infer<typeof placeOrderSchema>;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import type { Order } from "./types";
 import {
   getOrdersAction,
@@ -95,12 +95,10 @@ export const ordersStore = {
 
     if (res.success) {
       toast.success("Order cancelled successfully");
-      updateState((prev) => ({
-        ...prev,
-        orders: prev.orders
-          ? prev.orders.map((o) => (o.id === orderId ? res.data : o))
-          : [res.data],
-      }));
+        updateState((prev) => ({
+          ...prev,
+          orders: prev.orders ? prev.orders.map((o) => (o.id === orderId ? res.data : o)) : null,
+        }));
       return true;
     } else {
       toast.error("Failed to cancel order", { description: res.error.message });
@@ -167,17 +165,60 @@ export function useOrder(idOrCode: string): {
   // If already in list store, find it
   const cachedOrder = state.orders?.find((o) => o.id === idOrCode || o.code === idOrCode) ?? null;
 
+  const [order, setOrder] = useState<Order | null>(cachedOrder);
+  const [loading, setLoading] = useState<boolean>(() => (!cachedOrder ? state.loading : false));
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setOrder(cachedOrder);
+  }, [cachedOrder]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function fetch() {
+      if (cachedOrder) {
+        setLoading(false);
+        setError(null);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      const res = await getOrderByIdAction(idOrCode);
+      if (cancelled) return;
+      if (res.success) {
+        setOrder(res.data);
+      } else {
+        // Distinguish genuine load errors from not-found (return null)
+        setError(res.error?.message ?? "Failed to load order");
+        setOrder(null);
+      }
+      setLoading(false);
+    }
+
+    fetch();
+    return () => {
+      cancelled = true;
+    };
+  }, [idOrCode, cachedOrder]);
+
   return {
-    order: cachedOrder,
-    loading: state.loading && !cachedOrder,
-    error: state.error,
-    refetch: () => void ordersStore.load(true),
+    order,
+    loading,
+    error,
+    refetch: () => {
+      void ordersStore.load(true);
+      // also re-fetch single order
+      void getOrderByIdAction(idOrCode).then((res) => {
+        if (res.success) setOrder(res.data);
+      });
+    },
   };
 }
 
 export function formatMoney(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
+  return `Rs ${amount.toLocaleString("en-PK", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })}`;
 }

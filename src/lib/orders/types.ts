@@ -121,7 +121,9 @@ export interface DeliveryDateOption {
  * If now >= 5:00 PM, today is past cutoff, so tomorrow is the earliest date available.
  */
 export function getAvailableDeliveryDates(now: Date = new Date()): DeliveryDateOption[] {
-  const cutoff = setMinutes(setHours(new Date(now), DELIVERY_WINDOW.cutoffHour), 0);
+  // Build an exact cutoff at cutoffHour:00:00.000 in local time
+  const cutoff = new Date(now);
+  cutoff.setHours(DELIVERY_WINDOW.cutoffHour, 0, 0, 0);
   const pastCutoff = isAfter(now, cutoff);
 
   const options: DeliveryDateOption[] = [];

@@ -4,14 +4,23 @@ import type { OrderItem } from "@/lib/orders/types";
 export function OrderItemsList({ items }: { items: OrderItem[] }) {
   return (
     <ul aria-label="Order items" className="divide-y divide-border">
-      {items.map((item) => (
-        <li key={item.productId} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-          <span
-            aria-hidden="true"
-            className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent/70 text-2xl"
-          >
-            {item.image}
-          </span>
+      {items.map((item) => {
+        const isImageUrl =
+          item.image && (item.image.startsWith("http") || item.image.startsWith("/"));
+        return (
+          <li key={item.productId} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+            {isImageUrl ? (
+              <div className="relative size-11 shrink-0 overflow-hidden rounded-xl bg-accent/70">
+                <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+              </div>
+            ) : (
+              <span
+                aria-hidden="true"
+                className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent/70 text-2xl"
+              >
+                {item.image || "🛒"}
+              </span>
+            )}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-foreground">{item.name}</p>
             <p className="truncate text-xs text-muted-foreground">
@@ -22,7 +31,8 @@ export function OrderItemsList({ items }: { items: OrderItem[] }) {
             {formatMoney(item.price * item.quantity)}
           </p>
         </li>
-      ))}
+      );
+      })}
     </ul>
   );
 }

@@ -8,6 +8,7 @@ import {
   cancelUserOrder,
   reorderUserOrder,
   OrderNotFoundError,
+  OrderCannotCancelError,
 } from "@/services/order.service";
 import { cancelOrderSchema } from "@/validations/order";
 import type { Order } from "@/lib/orders/types";
@@ -94,8 +95,11 @@ export async function cancelOrderAction(
     const updatedOrder = await cancelUserOrder(userId, parsed.data);
     return { success: true, data: updatedOrder };
   } catch (error) {
-    if (error instanceof Error && error.message.includes("cannot be cancelled")) {
+    if (error instanceof OrderCannotCancelError) {
       return buildError("CANNOT_CANCEL", error.message);
+    }
+    if (error instanceof OrderNotFoundError) {
+      return buildError("NOT_FOUND", error.message);
     }
     console.error("Failed to cancel order:", error);
     return buildError("DATABASE_ERROR", "Unable to cancel order at this time.");

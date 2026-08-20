@@ -146,7 +146,11 @@ function OrderDetailsModal({
   order: Order | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpdateStatus: (orderId: string, status: OrderStatus, cancelReason?: string) => Promise<void>;
+  onUpdateStatus: (orderId: string, status: OrderStatus, cancelReason?: string) => Promise<{
+    success: boolean;
+    data?: Order;
+    error?: any;
+  }>;
 }) {
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus>("placed");
   const [cancelReasonInput, setCancelReasonInput] = useState("");
@@ -175,12 +179,16 @@ function OrderDetailsModal({
 
     setIsUpdating(true);
     try {
-      await onUpdateStatus(
+      const res = await onUpdateStatus(
         order.id,
         selectedStatus,
         selectedStatus === "cancelled" ? cancelReasonInput.trim() : undefined
       );
-      toast.success(`Order ${order.code} updated to ${STATUS_CONFIG[selectedStatus].label}`);
+      if (res && res.success) {
+        toast.success(`Order ${order.code} updated to ${STATUS_CONFIG[selectedStatus].label}`);
+      } else if (res && res.error) {
+        toast.error(res.error.message || "Failed to update order status.");
+      }
     } catch {
       // Error handled by parent
     } finally {
@@ -519,6 +527,9 @@ function CancellationDialog({
   isPending: boolean;
 }) {
   const [reason, setReason] = useState("");
+  useEffect(() => {
+    if (open) setReason("");
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -600,16 +611,28 @@ export default function AdminOrdersPage() {
     setSearchInput(search);
   }, [search]);
 
+  // Debounce search updates so we don't push URL on every keystroke.
+  const searchDebounceRef = useRef<number | null>(null);
+  useEffect(() => {
+    return () => {
+      if (searchDebounceRef.current) window.clearTimeout(searchDebounceRef.current);
+    };
+  }, []);
+
   // URL Helper updates
-  function updateQuery(updates: Record<string, string>) {
+  function updateQuery(updates: Record<string, string>, method: "push" | "replace" = "push") {
     const params = new URLSearchParams(searchParams.toString());
+    const isPageUpdate = Object.prototype.hasOwnProperty.call(updates, "page");
     for (const [k, v] of Object.entries(updates)) {
       if (v) params.set(k, v);
       else params.delete(k);
     }
-    params.delete("page");
+    // Remove page only when not explicitly updating the page (filter changes reset pagination)
+    if (!isPageUpdate) params.delete("page");
     const query = params.toString();
-    router.push(query ? `${pathname}?${query}` : pathname);
+    const url = query ? `${pathname}?${query}` : pathname;
+    if (method === "replace") router.replace(url);
+    else router.push(url);
   }
 
   // Load Data
@@ -663,7 +686,7 @@ export default function AdminOrdersPage() {
     orderId: string,
     newStatus: OrderStatus,
     cancelReason?: string
-  ) {
+  ): Promise<{ success: boolean; data?: Order; error?: any }> {
     const dbStatus = DB_STATUS_MAP[newStatus];
     const res = await updateAdminOrderStatusAction({
       orderId,
@@ -672,12 +695,16 @@ export default function AdminOrdersPage() {
     });
 
     if (res.success) {
-      toast.success(`Order status updated to ${STATUS_CONFIG[newStatus].label}`);
-      setSelectedInspectOrder(res.data);
+      // Refresh selected inspect order only when the detail modal is already open for the same order
+      if (selectedInspectOrder && selectedInspectOrder.id === orderId) {
+        setSelectedInspectOrder(res.data);
+      }
+      // Always refresh list data
       loadData();
-    } else {
-      toast.error(res.error.message);
+      return { success: true, data: res.data };
     }
+
+    return { success: false, error: res.error };
   }
 
   // Next Step Transition shortcut
@@ -837,8 +864,12 @@ export default function AdminOrdersPage() {
           <Input
             value={searchInput}
             onChange={(e) => {
-              setSearchInput(e.target.value);
-              updateQuery({ search: e.target.value });
+              const v = e.target.value;
+              setSearchInput(v);
+              if (searchDebounceRef.current) window.clearTimeout(searchDebounceRef.current);
+              // debounce 350ms
+              // @ts-ignore
+              searchDebounceRef.current = window.setTimeout(() => updateQuery({ search: v }, "replace"), 350);
             }}
             placeholder="Search by code (e.g. ORD-123), customer name, phone, city..."
             className="pl-9 text-xs"
@@ -1111,10 +1142,18 @@ export default function AdminOrdersPage() {
         onOpenChange={(open) => {
           if (!open) setSelectedCancelOrder(null);
         }}
-        onConfirm={async (reason) => {
+        onConfirm={(reason) => {
           if (!selectedCancelOrder) return;
-          await handleUpdateOrderStatus(selectedCancelOrder.id, "cancelled", reason);
-          setSelectedCancelOrder(null);
+          startTransition(() => {
+            void handleUpdateOrderStatus(selectedCancelOrder.id, "cancelled", reason).then((res) => {
+              if (res.success) {
+                toast.success(`Order ${selectedCancelOrder.code} cancelled`);
+              } else {
+                toast.error(res.error?.message || "Failed to cancel order.");
+              }
+              setSelectedCancelOrder(null);
+            });
+          });
         }}
         isPending={isPending}
       />

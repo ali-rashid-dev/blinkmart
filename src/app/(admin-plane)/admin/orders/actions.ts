@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin, isAuthError } from "@/lib/authz";
+import { z } from "zod";
 import {
   getAdminOrders,
   getAdminOrderStats,
@@ -9,6 +10,7 @@ import {
   getAdminOrderDetail,
 } from "@/services/order.service";
 import { updateOrderStatusSchema } from "@/validations/order";
+import { OrderNotFoundError } from "@/services/order.service";
 import type { Order } from "@/lib/orders/types";
 import type { AdminOrderStats } from "@/repositories/order.repository";
 
@@ -51,8 +53,39 @@ export async function getAdminOrdersAction(params: {
   const authCheck = await requireAdmin<AdminOrderActionErrorCode, AdminOrderActionResult<never>>(buildError);
   if (isAuthError(authCheck)) return authCheck;
 
+  // Validate client-supplied params. Coerce string numbers when possible.
+  const getAdminOrdersSchema = z.object({
+    search: z.string().min(1).max(200).optional(),
+    status: z
+      .string()
+      .transform((s) => s?.toUpperCase())
+      .optional()
+      .refine(
+        (v) => v == null || v === "ALL" || ["PLACED", "CONFIRMED", "PACKED", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED"].includes(v),
+        { message: "Invalid status value" }
+      ),
+    deliveryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid deliveryDate format").optional(),
+    page: z.preprocess((val) => {
+      if (typeof val === "string") return parseInt(val, 10);
+      return val;
+    }, z.number().int().min(1).max(1000).optional()),
+    limit: z.preprocess((val) => {
+      if (typeof val === "string") return parseInt(val, 10);
+      return val;
+    }, z.number().int().min(1).max(100).optional()),
+  });
+
+  const parsed = getAdminOrdersSchema.safeParse(params);
+  if (!parsed.success) {
+    return buildError(
+      "VALIDATION_ERROR",
+      "Invalid filters provided for orders.",
+      parsed.error.flatten().fieldErrors as unknown as Record<string, string>
+    );
+  }
+
   try {
-    const result = await getAdminOrders(params);
+    const result = await getAdminOrders(parsed.data as any);
     return { success: true, data: result };
   } catch (error) {
     console.error("Failed to fetch admin orders:", error);
@@ -98,7 +131,15 @@ export async function updateAdminOrderStatusAction(params: {
     return { success: true, data: updatedOrder };
   } catch (error) {
     console.error("Failed to update order status:", error);
-    return buildError("DATABASE_ERROR", (error as Error).message || "Failed to update order status.");
+    // Map known service errors to action error codes
+    if (error instanceof OrderNotFoundError) {
+      return buildError("NOT_FOUND", "Order not found.");
+    }
+
+    // No specific illegal-transition error type is exported by the service; skip mapping.
+
+    // For unknown failures, return a fixed safe message to avoid leaking internals.
+    return buildError("DATABASE_ERROR", "Failed to update order status.");
   }
 }
 

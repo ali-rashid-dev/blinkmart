@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { getAvailableDeliveryDates, canCancel, type Order } from "../lib/orders/types";
 import { placeOrderSchema, cancelOrderSchema } from "../validations/order";
+import { InsufficientInventoryError } from "./order.errors";
 
 describe("Order Module Service & Utilities", () => {
   it("computes delivery date options before 5:00 PM cutoff", () => {
@@ -100,4 +101,16 @@ describe("Order Module Service & Utilities", () => {
     const invalidData = { orderId: "", reason: "" };
     assert.equal(cancelOrderSchema.safeParse(invalidData).success, false);
   });
+
+  it("formats InsufficientInventoryError with friendly product name and details", () => {
+    const err1 = new InsufficientInventoryError("Organic Hass Avocados", "prod_123");
+    assert.equal(err1.name, "InsufficientInventoryError");
+    assert.equal(err1.productName, "Organic Hass Avocados");
+    assert.equal(err1.productId, "prod_123");
+    assert.equal(err1.message, 'Insufficient inventory for product "Organic Hass Avocados".');
+
+    const err2 = new InsufficientInventoryError("Organic Hass Avocados", "prod_123", 5, 2);
+    assert.equal(err2.message, 'Insufficient inventory for product "Organic Hass Avocados" (2 available, 5 requested).');
+  });
 });
+

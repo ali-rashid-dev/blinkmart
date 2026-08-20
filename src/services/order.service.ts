@@ -10,7 +10,10 @@ import {
   type OrderWithItems,
   type AdminOrderStats,
 } from "@/repositories/order.repository";
+import { OrderCannotCancelError, InsufficientInventoryError } from "@/services/order.errors";
+export { OrderCannotCancelError, InsufficientInventoryError };
 import type { OrderStatus as PrismaOrderStatus } from "@/generated/prisma/client";
+import { OrderStatus as PrismaOrderStatusEnum } from "@/generated/prisma/enums";
 import { findCartByIdentifier } from "@/repositories/cart.repository";
 import { addItemToCart } from "@/services/cart.service";
 import {
@@ -28,7 +31,7 @@ import {
   type OrderTimelineEvent,
   getAvailableDeliveryDates,
 } from "@/lib/orders/types";
-import { parseISO, isBefore, startOfDay } from "date-fns";
+import { parseISO, isBefore, startOfDay, isAfter } from "date-fns";
 
 export class EmptyCartError extends Error {
   constructor() {
@@ -76,43 +79,15 @@ export function mapPrismaOrderToDomainOrder(dbOrder: OrderWithItems): Order {
   }));
 
   // Build realistic timeline step events
-  const timeline: OrderTimelineEvent[] = [
-    { status: "placed", at: dbOrder.createdAt.toISOString() },
-  ];
+  const timeline: OrderTimelineEvent[] = [{ status: "placed", at: dbOrder.createdAt.toISOString() }];
 
-  if (status === "confirmed" || status === "packed" || status === "out_for_delivery" || status === "delivered") {
-    timeline.push({
-      status: "confirmed",
-      at: new Date(dbOrder.createdAt.getTime() + 5 * 60 * 1000).toISOString(),
-    });
-  }
-
-  if (status === "packed" || status === "out_for_delivery" || status === "delivered") {
-    timeline.push({
-      status: "packed",
-      at: new Date(dbOrder.createdAt.getTime() + 20 * 60 * 1000).toISOString(),
-    });
-  }
-
-  if (status === "out_for_delivery" || status === "delivered") {
-    timeline.push({
-      status: "out_for_delivery",
-      at: new Date(dbOrder.createdAt.getTime() + 45 * 60 * 1000).toISOString(),
-    });
-  }
-
+  // Use persisted timestamps when present. Do not synthesize confirmed/packed/out_for_delivery from createdAt.
   if (status === "delivered") {
-    timeline.push({
-      status: "delivered",
-      at: dbOrder.updatedAt.toISOString(),
-    });
+    timeline.push({ status: "delivered", at: dbOrder.updatedAt.toISOString() });
   }
 
   if (status === "cancelled") {
-    timeline.push({
-      status: "cancelled",
-      at: (dbOrder.cancelledAt || dbOrder.updatedAt).toISOString(),
-    });
+    timeline.push({ status: "cancelled", at: (dbOrder.cancelledAt || dbOrder.updatedAt).toISOString() });
   }
 
   return {
@@ -162,6 +137,18 @@ export async function placeOrder(
     throw new EmptyCartError();
   }
 
+  // Validate inventory before proceeding to checkout
+  for (const item of validItems) {
+    if (item.product.inventory !== null && item.product.inventory < item.quantity) {
+      throw new InsufficientInventoryError(
+        item.product.name,
+        item.productId,
+        item.quantity,
+        item.product.inventory
+      );
+    }
+  }
+
   // Validate delivery date against available windows (cutoff rule)
   const availableWindows = getAvailableDeliveryDates(new Date());
   const minAvailableIso = availableWindows[0]!.dateIso;
@@ -171,6 +158,15 @@ export async function placeOrder(
   if (isBefore(requestedDate, minAvailableDate)) {
     throw new InvalidDeliveryDateError(
       `Selected delivery date is past the 5:00 PM cutoff window. Earliest delivery date is ${minAvailableIso}.`
+    );
+  }
+
+  // Reject dates beyond the last offered delivery window
+  const maxAvailableIso = availableWindows[availableWindows.length - 1]!.dateIso;
+  const maxAvailableDate = startOfDay(parseISO(maxAvailableIso));
+  if (isAfter(requestedDate, maxAvailableDate)) {
+    throw new InvalidDeliveryDateError(
+      `Selected delivery date is beyond the last available delivery window (${maxAvailableIso}).`
     );
   }
 
@@ -253,10 +249,14 @@ export async function getAdminOrders(params: {
   totalPages: number;
 }> {
   let dbStatus: PrismaOrderStatus | undefined = undefined;
-  if (params.status && params.status !== "ALL" && params.status !== "all") {
+  if (params.status && params.status.toUpperCase() !== "ALL") {
     const uppercase = params.status.toUpperCase();
-    if (["PLACED", "CONFIRMED", "PACKED", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED"].includes(uppercase)) {
+    const allowed = Object.values(PrismaOrderStatusEnum) as string[];
+    if (allowed.includes(uppercase)) {
       dbStatus = uppercase as PrismaOrderStatus;
+    } else {
+      // Unrecognized non-ALL status - return empty result to avoid accidental full scans
+      return { items: [], totalItems: 0, totalPages: 1 };
     }
   }
 
@@ -296,4 +296,6 @@ export async function getAdminOrderDetail(orderId: string): Promise<Order | null
   if (!dbOrder) return null;
   return mapPrismaOrderToDomainOrder(dbOrder);
 }
+
+
 
