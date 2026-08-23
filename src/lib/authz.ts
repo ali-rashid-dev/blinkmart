@@ -47,10 +47,10 @@ export async function requireAdmin<TCode extends string, TResult extends AuthAct
 
     const dbUser = await (await import("@/lib/prisma")).default.user.findUnique({
       where: { id: session.user.id },
-      select: { role: true },
+      select: { role: true, banned: true },
     });
 
-    if (!dbUser || dbUser.role !== "ADMIN") {
+    if (!dbUser || dbUser.banned || dbUser.role !== "ADMIN") {
       return buildError("FORBIDDEN", "You do not have permission to perform this action.");
     }
 

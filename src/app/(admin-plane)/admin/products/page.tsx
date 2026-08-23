@@ -70,8 +70,8 @@ import {
   type ProductActionResult,
   type SerializedProduct,
 } from "./actions";
-import { getCategoriesAction } from "@/app/(admin-plane)/categories/actions";
-import { getBrandsAction } from "@/app/(admin-plane)/brands/actions";
+import { getCategoriesAction } from "@/app/(admin-plane)/admin/categories/actions";
+import { getBrandsAction } from "@/app/(admin-plane)/admin/brands/actions";
 
 import type { ProductWithBrandAndCategory } from "@/repositories/product.repository";
 import type { CategoryRecord } from "@/repositories/category.repository";
