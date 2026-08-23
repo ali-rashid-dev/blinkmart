@@ -6,23 +6,33 @@ export { getCategoryEmoji, formatCurrency, formatCompact, calculateDelta, getIni
 
 export function getDateRanges(range: RangeKey, referenceDate = new Date()) {
   const now = new Date(referenceDate);
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   let currentStart: Date;
   let priorStart: Date;
   let priorEnd: Date;
 
   if (range === "7d") {
-    currentStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    priorStart = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
-    priorEnd = new Date(currentStart.getTime() - 1);
+    currentStart = new Date(startOfToday);
+    currentStart.setDate(currentStart.getDate() - 6);
+    priorStart = new Date(startOfToday);
+    priorStart.setDate(priorStart.getDate() - 13);
+    priorEnd = new Date(startOfToday);
+    priorEnd.setDate(priorEnd.getDate() - 7);
   } else if (range === "30d") {
-    currentStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    priorStart = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
-    priorEnd = new Date(currentStart.getTime() - 1);
+    currentStart = new Date(startOfToday);
+    currentStart.setDate(currentStart.getDate() - 29);
+    priorStart = new Date(startOfToday);
+    priorStart.setDate(priorStart.getDate() - 59);
+    priorEnd = new Date(startOfToday);
+    priorEnd.setDate(priorEnd.getDate() - 30);
   } else {
-    // 12m
-    currentStart = new Date(now.getFullYear() - 1, now.getMonth(), 1);
-    priorStart = new Date(now.getFullYear() - 2, now.getMonth(), 1);
-    priorEnd = new Date(currentStart.getTime() - 1);
+    currentStart = new Date(now);
+    currentStart.setFullYear(currentStart.getFullYear() - 1);
+    currentStart.setHours(0, 0, 0, 0);
+    priorStart = new Date(currentStart);
+    priorStart.setFullYear(priorStart.getFullYear() - 1);
+    priorEnd = new Date(currentStart);
+    priorEnd.setTime(priorEnd.getTime() - 1);
   }
 
   return {
@@ -128,12 +138,13 @@ export function buildSeriesForRange(orders: RawReportOrder[], range: RangeKey, r
     });
   }
 
-  const msPerDay = 24 * 60 * 60 * 1000;
-  const endTs = refDate.getTime();
-  const startTs = endTs - (daysCount - 1) * msPerDay;
+  const startOfToday = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate());
+  const startDate = new Date(startOfToday);
+  startDate.setDate(startDate.getDate() - (daysCount - 1));
 
   for (let i = 0; i < daysCount; i++) {
-    const targetDate = new Date(startTs + i * msPerDay);
+    const targetDate = new Date(startDate);
+    targetDate.setDate(startDate.getDate() + i);
     const year = targetDate.getFullYear();
     const monthStr = String(targetDate.getMonth() + 1).padStart(2, "0");
     const dayStr = String(targetDate.getDate()).padStart(2, "0");
@@ -251,6 +262,7 @@ export function buildCustomerInsights(stats: Array<{
   city: string;
   orderCount: number;
   totalSpent: number;
+  preRangeOrderCount?: number;
 }>): {
   customerMix: CustomerMixItem[];
   topCustomers: TopCustomerItem[];
@@ -260,9 +272,10 @@ export function buildCustomerInsights(stats: Array<{
   let vipCount = 0;
 
   for (const c of stats) {
+    const hadPreviousOrders = (c.preRangeOrderCount ?? 0) > 0;
     if (c.orderCount >= 5 || c.totalSpent >= 500) {
       vipCount++;
-    } else if (c.orderCount > 1) {
+    } else if (c.orderCount > 1 || hadPreviousOrders) {
       returningCount++;
     } else {
       newCount++;
@@ -280,9 +293,10 @@ export function buildCustomerInsights(stats: Array<{
 
   const topCustomers: TopCustomerItem[] = top5.map((c) => {
     let status: "new" | "returning" | "vip" = "new";
+    const hadPreviousOrders = (c.preRangeOrderCount ?? 0) > 0;
     if (c.orderCount >= 5 || c.totalSpent >= 500) {
       status = "vip";
-    } else if (c.orderCount > 1) {
+    } else if (c.orderCount > 1 || hadPreviousOrders) {
       status = "returning";
     }
 

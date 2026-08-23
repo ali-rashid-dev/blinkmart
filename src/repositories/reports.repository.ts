@@ -40,6 +40,7 @@ export interface RawCustomerOrderStat {
   orderCount: number;
   totalSpent: number;
   firstOrderDate: Date;
+  preRangeOrderCount: number;
 }
 
 /**
@@ -127,40 +128,63 @@ export async function getCustomerOrderStatsInRange(
   startDate: Date,
   endDate: Date
 ): Promise<RawCustomerOrderStat[]> {
-  const orders = await prisma.order.findMany({
-    where: {
-      createdAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-      status: {
-        not: "CANCELLED" as OrderStatus,
-      },
-    },
-    select: {
-      userId: true,
-      total: true,
-      createdAt: true,
-      area: true,
-      city: true,
-      user: {
-        select: {
-          name: true,
-          email: true,
+  const [orders, priorOrders] = await Promise.all([
+    prisma.order.findMany({
+      where: {
+        createdAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+        status: {
+          not: "CANCELLED" as OrderStatus,
         },
       },
-    },
-  });
+      select: {
+        userId: true,
+        total: true,
+        createdAt: true,
+        area: true,
+        city: true,
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    }),
+    prisma.order.findMany({
+      where: {
+        createdAt: {
+          lt: startDate,
+        },
+        status: {
+          not: "CANCELLED" as OrderStatus,
+        },
+      },
+      select: {
+        userId: true,
+        createdAt: true,
+      },
+    }),
+  ]);
+
+  const preRangeOrderCounts = new Map<string, number>();
+  for (const o of priorOrders) {
+    preRangeOrderCounts.set(o.userId, (preRangeOrderCounts.get(o.userId) ?? 0) + 1);
+  }
 
   const customerMap = new Map<string, RawCustomerOrderStat>();
 
   for (const o of orders) {
     const existing = customerMap.get(o.userId);
     const orderTotal = Number(o.total);
+    const priorCount = preRangeOrderCounts.get(o.userId) ?? 0;
 
     if (existing) {
       existing.orderCount += 1;
       existing.totalSpent += orderTotal;
+      existing.preRangeOrderCount = Math.max(existing.preRangeOrderCount, priorCount);
       if (o.createdAt < existing.firstOrderDate) {
         existing.firstOrderDate = o.createdAt;
       }
@@ -174,6 +198,7 @@ export async function getCustomerOrderStatsInRange(
         orderCount: 1,
         totalSpent: orderTotal,
         firstOrderDate: o.createdAt,
+        preRangeOrderCount: priorCount,
       });
     }
   }

@@ -39,6 +39,16 @@ export default function AdminReportsPage() {
     fetchReports(range);
   }, [range]);
 
+  const escapeCsvText = (value: string | null | undefined) => {
+    const safe = String(value ?? "")
+      .replace(/\r/g, " ")
+      .replace(/\t/g, " ")
+      .replace(/^\s*([=+\-@])/g, "'$1")
+      .replace(/"/g, '""');
+
+    return `"${safe}"`;
+  };
+
   const handleExportCSV = () => {
     if (!data) return;
 
@@ -68,7 +78,7 @@ export default function AdminReportsPage() {
     csvLines.push("Best Selling Products");
     csvLines.push("Product Name,Category,Units Sold,Revenue ($),Share %");
     data.bestSelling.forEach((item) => {
-      csvLines.push(`"${item.name.replace(/"/g, '""')}","${item.category}",${item.units},${item.revenue},${item.share}%`);
+      csvLines.push(`${escapeCsvText(item.name)},${escapeCsvText(item.category)},${item.units},${item.revenue},${item.share}%`);
     });
     csvLines.push("");
 
@@ -76,7 +86,7 @@ export default function AdminReportsPage() {
     csvLines.push("Top Customers");
     csvLines.push("Customer Name,Location,Total Orders,Total Spent ($),Tier Status");
     data.topCustomers.forEach((c) => {
-      csvLines.push(`"${c.name.replace(/"/g, '""')}","${c.area}",${c.orders},${c.spent},${c.status}`);
+      csvLines.push(`${escapeCsvText(c.name)},${escapeCsvText(c.area)},${c.orders},${c.spent},${c.status}`);
     });
 
     const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(csvLines.join("\n"));
@@ -122,7 +132,7 @@ export default function AdminReportsPage() {
       </div>
 
       <div
-        role="tablist"
+        role="radiogroup"
         aria-label="Reporting period"
         className="mt-6 inline-flex rounded-full border border-border bg-card p-1"
       >
@@ -130,8 +140,8 @@ export default function AdminReportsPage() {
           <button
             key={r}
             type="button"
-            role="tab"
-            aria-selected={range === r}
+            role="radio"
+            aria-checked={range === r}
             onClick={() => setRange(r)}
             disabled={isPending}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${

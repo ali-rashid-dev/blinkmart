@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useRef } from "react";
 import { Megaphone, Send, ShoppingBasket, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 // Switch removed: push controls are not persisted server-side
@@ -30,15 +30,33 @@ export default function AdminNotificationsPage() {
   const [orderFeed, setOrderFeed] = useState<AdminOrderNotificationRow[]>([]);
   const [campaigns, setCampaigns] = useState<AdminCampaignRow[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const latestRequestRef = useRef(0);
 
   const fetchFeeds = async () => {
+    const requestId = ++latestRequestRef.current;
     setLoadingData(true);
     setError(null);
-    try {
-      const [feedRes, campRes] = await Promise.all([getAdminOrderFeedAction(), getAdminCampaignsAction()]);
 
-      // Preserve successful data and collect errors from unsuccessful siblings
+    try {
+      const [feedResult, campResult] = await Promise.allSettled([
+        getAdminOrderFeedAction(),
+        getAdminCampaignsAction(),
+      ]);
+
+      const feedRes =
+        feedResult.status === "fulfilled"
+          ? feedResult.value
+          : { success: false as const, error: { message: feedResult.reason?.message ?? "Failed to load order feed" } };
+      const campRes =
+        campResult.status === "fulfilled"
+          ? campResult.value
+          : { success: false as const, error: { message: campResult.reason?.message ?? "Failed to load campaigns" } };
+
       let collectedError: string | null = null;
+
+      if (requestId !== latestRequestRef.current) {
+        return;
+      }
 
       if (feedRes && feedRes.success) {
         setOrderFeed(feedRes.data);
@@ -52,12 +70,19 @@ export default function AdminNotificationsPage() {
         collectedError = collectedError ? `${collectedError}; ${campRes.error.message}` : campRes.error.message;
       }
 
-      if (collectedError) setError(collectedError);
+      if (collectedError) {
+        setError(collectedError);
+      }
     } catch (err: any) {
+      if (requestId !== latestRequestRef.current) {
+        return;
+      }
       // Unexpected failure (e.g., network) — show a fallback message
       setError(err?.message ?? "Failed to load feeds");
     } finally {
-      setLoadingData(false);
+      if (requestId === latestRequestRef.current) {
+        setLoadingData(false);
+      }
     }
   };
 
@@ -110,7 +135,8 @@ export default function AdminNotificationsPage() {
           <div>Failed to load notification feeds: {error}</div>
           <button
             onClick={() => void fetchFeeds()}
-            className="ml-4 inline-flex h-8 items-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-semibold text-foreground"
+            disabled={loadingData}
+            className="ml-4 inline-flex h-8 items-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-50"
           >
             Retry
           </button>
