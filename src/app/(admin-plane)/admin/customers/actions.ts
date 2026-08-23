@@ -33,6 +33,7 @@ export type CustomerActionErrorCode =
   | "CUSTOMER_NOT_FOUND"
   | "EMAIL_EXISTS"
   | "SELF_BAN_NOT_ALLOWED"
+  | "SELF_DEMOTION_NOT_ALLOWED"
   | "VALIDATION_ERROR"
   | "DATABASE_ERROR"
   | "UNKNOWN_ERROR";
@@ -116,9 +117,9 @@ export async function updateCustomerAction(
     }
     if (error instanceof CustomerNotFoundError) {
       return buildError("CUSTOMER_NOT_FOUND", error.message);
-      }
-      if (error instanceof AdminSelfDemotionError || error instanceof FinalAdminRemovalError) {
-        return buildError("SELF_DEMOTION_NOT_ALLOWED", error.message);
+    }
+    if (error instanceof AdminSelfDemotionError || error instanceof FinalAdminRemovalError) {
+      return buildError("SELF_DEMOTION_NOT_ALLOWED", error.message);
     }
     console.error("[updateCustomerAction] Error:", error);
     return buildError("DATABASE_ERROR", "Failed to update customer details.");
