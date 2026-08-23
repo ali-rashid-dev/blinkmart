@@ -400,7 +400,7 @@ export async function updateAdminOrderStatusInDb(params: {
     // Treat cancelReason as user-visible data; do not persist internal sentinels.
     data.cancelReason = cancelReason || "Cancelled by store administrator";
     data.cancelledAt = new Date();
-  } else if (existing.status === "CANCELLED" && status !== "CANCELLED") {
+  } else if (existing.status === "CANCELLED") {
     // Any transition away from CANCELLED should clear cancellation metadata
     data.cancelReason = null;
     data.cancelledAt = null;
