@@ -17,14 +17,13 @@ export function NotificationFilters({
   onChange: (next: NotificationFilter) => void;
 }) {
   return (
-    <div role="tablist" aria-label="Filter notifications" className="flex flex-wrap gap-2">
+    <div aria-label="Filter notifications" className="flex flex-wrap gap-2">
       {options.map((o) => {
         const active = o.value === value;
         return (
           <button
             key={o.value}
-            role="tab"
-            aria-selected={active}
+            aria-pressed={active}
             type="button"
             onClick={() => onChange(o.value)}
             className={`inline-flex h-9 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-all duration-200 active:scale-[0.98] ${

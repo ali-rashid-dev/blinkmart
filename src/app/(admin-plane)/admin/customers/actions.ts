@@ -12,6 +12,8 @@ import {
   CustomerNotFoundError,
   CustomerEmailExistsError,
   AdminSelfBanError,
+  AdminSelfDemotionError,
+  FinalAdminRemovalError,
   CustomerValidationError,
 } from "@/services/customer.service";
 import type {
@@ -114,6 +116,9 @@ export async function updateCustomerAction(
     }
     if (error instanceof CustomerNotFoundError) {
       return buildError("CUSTOMER_NOT_FOUND", error.message);
+      }
+      if (error instanceof AdminSelfDemotionError || error instanceof FinalAdminRemovalError) {
+        return buildError("SELF_DEMOTION_NOT_ALLOWED", error.message);
     }
     console.error("[updateCustomerAction] Error:", error);
     return buildError("DATABASE_ERROR", "Failed to update customer details.");

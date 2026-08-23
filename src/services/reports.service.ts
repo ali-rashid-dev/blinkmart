@@ -16,15 +16,15 @@ export function getDateRanges(range: RangeKey, referenceDate = new Date()) {
     currentStart.setDate(currentStart.getDate() - 6);
     priorStart = new Date(startOfToday);
     priorStart.setDate(priorStart.getDate() - 13);
-    priorEnd = new Date(startOfToday);
-    priorEnd.setDate(priorEnd.getDate() - 7);
+    // use an end-exclusive boundary: just before currentStart
+    priorEnd = new Date(currentStart.getTime() - 1);
   } else if (range === "30d") {
     currentStart = new Date(startOfToday);
     currentStart.setDate(currentStart.getDate() - 29);
     priorStart = new Date(startOfToday);
     priorStart.setDate(priorStart.getDate() - 59);
-    priorEnd = new Date(startOfToday);
-    priorEnd.setDate(priorEnd.getDate() - 30);
+    // use an end-exclusive boundary: just before currentStart
+    priorEnd = new Date(currentStart.getTime() - 1);
   } else {
     currentStart = new Date(now);
     currentStart.setFullYear(currentStart.getFullYear() - 1);

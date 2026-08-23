@@ -1,4 +1,5 @@
 import { Activity, ArrowUpRight, Boxes, ShoppingBag, Users } from "lucide-react";
+import Link from "next/link";
 
 const stats = [
   { label: "Total orders", value: "1,284", change: "+12.4%", icon: ShoppingBag },
@@ -59,18 +60,18 @@ export default function DashboardPage() {
           <h2 className="font-display text-xl text-foreground">Quick actions</h2>
           <div className="mt-4 space-y-2">
             {[
-              "Add a new product",
-              "Review monthly reports",
-              "Manage category visibility",
-            ].map((action) => (
-              <button
-                key={action}
-                type="button"
+              { label: "Add a new product", href: "/admin/products/new" },
+              { label: "Review monthly reports", href: "/admin/reports" },
+              { label: "Manage category visibility", href: "/admin/categories" },
+            ].map(({ label, href }) => (
+              <Link
+                key={label}
+                href={href}
                 className="flex w-full items-center justify-between rounded-xl border border-border bg-muted/30 px-3 py-2 text-left text-sm text-foreground transition-colors hover:border-primary/50 hover:bg-accent"
               >
-                <span>{action}</span>
+                <span>{label}</span>
                 <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
-              </button>
+              </Link>
             ))}
           </div>
         </div>

@@ -6,6 +6,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { CartBadge } from "@/components/cart/CartBadge";
 import { NotificationBadge } from "@/components/notification/NotificationBadge";
+import { notificationsStore } from "@/lib/notifications/store";
 
 export const Navbar = () => {
   const router = useRouter();
@@ -13,6 +14,14 @@ export const Navbar = () => {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
+          // reset client-side notifications cache before navigating to login
+          try {
+            notificationsStore.reset();
+          } catch (err) {
+            // best-effort; continue with navigation
+            // eslint-disable-next-line no-console
+            console.error("Failed to reset notifications store on logout", err);
+          }
           router.push("/login");
         },
       },

@@ -171,7 +171,11 @@ export async function placeOrder(
   });
 
   const domainOrder = mapPrismaOrderToDomainOrder(dbOrder);
-  void notifyOrderStatusChange(userId, domainOrder.id, domainOrder.code, "placed").catch(() => {});
+  try {
+    await notifyOrderStatusChange(userId, domainOrder.id, domainOrder.code, "placed");
+  } catch (err) {
+    console.error("[notifyOrderStatusChange] placeOrder error:", err);
+  }
   return domainOrder;
 }
 
@@ -196,7 +200,11 @@ export async function cancelUserOrder(
   const parsed = cancelOrderSchema.parse(input);
   const dbOrder = await cancelOrderInDb(userId, parsed.orderId, parsed.reason);
   const domainOrder = mapPrismaOrderToDomainOrder(dbOrder);
-  void notifyOrderStatusChange(userId, domainOrder.id, domainOrder.code, "cancelled").catch(() => {});
+  try {
+    await notifyOrderStatusChange(userId, domainOrder.id, domainOrder.code, "cancelled");
+  } catch (err) {
+    console.error("[notifyOrderStatusChange] cancelUserOrder error:", err);
+  }
   return domainOrder;
 }
 
@@ -289,12 +297,11 @@ export async function updateAdminOrderStatus(
     reinstate: reinstate || undefined,
   });
   const domainOrder = mapPrismaOrderToDomainOrder(updatedDbOrder);
-  void notifyOrderStatusChange(
-    updatedDbOrder.userId,
-    domainOrder.id,
-    domainOrder.code,
-    domainOrder.status
-  ).catch(() => {});
+  try {
+    await notifyOrderStatusChange(updatedDbOrder.userId, domainOrder.id, domainOrder.code, domainOrder.status);
+  } catch (err) {
+    console.error("[notifyOrderStatusChange] updateAdminOrderStatus error:", err);
+  }
   return domainOrder;
 }
 

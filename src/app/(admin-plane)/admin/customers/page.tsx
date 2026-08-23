@@ -818,7 +818,8 @@ export default function AdminCustomersPage() {
   const [tableLoading, setTableLoading] = useState(true);
 
   // Filters state
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(""); // debounced value used for queries
+  const [searchInput, setSearchInput] = useState(""); // immediate input value
   const [role, setRole] = useState<"ALL" | "USER" | "ADMIN">("ALL");
   const [status, setStatus] = useState<"ALL" | "ACTIVE" | "BANNED">("ALL");
   const [sortBy, setSortBy] = useState<"createdAt" | "name" | "totalSpent" | "ordersCount">("createdAt");
@@ -866,6 +867,10 @@ export default function AdminCustomersPage() {
       setCustomers(res.data.items);
       setTotal(res.data.total);
       setTotalPages(res.data.totalPages);
+      // Clamp current page to the returned totalPages to avoid invalid pages
+      if (page > res.data.totalPages) {
+        setPage(Math.max(1, res.data.totalPages));
+      }
     } else {
       toast.error(res.error.message);
     }
@@ -879,6 +884,15 @@ export default function AdminCustomersPage() {
   useEffect(() => {
     fetchCustomers();
   }, [fetchCustomers]);
+
+  // Debounce the immediate search input into the `search` value used by fetchCustomers
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1);
+    }, 250);
+    return () => clearTimeout(id);
+  }, [searchInput]);
 
   const handleRefresh = () => {
     fetchStats();
@@ -923,16 +937,21 @@ export default function AdminCustomersPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by customer name, email, or phone..."
-                  value={search}
+                  value={searchInput}
                   onChange={(e) => {
-                    setSearch(e.target.value);
-                    setPage(1);
+                    setSearchInput(e.target.value);
                   }}
                   className="pl-9"
                 />
-                {search && (
+                {searchInput && (
                   <button
-                    onClick={() => setSearch("")}
+                    type="button"
+                    aria-label="Clear search"
+                    onClick={() => {
+                      setSearchInput("");
+                      setSearch("");
+                      setPage(1);
+                    }}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
                     <X className="h-3.5 w-3.5" />

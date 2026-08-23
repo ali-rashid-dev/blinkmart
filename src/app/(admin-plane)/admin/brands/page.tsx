@@ -146,6 +146,7 @@ function BrandDialog({
 
 export default function BrandsPage() {
   const [brands, setBrands] = useState<BrandRecord[]>([]);
+  const [totalItems, setTotalItems] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
@@ -162,6 +163,9 @@ export default function BrandsPage() {
 
       if (res.success) {
         setBrands(res.data.items);
+        // keep track of total items so we can inform admins when the
+        // displayed list is truncated by the request limit
+        setTotalItems(res.data.totalItems ?? null);
       } else {
         toast.error(res.error.message);
       }
@@ -251,14 +255,18 @@ export default function BrandsPage() {
 
     startTransition(async () => {
       const res = await toggleBrandStatusAction(brand.id, enabled);
-      if (res.success) {
+        if (res.success) {
         setBrands((prev) =>
           prev.map((b) => (b.id === brand.id ? { ...b, enabled } : b))
         );
         if (enabled) {
           toast.success(`${brand.name} enabled — products visible again`);
         } else {
-          toast.success(`${brand.name} banned — ${productCount} products hidden`);
+          toast.success(
+            `${brand.name} disabled — ${productCount} ${
+              productCount === 1 ? "product" : "products"
+            } hidden`
+          );
         }
       } else {
         toast.error(res.error.message);
@@ -308,6 +316,12 @@ export default function BrandsPage() {
         </div>
       </div>
 
+      {totalItems !== null && totalItems > brands.length && (
+        <div className="paper-card mb-5 p-3 text-sm text-muted-foreground">
+          Showing {brands.length} of {totalItems} brands. Narrow your search or use paging to see the rest.
+        </div>
+      )}
+
       {isLoading ? (
         <div className="paper-card py-16 text-center flex flex-col items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-primary mb-2" />
@@ -337,7 +351,7 @@ export default function BrandsPage() {
 
                       {!brand.enabled && (
                         <Badge className="bg-alert text-alert-foreground hover:bg-alert">
-                          Banned
+                          Disabled
                         </Badge>
                       )}
                     </div>

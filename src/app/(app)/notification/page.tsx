@@ -55,33 +55,39 @@ export default function NotificationsPage() {
             <div key={i} className="h-20 w-full animate-pulse rounded-2xl bg-muted/50" />
           ))}
         </div>
-      ) : rows.length === 0 ? (
+      ) : (
         <div className="mt-6">
-          {error ? (
-            <div className="space-y-3">
-              <p className="text-sm text-destructive">Failed to load notifications: {error}</p>
+          {error && (
+            <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive flex items-center justify-between">
+              <div>Failed to load notification feed: {error}</div>
               <button
                 onClick={() => refresh()}
-                className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-foreground"
+                className="ml-4 inline-flex h-8 items-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-semibold text-foreground"
               >
                 Retry
               </button>
             </div>
-          ) : (
+          )}
+
+          {list.length === 0 ? (
             <EmptyNotifications message="Order updates and promotions will appear here as soon as they arrive." />
+          ) : rows.length === 0 ? (
+            <div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
+              No notifications match the selected filter. Try clearing the filter to view all notifications.
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              {rows.map((n) => (
+                <NotificationItem
+                  key={n.id}
+                  notification={n}
+                  onRead={notificationsStore.markRead}
+                  onDismiss={notificationsStore.remove}
+                />
+              ))}
+            </ul>
           )}
         </div>
-      ) : (
-        <ul className="mt-6 space-y-3">
-          {rows.map((n) => (
-            <NotificationItem
-              key={n.id}
-              notification={n}
-              onRead={notificationsStore.markRead}
-              onDismiss={notificationsStore.remove}
-            />
-          ))}
-        </ul>
       )}
     </main>
   );

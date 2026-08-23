@@ -298,15 +298,28 @@ export async function updateCustomerRepository(input: UpdateCustomerInput) {
       throw new Error("EMAIL_ALREADY_EXISTS");
     }
 
-    // 2. Update user
-    const updatedUser = await tx.user.update({
-      where: { id },
-      data: {
-        name,
-        email,
-        role,
-      },
-    });
+    // 2. Update user (handle unique constraint race via Prisma P2002)
+    let updatedUser;
+    try {
+      updatedUser = await tx.user.update({
+        where: { id },
+        data: {
+          name,
+          email,
+          role,
+        },
+      });
+    } catch (err: unknown) {
+      if (typeof err === "object" && err !== null && "code" in err && (err as any).code === "P2002") {
+        // If the unique constraint violation targets the email field, normalize to the existing signal
+        const meta = (err as any).meta;
+        const target = meta?.target;
+        if (Array.isArray(target) ? target.includes("email") : String(target).includes("email")) {
+          throw new Error("EMAIL_ALREADY_EXISTS");
+        }
+      }
+      throw err;
+    }
 
     // 3. Upsert profile
     const profile = await tx.userProfile.upsert({

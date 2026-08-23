@@ -30,18 +30,28 @@ export async function sendPromotionAction(input: {
     const authCheck = await requireAdmin(buildError);
     if (!("userId" in authCheck)) return authCheck;
 
-    if (!input.headline || !input.headline.trim()) {
+    // Runtime validation: trim and enforce length limits
+    const headline = (input.headline ?? "").trim();
+    const body = (input.body ?? "").trim();
+    const audience = input.audience;
+
+    if (!headline) {
       return buildError("VALIDATION_ERROR", "Headline is required.");
     }
-    if (!input.body || !input.body.trim()) {
+    if (headline.length > 48) {
+      return buildError("VALIDATION_ERROR", "Headline must be 48 characters or fewer.");
+    }
+    if (!body) {
       return buildError("VALIDATION_ERROR", "Campaign message body is required.");
     }
+    if (body.length > 140) {
+      return buildError("VALIDATION_ERROR", "Campaign message body must be 140 characters or fewer.");
+    }
+    if (!["all", "active", "lapsed"].includes(audience)) {
+      return buildError("VALIDATION_ERROR", "Invalid audience selection.");
+    }
 
-    const result = await sendPromotionCampaign({
-      headline: input.headline.trim(),
-      body: input.body.trim(),
-      audience: input.audience,
-    });
+    const result = await sendPromotionCampaign({ headline, body, audience });
 
     return { success: true, data: result };
   } catch (error) {

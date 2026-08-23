@@ -9,6 +9,7 @@ import {
   type PaginatedCustomers,
   type CustomerStats,
 } from "@/repositories/customer.repository";
+import prisma from "@/lib/prisma";
 import {
   customerQuerySchema,
   updateCustomerSchema,
@@ -38,6 +39,20 @@ export class AdminSelfBanError extends Error {
   constructor() {
     super("Administrators cannot ban their own account.");
     this.name = "AdminSelfBanError";
+  }
+}
+
+export class AdminSelfDemotionError extends Error {
+  constructor() {
+    super("Administrators cannot demote their own role.");
+    this.name = "AdminSelfDemotionError";
+  }
+}
+
+export class FinalAdminRemovalError extends Error {
+  constructor() {
+    super("Cannot remove the final administrator account.");
+    this.name = "FinalAdminRemovalError";
   }
 }
 
@@ -85,7 +100,19 @@ export async function updateCustomerService(
     throw new CustomerNotFoundError(result.data.id);
   }
 
-  // If demoting self from ADMIN, verify logic if needed, but allow role changes safely
+  // Prevent an administrator from demoting their own role
+  if (result.data.id === currentAdminId && existing.role === "ADMIN" && result.data.role === "USER") {
+    throw new AdminSelfDemotionError();
+  }
+
+  // Prevent removing the final ADMIN account
+  if (existing.role === "ADMIN" && result.data.role !== "ADMIN") {
+    const adminCount = await prisma.user.count({ where: { role: "ADMIN" } });
+    if (adminCount <= 1) {
+      throw new FinalAdminRemovalError();
+    }
+  }
+
   try {
     return await updateCustomerRepository(result.data);
   } catch (err: unknown) {

@@ -257,7 +257,7 @@ export default function AdminNotificationsPage() {
                     <li key={i} className="rounded-xl border border-border p-3">
                       <p className="text-sm font-semibold text-foreground">{c.title}</p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {formatRelative(c.sentAt.toString())} · {c.reach} reached
+                        {formatRelative(c.sentAt.toISOString())} · {c.reach} reached
                       </p>
                     </li>
                   ))}
@@ -293,7 +293,7 @@ export default function AdminNotificationsPage() {
                     </p>
                     <p className="text-xs text-muted-foreground">Sent to {o.userName}</p>
                   </div>
-                  <span className="text-xs text-muted-foreground">{formatRelative(o.createdAt.toString())}</span>
+                  <span className="text-xs text-muted-foreground">{formatRelative(o.createdAt.toISOString())}</span>
                 </li>
               ))}
             </ul>

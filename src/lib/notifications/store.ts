@@ -122,6 +122,10 @@ export const notificationsStore = {
       void notificationsStore.load(true);
     }
   },
+  reset() {
+    currentState = { loading: false, list: [], error: null };
+    emitChange();
+  },
 };
 
 export function useNotifications() {
