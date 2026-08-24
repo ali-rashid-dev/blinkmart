@@ -45,7 +45,6 @@ import {
 import type { Order, OrderStatus } from "@/lib/orders/types";
 import { formatDateTime, formatDeliveryDate } from "@/lib/orders/types";
 import type { AdminOrderStats } from "@/repositories/order.repository";
-import { OrderDetailsModal } from "@/components/admin/orders/OrderDetailsModal";
 import { CancellationDialog } from "@/components/admin/orders/CancellationDialog";
 import {
   STATUS_CONFIG,
@@ -77,7 +76,6 @@ export function AdminOrdersPage() {
   const [isPending, startTransition] = useTransition();
 
   const [searchInput, setSearchInput] = useState(search);
-  const [selectedInspectOrder, setSelectedInspectOrder] = useState<Order | null>(null);
   const [selectedCancelOrder, setSelectedCancelOrder] = useState<Order | null>(null);
 
   useEffect(() => {
@@ -174,10 +172,6 @@ export function AdminOrdersPage() {
         }
         return prevOrders.map((o) => (o.id === orderId ? updatedOrder : o));
       });
-
-      if (selectedInspectOrder && selectedInspectOrder.id === orderId) {
-        setSelectedInspectOrder(updatedOrder);
-      }
 
       const statsRes = await getAdminOrderStatsAction();
       if (statsRes.success) {
@@ -536,7 +530,7 @@ export function AdminOrdersPage() {
                             <DropdownMenuGroup>
                               <DropdownMenuLabel>Order Actions</DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => setSelectedInspectOrder(order)}>
+                              <DropdownMenuItem onClick={() => router.push(`/admin/orders/${order.id}`)}>
                                 <Eye className="h-4 w-4 mr-2" /> View Details
                               </DropdownMenuItem>
 
@@ -596,14 +590,7 @@ export function AdminOrdersPage() {
         )}
       </div>
 
-      <OrderDetailsModal
-        order={selectedInspectOrder}
-        open={Boolean(selectedInspectOrder)}
-        onOpenChange={(open) => {
-          if (!open) setSelectedInspectOrder(null);
-        }}
-        onUpdateStatus={handleUpdateOrderStatus}
-      />
+
 
       <CancellationDialog
         open={Boolean(selectedCancelOrder)}

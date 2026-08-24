@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,12 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+
 import {
   Tooltip,
   TooltipContent,
@@ -59,12 +55,6 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  Calendar,
-  Mail,
-  Phone,
-  MapPin,
-  ShoppingBag,
-  AlertCircle,
   ArrowUpDown,
   RefreshCw,
 } from "lucide-react";
@@ -72,7 +62,6 @@ import {
 import { toast } from "sonner";
 import {
   getCustomersAction,
-  getCustomerDetailsAction,
   updateCustomerAction,
   banCustomerAction,
   unbanCustomerAction,
@@ -80,7 +69,6 @@ import {
 } from "./actions";
 import type {
   CustomerRecord,
-  CustomerDetails,
   CustomerStats,
 } from "@/repositories/customer.repository";
 
@@ -164,20 +152,23 @@ function StatsGrid({ stats, loading }: { stats: CustomerStats | null; loading: b
         const Icon = card.icon;
         return (
           <Card key={card.title} className="shadow-organic border-border/80">
-            <CardContent className="flex items-center justify-between p-5">
-              <div className="space-y-1">
+            <CardContent className="flex items-center justify-between">
+              <div className="space-y-1 w-full h-full">
+                <div className="flex items-center justify-between">
                 <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {card.title}
                 </p>
+                <div className={`p-2 rounded-lg ${card.color}`}>
+                <Icon className="h-4 w-4" />
+              </div>
+                </div>
                 {loading ? (
                   <Skeleton className="h-8 w-16" />
                 ) : (
                   <p className="text-2xl font-bold font-serif">{card.value.toLocaleString()}</p>
                 )}
               </div>
-              <div className={`p-3 rounded-xl ${card.color}`}>
-                <Icon className="h-5 w-5" />
-              </div>
+            
             </CardContent>
           </Card>
         );
@@ -187,239 +178,6 @@ function StatsGrid({ stats, loading }: { stats: CustomerStats | null; loading: b
 }
 
 // ──────────────────────────────────────────────────────────
-// View Customer Details Modal
-// ──────────────────────────────────────────────────────────
-
-function ViewCustomerModal({
-  customerId,
-  open,
-  onOpenChange,
-}: {
-  customerId: string | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) {
-  const [details, setDetails] = useState<CustomerDetails | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const fetchDetails = useCallback(async (id: string) => {
-    setLoading(true);
-    const res = await getCustomerDetailsAction(id);
-    if (res.success) {
-      setDetails(res.data);
-    } else {
-      toast.error(res.error.message);
-      onOpenChange(false);
-    }
-    setLoading(false);
-  }, [onOpenChange]);
-
-  useEffect(() => {
-    if (open && customerId) {
-      fetchDetails(customerId);
-    } else {
-      setDetails(null);
-    }
-  }, [open, customerId, fetchDetails]);
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-card">
-        <DialogHeader>
-          <DialogTitle className="font-serif text-xl">Customer Details</DialogTitle>
-          <DialogDescription>
-            View customer profile, contact information, and order history.
-          </DialogDescription>
-        </DialogHeader>
-
-        {loading || !details ? (
-          <div className="space-y-4 py-8">
-            <div className="flex items-center gap-4">
-              <Skeleton className="h-16 w-16 rounded-full" />
-              <div className="space-y-2">
-                <Skeleton className="h-6 w-48" />
-                <Skeleton className="h-4 w-32" />
-              </div>
-            </div>
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-48 w-full" />
-          </div>
-        ) : (
-          <div className="space-y-6 pt-2">
-            {/* Header Profile Info */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl bg-muted/40 border border-border/60">
-              <div className="h-16 w-16 rounded-full bg-primary/10 text-primary grid place-items-center font-serif text-2xl font-bold shrink-0">
-                {getInitials(details.name)}
-              </div>
-              <div className="space-y-1 flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="text-lg font-semibold truncate">{details.name}</h3>
-                  <Badge variant={details.role === "ADMIN" ? "default" : "secondary"}>
-                    {details.role}
-                  </Badge>
-                  {details.banned ? (
-                    <Badge variant="destructive" className="flex items-center gap-1">
-                      <ShieldAlert className="h-3 w-3" /> Banned
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-emerald-600 border-emerald-600/30 bg-emerald-500/10">
-                      Active
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground flex items-center gap-1.5 truncate">
-                  <Mail className="h-3.5 w-3.5" /> {details.email}
-                </p>
-                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <Calendar className="h-3.5 w-3.5" /> Member since {formatDate(details.createdAt)}
-                </p>
-              </div>
-            </div>
-
-            {/* Ban Notification Banner if Banned */}
-            {details.banned && (
-              <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm space-y-1">
-                <div className="font-semibold flex items-center gap-1.5">
-                  <AlertCircle className="h-4 w-4" /> Customer Account Banned
-                </div>
-                <p className="text-xs opacity-90">
-                  <span className="font-medium">Reason:</span> {details.banReason || "No reason specified"}
-                </p>
-                <p className="text-[11px] opacity-75">
-                  Banned on: {formatDateTime(details.bannedAt)}
-                </p>
-              </div>
-            )}
-
-            {/* Main Tabs */}
-            <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="overview">Overview & Address</TabsTrigger>
-                <TabsTrigger value="orders">
-                  Order History ({details.ordersCount})
-                </TabsTrigger>
-              </TabsList>
-
-              {/* Overview Tab */}
-              <TabsContent value="overview" className="space-y-4 pt-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Card className="border-border/60">
-                    <CardContent className="p-4 space-y-3">
-                      <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                        <ShoppingBag className="h-3.5 w-3.5 text-primary" /> Lifetime Activity
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 pt-1">
-                        <div>
-                          <div className="text-xs text-muted-foreground">Total Orders</div>
-                          <div className="text-xl font-bold font-serif">{details.ordersCount}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-muted-foreground">Total Spent</div>
-                          <div className="text-xl font-bold font-serif text-emerald-600 dark:text-emerald-400">
-                            {formatCurrency(details.totalSpent)}
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-border/60">
-                    <CardContent className="p-4 space-y-3">
-                      <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                        <Phone className="h-3.5 w-3.5 text-primary" /> Contact Details
-                      </div>
-                      <div className="space-y-1.5 text-sm">
-                        <div>
-                          <span className="text-xs text-muted-foreground block">Phone Number</span>
-                          <span className="font-medium">{details.profile?.phone || "Not provided"}</span>
-                        </div>
-                        <div>
-                          <span className="text-xs text-muted-foreground block">Email Address</span>
-                          <span className="font-medium">{details.email}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Address Card */}
-                <Card className="border-border/60">
-                  <CardContent className="p-4 space-y-3">
-                    <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5 text-primary" /> Default Shipping Address
-                    </div>
-
-                    {details.profile && (details.profile.houseNo || details.profile.street || details.profile.city) ? (
-                      <div className="text-sm space-y-1 bg-muted/30 p-3 rounded-lg border border-border/40">
-                        <p className="font-medium">
-                          {[details.profile.houseNo, details.profile.street].filter(Boolean).join(", ")}
-                        </p>
-                        <p className="text-muted-foreground">
-                          {[details.profile.area, details.profile.city, details.profile.postalCode]
-                            .filter(Boolean)
-                            .join(", ")}
-                        </p>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground italic py-2">
-                        No address provided by customer.
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Orders Tab */}
-              <TabsContent value="orders" className="pt-4">
-                {details.recentOrders.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground space-y-2">
-                    <ShoppingBag className="h-8 w-8 mx-auto opacity-40" />
-                    <p className="text-sm">No orders placed by this customer yet.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
-                    {details.recentOrders.map((order) => (
-                      <div
-                        key={order.id}
-                        className="p-3.5 rounded-lg border border-border/60 bg-muted/20 space-y-2"
-                      >
-                        <div className="flex items-center justify-between text-sm flex-wrap gap-2">
-                          <div className="font-semibold flex items-center gap-2">
-                            <span>Order #{order.code}</span>
-                            <Badge variant="outline" className="text-xs font-normal">
-                              {order.status}
-                            </Badge>
-                          </div>
-                          <div className="font-bold text-emerald-600 dark:text-emerald-400">
-                            {formatCurrency(order.total)}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>Date: {formatDate(order.createdAt)}</span>
-                          <span>{order.items.length} item(s)</span>
-                        </div>
-
-                        {/* Order Items Preview */}
-                        <div className="text-xs text-muted-foreground border-t border-border/40 pt-2 flex flex-wrap gap-1">
-                          {order.items.map((item) => (
-                            <span key={item.id} className="bg-background px-2 py-0.5 rounded border border-border/50">
-                              {item.quantity}x {item.name}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 // ──────────────────────────────────────────────────────────
 // Edit Customer Dialog Component
@@ -809,6 +567,7 @@ function UnbanCustomerModal({
 // ──────────────────────────────────────────────────────────
 
 export default function AdminCustomersPage() {
+  const router = useRouter();
   const [stats, setStats] = useState<CustomerStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
 
@@ -827,9 +586,6 @@ export default function AdminCustomersPage() {
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  // Selected customer modals state
-  const [viewCustomerId, setViewCustomerId] = useState<string | null>(null);
-  const [isViewOpen, setIsViewOpen] = useState(false);
 
   const [editCustomer, setEditCustomer] = useState<CustomerRecord | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -1170,10 +926,7 @@ export default function AdminCustomersPage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => {
-                                  setViewCustomerId(c.id);
-                                  setIsViewOpen(true);
-                                }}
+                                onClick={() => router.push(`/admin/customers/${c.id}`)}
                               >
                                 <Eye className="h-4 w-4 text-muted-foreground hover:text-foreground" />
                               </Button>
@@ -1275,12 +1028,6 @@ export default function AdminCustomersPage() {
           )}
         </Card>
 
-        {/* View Customer Details Modal */}
-        <ViewCustomerModal
-          customerId={viewCustomerId}
-          open={isViewOpen}
-          onOpenChange={setIsViewOpen}
-        />
 
         {/* Edit Customer Dialog */}
         <EditCustomerModal
