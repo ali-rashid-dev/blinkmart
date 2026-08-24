@@ -85,10 +85,10 @@ export async function getAdminDashboardAction(): Promise<
   try {
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const thirtyDaysAgo = new Date(startOfToday);
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29);
-    const sixtyDaysAgo = new Date(startOfToday);
-    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 59);
+    const thirtyDaysAgo = new Date(now);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const sixtyDaysAgo = new Date(now);
+    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
     // Fetch parallel DB queries
     const [

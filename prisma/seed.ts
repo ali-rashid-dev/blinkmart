@@ -70,12 +70,14 @@ export async function main() {
   console.log("Seeding database (Pakistan grocery)...");
 
   // Seed Users
+  const seededUsers: Record<string, { id: string }> = {};
   for (const user of userData) {
-    await prisma.user.upsert({
+    const record = await prisma.user.upsert({
       where: { email: user.email },
       update: { role: user.role, name: user.name },
       create: user,
     });
+    seededUsers[user.email] = record;
   }
   console.log("✓ Users seeded");
 
@@ -277,11 +279,11 @@ export async function main() {
     const sampleOrders = [
       {
         code: "BM-PK-1001",
-        userId: "user-1",
+        userId: seededUsers["ahmed@example.com.pk"].id,
         status: OrderStatus.DELIVERED,
-        subtotal: 1180,
+        subtotal: 1320,
         deliveryFee: 150,
-        total: 1330,
+        total: 1470,
         deliveryDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
         fullName: "Ahmed Khan",
         phone: "+92 300 1234567",
@@ -317,11 +319,11 @@ export async function main() {
       },
       {
         code: "BM-PK-1002",
-        userId: "user-2",
+        userId: seededUsers["fatima@example.com.pk"].id,
         status: OrderStatus.OUT_FOR_DELIVERY,
-        subtotal: 1015,
+        subtotal: 1280,
         deliveryFee: 120,
-        total: 1135,
+        total: 1400,
         deliveryDate: new Date(),
         fullName: "Fatima Ali",
         phone: "+92 321 9876543",
@@ -364,11 +366,11 @@ export async function main() {
       },
       {
         code: "BM-PK-1003",
-        userId: "user-1",
+        userId: seededUsers["ahmed@example.com.pk"].id,
         status: OrderStatus.PLACED,
-        subtotal: 935,
+        subtotal: 1030,
         deliveryFee: 130,
-        total: 1065,
+        total: 1160,
         deliveryDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
         fullName: "Ahmed Khan",
         phone: "+92 300 1234567",

@@ -57,11 +57,15 @@ export default function DashboardPage() {
   const fetchDashboardData = () => {
     setError(null);
     startTransition(async () => {
-      const res = await getAdminDashboardAction();
-      if (res.success) {
-        setData(res.data);
-      } else {
-        setError(res.error.message || "Failed to load dashboard metrics");
+      try {
+        const res = await getAdminDashboardAction();
+        if (res.success) {
+          setData(res.data);
+        } else {
+          setError(res.error.message || "Failed to load dashboard metrics");
+        }
+      } catch (error) {
+        setError(error instanceof Error ? error.message : "Failed to load dashboard metrics");
       }
     });
   };
@@ -290,7 +294,7 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-foreground">Orders Today</p>
-                    <p className="text-xs text-muted-foreground">Received in last 24h</p>
+                    <p className="text-xs text-muted-foreground">Received since start of day</p>
                   </div>
                 </div>
                 <span className="font-display text-lg font-bold text-foreground">

@@ -12,10 +12,12 @@ export const dynamic = "force-dynamic";
 
 export default async function CustomerBrandsPage() {
   let brands: Awaited<ReturnType<typeof getEnabledBrands>> = [];
+  let loadError: string | null = null;
   try {
     brands = await getEnabledBrands();
   } catch (error) {
     console.error("Error loading brands from backend DB:", error);
+    loadError = error instanceof Error ? error.message : "Failed to load brands";
   }
 
   return (
@@ -29,7 +31,16 @@ export default async function CustomerBrandsPage() {
         </p>
       </div>
 
-      {brands.length === 0 ? (
+      {loadError ? (
+        <div className="paper-card rounded-xl border border-destructive/30 p-8 py-16 text-center" role="alert">
+          <Store className="mx-auto mb-3 h-10 w-10 text-destructive/70" />
+          <h3 className="font-serif text-lg font-medium text-foreground">Unable to load brands</h3>
+          <p className="mt-1 text-sm text-muted-foreground">{loadError}</p>
+          <a className="mt-4 inline-block text-sm font-medium text-primary underline" href="/brand">
+            Try again
+          </a>
+        </div>
+      ) : brands.length === 0 ? (
         <div className="paper-card py-16 text-center rounded-xl border border-border p-8">
           <Store className="mx-auto h-10 w-10 text-muted-foreground/60 mb-3" />
           <h3 className="font-serif text-lg font-medium text-foreground">No brands available</h3>
