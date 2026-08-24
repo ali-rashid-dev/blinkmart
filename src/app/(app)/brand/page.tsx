@@ -17,7 +17,7 @@ export default async function CustomerBrandsPage() {
     brands = await getEnabledBrands();
   } catch (error) {
     console.error("Error loading brands from backend DB:", error);
-    loadError = error instanceof Error ? error.message : "Failed to load brands";
+    loadError = "Unable to load brands right now. Please try again.";
   }
 
   return (

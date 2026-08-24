@@ -64,8 +64,8 @@ export default function DashboardPage() {
         } else {
           setError(res.error.message || "Failed to load dashboard metrics");
         }
-      } catch (error) {
-        setError(error instanceof Error ? error.message : "Failed to load dashboard metrics");
+      } catch {
+        setError("Failed to load dashboard metrics");
       }
     });
   };

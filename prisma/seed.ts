@@ -273,10 +273,8 @@ export async function main() {
   console.log(`✓ ${sampleProducts.length} Sample Products seeded`);
 
   // Seed Sample Orders (Pakistan addresses & phone format)
-  const existingOrdersCount = await prisma.order.count();
-  if (existingOrdersCount === 0) {
-    console.log("Seeding sample orders (Pakistan)...");
-    const sampleOrders = [
+  console.log("Seeding sample orders (Pakistan)...");
+  const sampleOrders = [
       {
         code: "BM-PK-1001",
         userId: seededUsers["ahmed@example.com.pk"].id,
@@ -411,21 +409,22 @@ export async function main() {
           },
         ],
       },
-    ];
+  ];
 
-    for (const order of sampleOrders) {
-      const { items, ...orderData } = order;
-      await prisma.order.create({
-        data: {
-          ...orderData,
-          items: {
-            create: items,
-          },
+  for (const order of sampleOrders) {
+    const { items, ...orderData } = order;
+    await prisma.order.upsert({
+      where: { code: order.code },
+      update: orderData,
+      create: {
+        ...orderData,
+        items: {
+          create: items,
         },
-      });
-    }
-    console.log(`✓ ${sampleOrders.length} Sample Orders seeded`);
+      },
+    });
   }
+  console.log(`✓ ${sampleOrders.length} Sample Orders seeded`);
 
   console.log("Seeding completed successfully.");
 }
