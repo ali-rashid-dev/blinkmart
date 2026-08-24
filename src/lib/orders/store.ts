@@ -347,9 +347,8 @@ export function useOrder(idOrCode: string): {
   };
 }
 
+import { formatCurrency } from "@/lib/currency";
+
 export function formatMoney(amount: number): string {
-  return `Rs ${amount.toLocaleString("en-PK", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  })}`;
+  return formatCurrency(amount);
 }

@@ -8,10 +8,15 @@ export const metadata: Metadata = {
   description: "Browse featured brands and artisanal producers available on BlinkMart.",
 };
 
-export const revalidate = 60; // ISR cache revalidation
+export const dynamic = "force-dynamic";
 
 export default async function CustomerBrandsPage() {
-  const brands = await getEnabledBrands();
+  let brands: Awaited<ReturnType<typeof getEnabledBrands>> = [];
+  try {
+    brands = await getEnabledBrands();
+  } catch (error) {
+    console.error("Error loading brands from backend DB:", error);
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">

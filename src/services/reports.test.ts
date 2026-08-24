@@ -21,9 +21,9 @@ describe("Reports Service & Helper Utilities", () => {
     assert.equal(getCategoryEmoji("Unknown Category", "unknown-slug"), "📦");
   });
 
-  test("formatCurrency formats numbers as USD currency", () => {
-    assert.equal(formatCurrency(1250), "$1,250");
-    assert.equal(formatCurrency(29.77), "$29.77");
+  test("formatCurrency formats numbers as Pakistan Rupee currency", () => {
+    assert.equal(formatCurrency(1250), "Rs 1,250");
+    assert.equal(formatCurrency(29.77), "Rs 29.77");
   });
 
   test("calculateDelta calculates percentage change accurately", () => {

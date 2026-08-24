@@ -59,12 +59,7 @@ import type {
 // Helpers
 // ──────────────────────────────────────────────────────────
 
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
-}
+import { formatCurrency } from "@/lib/currency";
 
 function formatDate(date: Date | string | null) {
   if (!date) return "N/A";

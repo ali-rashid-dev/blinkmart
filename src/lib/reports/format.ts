@@ -26,22 +26,12 @@ export function getCategoryEmoji(categoryName?: string | null, categorySlug?: st
   return "📦";
 }
 
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
-  }).format(amount);
-}
+import { formatCurrency, formatCompactCurrency } from "@/lib/currency";
+
+export { formatCurrency };
 
 export function formatCompact(amount: number): string {
-  if (amount >= 1_000_000) {
-    return `$${(amount / 1_000_000).toFixed(1)}M`;
-  }
-  if (amount >= 1_000) {
-    return `$${(amount / 1_000).toFixed(1)}k`;
-  }
-  return formatCurrency(amount);
+  return formatCompactCurrency(amount);
 }
 
 export function calculateDelta(current: number, prior: number): number {

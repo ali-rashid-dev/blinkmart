@@ -68,7 +68,7 @@ export default function AdminReportsPage() {
 
     // Sales Performance
     csvLines.push("Sales Performance");
-    csvLines.push("Period Label,Revenue ($),Order Count,Date/Month ISO");
+    csvLines.push("Period Label,Revenue (Rs),Order Count,Date/Month ISO");
     data.points.forEach((p) => {
       csvLines.push(`"${p.label}",${p.value},${p.orders},"${p.dateIso}"`);
     });
@@ -76,7 +76,7 @@ export default function AdminReportsPage() {
 
     // Best Selling Products
     csvLines.push("Best Selling Products");
-    csvLines.push("Product Name,Category,Units Sold,Revenue ($),Share %");
+    csvLines.push("Product Name,Category,Units Sold,Revenue (Rs),Share %");
     data.bestSelling.forEach((item) => {
       csvLines.push(`${escapeCsvText(item.name)},${escapeCsvText(item.category)},${item.units},${item.revenue},${item.share}%`);
     });
@@ -84,7 +84,7 @@ export default function AdminReportsPage() {
 
     // Top Customers
     csvLines.push("Top Customers");
-    csvLines.push("Customer Name,Location,Total Orders,Total Spent ($),Tier Status");
+    csvLines.push("Customer Name,Location,Total Orders,Total Spent (Rs),Tier Status");
     data.topCustomers.forEach((c) => {
       csvLines.push(`${escapeCsvText(c.name)},${escapeCsvText(c.area)},${c.orders},${c.spent},${c.status}`);
     });

@@ -215,9 +215,8 @@ export function cartTotals(lines: CartLine[]): CartTotals {
   return { subtotal, tax, total, itemCount };
 }
 
+import { formatCurrency } from "@/lib/currency";
+
 export function formatPrice(amount: number): string {
-  return `Rs ${amount.toLocaleString("en-PK", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+  return formatCurrency(amount);
 }
