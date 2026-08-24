@@ -15,7 +15,8 @@ export default function AppLayout({ children }: RootLayoutProps) {
   return (
     <>
       <Navbar />
-      {children}
+      {/* pb-20 ensures content isn't hidden behind the mobile bottom nav on small screens */}
+      <div className="pb-20 lg:pb-0">{children}</div>
     </>
   );
 }
