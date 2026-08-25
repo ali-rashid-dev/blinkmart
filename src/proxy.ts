@@ -19,9 +19,17 @@ const PUBLIC_PREFIXES = [
   "/api/auth",
   "/_next",
   "/favicon.ico",
+  "/brand",
+  "/brands",
+  "/category",
+  "/categories",
+  "/product",
+  "/products",
+  "/cart",
 ];
 
 function isPublicPath(pathname: string): boolean {
+  if (pathname === "/") return true;
   return PUBLIC_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(prefix + "/") || pathname.startsWith(prefix + "?")
   );
