@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { BadgeCheck, CalendarDays, Mail, ShieldCheck, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,10 +29,11 @@ export function Avatar({ user, size = "lg" }: { user: ProfileUser; size?: "lg" |
       )}
     >
       {user.avatarUrl ? (
-        <img
+        <Image
           src={user.avatarUrl}
           alt={`${user.name} profile photo`}
-          className="size-full object-cover"
+          fill
+          className="object-cover"
         />
       ) : (
         <span aria-hidden="true">{initials(user.name)}</span>

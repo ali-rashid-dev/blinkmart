@@ -9,6 +9,7 @@ import {
   type FormEvent,
 } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import Image from "next/image";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 
@@ -331,14 +332,11 @@ function ProductFormDialog({
                 <div className="h-24 w-24 shrink-0 rounded-xl border border-border bg-accent grid place-items-center overflow-hidden relative group">
                   {imageUrlValue ? (
                     <>
-                      <img
+                      <Image
                         src={imageUrlValue}
                         alt="Product preview"
-                        className="h-full w-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            "https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&auto=format&fit=crop";
-                        }}
+                        fill
+                        className="object-cover"
                       />
                       <button
                         type="button"
@@ -446,12 +444,13 @@ function ProductDetailsDialog({
         <div className="space-y-4 py-2">
           {/* Image & Main stats */}
           <div className="flex gap-4 items-start">
-            <div className="h-28 w-28 shrink-0 rounded-xl border border-border bg-accent overflow-hidden grid place-items-center">
+            <div className="relative h-28 w-28 shrink-0 rounded-xl border border-border bg-accent overflow-hidden grid place-items-center">
               {product.imageUrl ? (
-                <img
+                <Image
                   src={product.imageUrl}
                   alt={product.name}
-                  className="h-full w-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               ) : (
                 <ImageIcon className="h-8 w-8 text-muted-foreground" />
@@ -1024,16 +1023,13 @@ export default function AdminProductsPage() {
                       {/* Product Column: Image + Name */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 shrink-0 rounded-lg border border-border bg-accent overflow-hidden grid place-items-center">
+                          <div className="relative h-10 w-10 shrink-0 rounded-lg border border-border bg-accent overflow-hidden grid place-items-center">
                             {prod.imageUrl ? (
-                              <img
+                              <Image
                                 src={prod.imageUrl}
                                 alt={prod.name}
-                                className="h-full w-full object-cover"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src =
-                                    "https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&auto=format&fit=crop";
-                                }}
+                                fill
+                                className="object-cover"
                               />
                             ) : (
                               <ImageIcon className="h-4 w-4 text-muted-foreground" />

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { formatMoney } from "@/lib/orders/store";
 import type { OrderItem } from "@/lib/orders/types";
 
@@ -11,7 +12,7 @@ export function OrderItemsList({ items }: { items: OrderItem[] }) {
           <li key={`${item.productId}-${index}`} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
             {isImageUrl ? (
               <div className="relative size-11 shrink-0 overflow-hidden rounded-xl bg-accent/70">
-                <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                <Image src={item.image} alt={item.name} fill className="object-cover" />
               </div>
             ) : (
               <span

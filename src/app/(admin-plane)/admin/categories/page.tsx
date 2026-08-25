@@ -9,6 +9,7 @@ import {
   type FormEvent,
 } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import Image from "next/image";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 
@@ -162,12 +163,13 @@ function CategoryFormDialog({
           <div className="space-y-1.5">
             <Label htmlFor="cat-image">Image URL</Label>
             <div className="flex gap-2 items-start">
-              <div className="h-10 w-10 shrink-0 rounded-md border bg-accent grid place-items-center overflow-hidden">
+              <div className="relative h-10 w-10 shrink-0 rounded-md border bg-accent grid place-items-center overflow-hidden">
                 {watch("imageUrl") ? (
-                  <img
-                    src={watch("imageUrl")}
+                  <Image
+                    src={watch("imageUrl")!}
                     alt="preview"
-                    className="h-full w-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 ) : (
                   <ImageIcon className="h-4 w-4 text-muted-foreground" />
@@ -494,9 +496,9 @@ export default function CategoriesPage() {
                   {/* Name + image */}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 shrink-0 rounded-lg border bg-accent grid place-items-center overflow-hidden">
+                      <div className="relative h-10 w-10 shrink-0 rounded-lg border bg-accent grid place-items-center overflow-hidden">
                         {cat.imageUrl ? (
-                          <img src={cat.imageUrl} alt={cat.name} className="h-full w-full object-cover" />
+                          <Image src={cat.imageUrl} alt={cat.name} fill className="object-cover" />
                         ) : (
                           <ImageIcon className="h-4 w-4 text-muted-foreground" />
                         )}

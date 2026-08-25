@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useTransition, useRef } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/page-header";
@@ -464,13 +465,14 @@ export function AdminOrdersPage() {
                             {order.items.slice(0, 3).map((item, idx) => (
                               <div
                                 key={idx}
-                                className="inline-block h-7 w-7 rounded-full ring-2 ring-background bg-accent overflow-hidden"
+                                className="relative inline-block h-7 w-7 rounded-full ring-2 ring-background bg-accent overflow-hidden"
                               >
                                 {item.image && item.image.startsWith("http") ? (
-                                  <img
+                                  <Image
                                     src={item.image}
                                     alt={item.name}
-                                    className="h-full w-full object-cover"
+                                    fill
+                                    className="object-cover"
                                   />
                                 ) : (
                                   <Package className="h-3.5 w-3.5 m-1.5 text-muted-foreground" />

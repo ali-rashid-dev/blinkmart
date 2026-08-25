@@ -13,11 +13,6 @@ export function CategoryDropdown() {
   const pathname = usePathname();
   const { categories } = useNavbarCategories();
 
-  // Hide the category dropdown on the products page
-  if (pathname?.startsWith("/products")) {
-    return null;
-  }
-
   // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -28,6 +23,11 @@ export function CategoryDropdown() {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  // Hide the category dropdown on the products page
+  if (pathname?.startsWith("/products")) {
+    return null;
+  }
 
   return (
     <div ref={ref} className="relative">

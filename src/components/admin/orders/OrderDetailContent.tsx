@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -281,12 +282,13 @@ export function OrderDetailContent({ orderId }: { orderId: string }) {
           {order.items.map((item, idx) => (
             <div key={idx} className="p-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="h-12 w-12 shrink-0 rounded-lg border border-border bg-accent overflow-hidden grid place-items-center">
+                <div className="relative h-12 w-12 shrink-0 rounded-lg border border-border bg-accent overflow-hidden grid place-items-center">
                   {item.image && item.image.startsWith("http") ? (
-                    <img
+                    <Image
                       src={item.image}
                       alt={item.name}
-                      className="h-full w-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <Package className="h-5 w-5 text-muted-foreground" />

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Loader2, Trash2 } from "lucide-react";
 import { QuantitySelector } from "@/components/products/QuantitySelector";
 import { cartStore, formatPrice } from "@/lib/cart/store";
@@ -33,10 +34,11 @@ export function CartItem({
         className="relative grid size-20 shrink-0 place-items-center overflow-hidden rounded-2xl bg-accent/70 text-3xl sm:size-24 sm:text-4xl"
       >
         {isImageUrl ? (
-          <img
+          <Image
             src={line.image}
             alt={line.name}
-            className="size-full object-cover"
+            fill
+            className="object-cover"
           />
         ) : (
           <span role="img" aria-label={line.name}>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AddToCartButton } from "./AddToCartButton";
@@ -47,16 +48,14 @@ export function ProductCard({
         />
 
         {hasImageUrl ? (
-          <img
+          <Image
             src={product.imageUrl!}
             alt={product.name}
+            fill
             className={cn(
-              "relative h-full w-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105",
+              "object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105",
               soldOut && "opacity-45 saturate-0",
             )}
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = "none";
-            }}
           />
         ) : (
           <div

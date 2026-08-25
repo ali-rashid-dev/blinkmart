@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ImageIcon } from "lucide-react";
 import type { CustomerProduct } from "./data";
@@ -35,17 +36,15 @@ export function ProductGallery({ product }: ProductGalleryProps) {
         />
 
         {currentImage && isUrl(currentImage) ? (
-          <img
+          <Image
             key={active}
             src={currentImage}
             alt={product.name}
+            fill
             className={cn(
-              "relative h-full w-full object-cover object-center transition-all duration-300",
+              "object-cover object-center transition-all duration-300",
               soldOut && "opacity-45 saturate-0"
             )}
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = "none";
-            }}
           />
         ) : (
           <div
@@ -77,17 +76,18 @@ export function ProductGallery({ product }: ProductGalleryProps) {
               aria-label={`View image ${i + 1} of ${product.name}`}
               aria-pressed={i === active}
               className={cn(
-                "grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl border bg-accent/50 transition-all sm:size-20",
+                "relative grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl border bg-accent/50 transition-all sm:size-20",
                 i === active
                   ? "border-primary ring-2 ring-primary/20 shadow-[var(--shadow-soft)]"
                   : "border-border opacity-70 hover:opacity-100"
               )}
             >
               {isUrl(img) ? (
-                <img
+                <Image
                   src={img}
                   alt={`Image ${i + 1}`}
-                  className="h-full w-full object-cover object-center"
+                  fill
+                  className="object-cover object-center"
                 />
               ) : (
                 <ImageIcon className="h-6 w-6 text-muted-foreground" />

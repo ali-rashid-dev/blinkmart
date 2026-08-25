@@ -1,34 +1,74 @@
-import { CATEGORIES } from '@/components/layout/navbar/constants'
-import { Link, ShoppingBag } from 'lucide-react'
-import React from 'react'
+import type { Metadata } from "next";
+import { MarketHero } from "@/components/home/MarketHero";
+import { CategoryStrip } from "@/components/home/CategoryStrip";
+import { PromoBanner } from "@/components/home/PromoBanner";
+import { ProductRow } from "@/components/home/ProductRow";
+import { DealOfTheDay } from "@/components/home/DealOfTheDay";
+import { ShopByNeed } from "@/components/home/ShopByNeed";
+import { WhyShopWithUs } from "@/components/home/WhyShopWithUs";
+import { FinalCta } from "@/components/home/FinalCta";
+import { listCustomerCategories } from "@/repositories/category.repository";
+import { listCustomerProducts } from "@/repositories/product.repository";
+import { toCustomerProduct } from "@/components/products/data";
 
-const page = () => {
+export const metadata: Metadata = {
+  title: "BlinkMart — Fresh Groceries Delivered Daily",
+  description:
+    "Shop handpicked fruit, vegetables, dairy, bakery, meat and pantry staples with daily deals and fast delivery from BlinkMart.",
+  openGraph: {
+    title: "BlinkMart — Fresh Groceries Delivered Daily",
+    description:
+      "Shop handpicked fresh produce, dairy, bakery and household essentials with fast delivery.",
+  },
+};
+
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  let dbCategories: Awaited<ReturnType<typeof listCustomerCategories>> = [];
+  let dbProducts: Awaited<ReturnType<typeof listCustomerProducts>> = [];
+
+  try {
+    const [cats, prods] = await Promise.all([
+      listCustomerCategories({}),
+      listCustomerProducts({ take: 20 }),
+    ]);
+    dbCategories = cats;
+    dbProducts = prods;
+  } catch (error) {
+    console.error("Error loading categories or products for home page:", error);
+  }
+
+  const allCustomerProducts = dbProducts.map(toCustomerProduct);
+
+  const bestSellers = allCustomerProducts.slice(0, 5);
+  const freshArrivals = allCustomerProducts.slice(5, 10);
+
+  const dealProduct = allCustomerProducts.length > 0 ? allCustomerProducts[0] : null;
+
   return (
-    <main>
-        {/* Mobile: scrollable category pill strip */}
-        <div className="lg:hidden border-t border-border bg-background overflow-x-auto scrollbar-none">
-          <div className="flex items-center gap-1.5 px-4 py-2 w-max">
-            {CATEGORIES.map(({ label, href, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border bg-card text-xs font-medium text-muted-foreground hover:border-primary/40 hover:text-primary hover:bg-primary/5 transition-colors whitespace-nowrap"
-              >
-                <Icon className="size-3.5 shrink-0" strokeWidth={1.7} />
-                {label}
-              </Link>
-            ))}
-            <Link
-              href="/products"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-medium whitespace-nowrap hover:bg-primary/90 transition-colors"
-            >
-              <ShoppingBag className="size-3.5 shrink-0" />
-              All
-            </Link>
-          </div>
-        </div>
+    <main className="min-h-screen overflow-x-hidden bg-background">
+      <h1 className="sr-only">BlinkMart — fresh groceries delivered daily</h1>
+      <MarketHero />
+      <CategoryStrip categories={dbCategories} />
+      <PromoBanner />
+      <ProductRow
+        title="Best Sellers"
+        subtitle="Popular picks our customers love."
+        products={bestSellers}
+        ctaLabel="View All Products"
+      />
+      <DealOfTheDay product={dealProduct} />
+      <ShopByNeed />
+      <ProductRow
+        title="Fresh Arrivals"
+        subtitle="New products added to our shelves."
+        products={freshArrivals.length > 0 ? freshArrivals : bestSellers}
+        ctaLabel="See New Arrivals"
+      />
+      <WhyShopWithUs />
+      <FinalCta />
     </main>
-  )
+  );
 }
 
-export default page

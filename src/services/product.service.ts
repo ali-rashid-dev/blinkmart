@@ -183,7 +183,7 @@ export async function updateProductService(
     throw new ProductNotFoundError(input.id);
   }
 
-  let finalSlug = input.slug;
+  const finalSlug = input.slug;
   if (input.name && (!input.slug || input.slug === existing.slug)) {
     // If name changed but slug didn't explicitly change, auto-slugify if needed or keep existing
   }

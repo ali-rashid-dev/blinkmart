@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ChevronRight, Loader2, RotateCcw } from "lucide-react";
 import { OrderStatusBadge } from "./OrderStatusBadge";
@@ -64,7 +65,7 @@ export function OrderCard({ order, busy }: { order: Order; busy: boolean }) {
               key={`${item.productId}-${idx}`}
               className="relative size-11 shrink-0 overflow-hidden rounded-xl bg-accent/70"
             >
-              <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+              <Image src={item.image} alt={item.name} fill className="object-cover" />
             </div>
           ) : (
             <span
