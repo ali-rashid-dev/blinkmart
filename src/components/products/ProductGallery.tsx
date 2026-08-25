@@ -5,6 +5,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ImageIcon } from "lucide-react";
 import type { CustomerProduct } from "./data";
+import { getSupportedImageSrc } from "@/lib/image";
 
 interface ProductGalleryProps {
   product: CustomerProduct;
@@ -12,6 +13,7 @@ interface ProductGalleryProps {
 
 export function ProductGallery({ product }: ProductGalleryProps) {
   const [active, setActive] = useState(0);
+  const [failedImages, setFailedImages] = useState<Set<string>>(() => new Set());
 
   // The Prisma schema has a single imageUrl field — no image array on the DB model.
   // We keep an array here so that if extra images are ever added via an extension, the
@@ -20,11 +22,6 @@ export function ProductGallery({ product }: ProductGalleryProps) {
 
   const soldOut = !product.enabled;
   const currentImage = images[active] ?? null;
-
-  const isUrl = (src: string) =>
-    src.startsWith("http://") ||
-    src.startsWith("https://") ||
-    src.startsWith("/");
 
   return (
     <div className="space-y-3">
@@ -35,16 +32,17 @@ export function ProductGallery({ product }: ProductGalleryProps) {
           className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,var(--color-card),transparent_70%)]"
         />
 
-        {currentImage && isUrl(currentImage) ? (
+        {currentImage && getSupportedImageSrc(currentImage) && !failedImages.has(currentImage) ? (
           <Image
             key={active}
-            src={currentImage}
+            src={getSupportedImageSrc(currentImage)!}
             alt={product.name}
             fill
             className={cn(
               "object-cover object-center transition-all duration-300",
               soldOut && "opacity-45 saturate-0"
             )}
+            onError={() => setFailedImages((failed) => new Set(failed).add(currentImage))}
           />
         ) : (
           <div
@@ -82,12 +80,13 @@ export function ProductGallery({ product }: ProductGalleryProps) {
                   : "border-border opacity-70 hover:opacity-100"
               )}
             >
-              {isUrl(img) ? (
+              {getSupportedImageSrc(img) && !failedImages.has(img) ? (
                 <Image
-                  src={img}
+                  src={getSupportedImageSrc(img)!}
                   alt={`Image ${i + 1}`}
                   fill
                   className="object-cover object-center"
+                  onError={() => setFailedImages((failed) => new Set(failed).add(img))}
                 />
               ) : (
                 <ImageIcon className="h-6 w-6 text-muted-foreground" />

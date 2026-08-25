@@ -78,6 +78,7 @@ import type { ProductWithBrandAndCategory } from "@/repositories/product.reposit
 import type { CategoryRecord } from "@/repositories/category.repository";
 import type { BrandRecord } from "@/repositories/brand.repository";
 import { slugify } from "@/validations/product";
+import { getSupportedImageSrc } from "@/lib/image";
 
 // ──────────────────────────────────────────────────────────
 //  Types
@@ -140,6 +141,8 @@ function ProductFormDialog({
   const nameValue = watch("name");
   const enabledValue = watch("enabled");
   const imageUrlValue = watch("imageUrl");
+  const imageSrc = getSupportedImageSrc(imageUrlValue);
+  const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
 
   useEffect(() => {
     if (!slugManuallyEdited && !defaultValues?.slug && nameValue) {
@@ -330,13 +333,14 @@ function ProductFormDialog({
               <Label htmlFor="prod-image">Product Image URL</Label>
               <div className="flex flex-col sm:flex-row gap-4 items-start">
                 <div className="h-24 w-24 shrink-0 rounded-xl border border-border bg-accent grid place-items-center overflow-hidden relative group">
-                  {imageUrlValue ? (
+                  {imageSrc && failedImageSrc !== imageSrc ? (
                     <>
                       <Image
-                        src={imageUrlValue}
+                        src={imageSrc}
                         alt="Product preview"
                         fill
                         className="object-cover"
+                        onError={() => setFailedImageSrc(imageSrc)}
                       />
                       <button
                         type="button"
@@ -424,9 +428,12 @@ function ProductDetailsDialog({
   onToggleStatus: (product: SerializedProduct, enabled: boolean) => void;
   onDelete: (product: SerializedProduct) => void;
 }) {
+  const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
+
   if (!product) return null;
 
   const sku = `SKU-${product.id.slice(-6).toUpperCase()}`;
+  const imageSrc = getSupportedImageSrc(product.imageUrl);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -445,12 +452,13 @@ function ProductDetailsDialog({
           {/* Image & Main stats */}
           <div className="flex gap-4 items-start">
             <div className="relative h-28 w-28 shrink-0 rounded-xl border border-border bg-accent overflow-hidden grid place-items-center">
-              {product.imageUrl ? (
+              {imageSrc && failedImageSrc !== imageSrc ? (
                 <Image
-                  src={product.imageUrl}
+                  src={imageSrc}
                   alt={product.name}
                   fill
                   className="object-cover"
+                  onError={() => setFailedImageSrc(imageSrc)}
                 />
               ) : (
                 <ImageIcon className="h-8 w-8 text-muted-foreground" />

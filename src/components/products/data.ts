@@ -23,6 +23,8 @@ export type CustomerProduct = {
   categoryId?: string | null;
   /** Category name (resolved from relation) */
   categoryName: string | null;
+  /** Optional expiry timestamp for deal presentation. */
+  dealExpiresAt?: Date | string | null;
   createdAt: Date;
   updatedAt: Date;
 };

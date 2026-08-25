@@ -8,8 +8,6 @@ import { AddToCartButton } from "@/components/products/AddToCartButton";
 import type { CustomerProduct } from "@/components/products/data";
 import { SectionHeader } from "./SectionHeader";
 
-const DURATION = 6 * 3600 + 42 * 60 + 18;
-
 const pad = (n: number) => String(n).padStart(2, "0");
 
 interface DealOfTheDayProps {
@@ -17,13 +15,20 @@ interface DealOfTheDayProps {
 }
 
 export function DealOfTheDay({ product }: DealOfTheDayProps) {
-  const [left, setLeft] = useState(DURATION);
+  const expiry = product?.dealExpiresAt ? new Date(product.dealExpiresAt).getTime() : null;
+  const [left, setLeft] = useState(() =>
+    expiry === null || Number.isNaN(expiry) ? 0 : Math.max(0, Math.ceil((expiry - Date.now()) / 1000)),
+  );
   const [qty, setQty] = useState(1);
 
   useEffect(() => {
-    const t = setInterval(() => setLeft((v) => (v <= 1 ? DURATION : v - 1)), 1000);
+    if (expiry === null || Number.isNaN(expiry)) return;
+
+    const t = setInterval(() => {
+      setLeft(Math.max(0, Math.ceil((expiry - Date.now()) / 1000)));
+    }, 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [expiry]);
 
   if (!product) {
     return null;
@@ -37,7 +42,7 @@ export function DealOfTheDay({ product }: DealOfTheDayProps) {
 
   const p = product;
   const soldOut = !p.enabled;
-  const originalPrice = Math.round(p.price * 1.2); // Special deal original price comparison
+  const originalPrice = Math.round(p.price / 0.8);
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
@@ -89,7 +94,7 @@ export function DealOfTheDay({ product }: DealOfTheDayProps) {
             {soldOut ? "Out of Stock" : "In Stock — Fresh Daily"}
           </p>
 
-          <div className="rounded-2xl border border-border bg-accent/40 p-4">
+          {expiry !== null && !Number.isNaN(expiry) && <div className="rounded-2xl border border-border bg-accent/40 p-4">
             <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
               <Clock className="size-3.5" />
               Deal ends soon
@@ -109,7 +114,7 @@ export function DealOfTheDay({ product }: DealOfTheDayProps) {
                 </div>
               ))}
             </div>
-          </div>
+          </div>}
 
           <div className="mt-auto flex flex-wrap items-center gap-3 pt-1">
             <QuantitySelector

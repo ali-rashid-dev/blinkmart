@@ -29,14 +29,15 @@ export default async function HomePage() {
   let dbProducts: Awaited<ReturnType<typeof listCustomerProducts>> = [];
 
   try {
-    const [cats, prods] = await Promise.all([
-      listCustomerCategories({}),
-      listCustomerProducts({ take: 20 }),
-    ]);
-    dbCategories = cats;
-    dbProducts = prods;
+    dbCategories = await listCustomerCategories({});
   } catch (error) {
-    console.error("Error loading categories or products for home page:", error);
+    console.error("Error loading categories for home page:", error);
+  }
+
+  try {
+    dbProducts = await listCustomerProducts({ take: 20 });
+  } catch (error) {
+    console.error("Error loading products for home page:", error);
   }
 
   const allCustomerProducts = dbProducts.map(toCustomerProduct);

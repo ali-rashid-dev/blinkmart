@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ImageIcon } from "lucide-react";
@@ -8,6 +9,7 @@ import { AddToCartButton } from "./AddToCartButton";
 import { QuantitySelector } from "./QuantitySelector";
 import { cartStore, useCartState } from "@/lib/cart/store";
 import type { CustomerProduct } from "./data";
+import { getSupportedImageSrc } from "@/lib/image";
 
 export function ProductCard({
   product,
@@ -21,10 +23,8 @@ export function ProductCard({
   const qty = cartLine ? cartLine.quantity : 0;
   const soldOut = !product.enabled;
   const compact = view === "compact";
-
-  const hasImageUrl =
-    product.imageUrl &&
-    (product.imageUrl.startsWith("http") || product.imageUrl.startsWith("/"));
+  const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
+  const imageSrc = getSupportedImageSrc(product.imageUrl);
 
   return (
     <article
@@ -47,15 +47,16 @@ export function ProductCard({
           className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,var(--color-card),transparent_70%)]"
         />
 
-        {hasImageUrl ? (
+        {imageSrc && failedImageSrc !== imageSrc ? (
           <Image
-            src={product.imageUrl!}
+            src={imageSrc}
             alt={product.name}
             fill
             className={cn(
               "object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105",
               soldOut && "opacity-45 saturate-0",
             )}
+            onError={() => setFailedImageSrc(imageSrc)}
           />
         ) : (
           <div

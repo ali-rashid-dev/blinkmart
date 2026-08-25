@@ -50,6 +50,7 @@ import {
 } from "./actions";
 import type { CategoryRecord } from "@/repositories/category.repository";
 import { slugify } from "@/validations/category";
+import { getSupportedImageSrc } from "@/lib/image";
 
 // ──────────────────────────────────────────────────────────
 //  Category Form Dialog
@@ -91,6 +92,7 @@ function CategoryFormDialog({
 
   const nameValue = watch("name");
   const isActiveValue = watch("isActive");
+  const imageSrc = getSupportedImageSrc(watch("imageUrl"));
 
   // Auto-generate slug from name unless manually edited
   useEffect(() => {
@@ -164,9 +166,9 @@ function CategoryFormDialog({
             <Label htmlFor="cat-image">Image URL</Label>
             <div className="flex gap-2 items-start">
               <div className="relative h-10 w-10 shrink-0 rounded-md border bg-accent grid place-items-center overflow-hidden">
-                {watch("imageUrl") ? (
+                {imageSrc ? (
                   <Image
-                    src={watch("imageUrl")!}
+                    src={imageSrc}
                     alt="preview"
                     fill
                     className="object-cover"
