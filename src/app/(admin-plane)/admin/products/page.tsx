@@ -79,6 +79,7 @@ import type { CategoryRecord } from "@/repositories/category.repository";
 import type { BrandRecord } from "@/repositories/brand.repository";
 import { slugify } from "@/validations/product";
 import { getSupportedImageSrc } from "@/lib/image";
+import { UploadButton } from "@/lib/uploadthing";
 
 // ──────────────────────────────────────────────────────────
 //  Types
@@ -365,8 +366,24 @@ function ProductFormDialog({
                     {...register("imageUrl")}
                     placeholder="https://images.unsplash.com/photo-..."
                   />
+                  <div className="pt-1">
+                    <UploadButton
+                      endpoint="imageUploader"
+                      onClientUploadComplete={(res) => {
+                        const url = res?.[0]?.ufsUrl || res?.[0]?.url;
+                        if (url) {
+                          setValue("imageUrl", url, { shouldValidate: true, shouldDirty: true });
+                          setFailedImageSrc(null);
+                          toast.success("Product image uploaded!");
+                        }
+                      }}
+                      onUploadError={(error: Error) => {
+                        toast.error(`Upload failed: ${error.message}`);
+                      }}
+                    />
+                  </div>
                   <p className="text-xs text-muted-foreground">
-                    Provide a public image link. Image preview updates automatically.
+                    Upload an image file or provide a public URL. Image preview updates automatically.
                   </p>
                 </div>
               </div>

@@ -51,6 +51,7 @@ import {
 import type { CategoryRecord } from "@/repositories/category.repository";
 import { slugify } from "@/validations/category";
 import { getSupportedImageSrc } from "@/lib/image";
+import { UploadButton } from "@/lib/uploadthing";
 
 // ──────────────────────────────────────────────────────────
 //  Category Form Dialog
@@ -183,6 +184,21 @@ function CategoryFormDialog({
                   {...register("imageUrl")}
                   placeholder="https://example.com/image.png"
                 />
+                <div className="pt-1">
+                  <UploadButton
+                    endpoint="imageUploader"
+                    onClientUploadComplete={(res) => {
+                      const url = res?.[0]?.ufsUrl || res?.[0]?.url;
+                      if (url) {
+                        setValue("imageUrl", url, { shouldValidate: true, shouldDirty: true });
+                        toast.success("Category image uploaded!");
+                      }
+                    }}
+                    onUploadError={(error: Error) => {
+                      toast.error(`Upload failed: ${error.message}`);
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>

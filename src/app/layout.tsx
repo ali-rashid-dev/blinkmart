@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Fraunces, Geist_Mono, Manrope } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "@/components/ui/sonner";
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
+import { ourFileRouter } from "@/app/api/uploadthing/core";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -38,9 +41,11 @@ export default function RootLayout({
       className={cn("h-full", "antialiased", fraunces.variable, manrope.variable, geistMono.variable, "font-sans")}
     >
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-background text-foreground">
+        <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         <TooltipProvider delayDuration={100}>{children}</TooltipProvider>
         <Toaster richColors position="top-right" />
       </body>
     </html>
   );
 }
+
