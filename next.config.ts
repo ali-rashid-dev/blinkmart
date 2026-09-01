@@ -18,11 +18,11 @@ const nextConfig: NextConfig = {
         hostname: "uploadthing.com",
         pathname: "/**",
       },
-      // {
-      //   protocol: "https",
-      //   hostname: "fmcupnguk1.ufs.sh",
-      //   pathname: "/**",
-      // },
+      {
+        protocol: "https",
+        hostname: "fmcupnguk1.ufs.sh",
+        pathname: "/**",
+      },
     ],
   },
 };
