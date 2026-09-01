@@ -1,35 +1,57 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ShoppingBag, Sparkles, Truck } from "lucide-react";
 
 export function FinalCta() {
   return (
     <section className="mx-auto w-full max-w-7xl px-4 pb-16 pt-4 sm:px-6 sm:pb-24">
-      <div className="relative overflow-hidden rounded-3xl border border-border bg-card px-6 py-12 text-center sm:px-10 sm:py-16">
+      <div className="relative overflow-hidden rounded-[2.5rem] border border-primary/30 bg-gradient-to-br from-primary/15 via-card to-secondary/20 px-6 py-12 text-center sm:px-12 sm:py-16 shadow-card">
+        {/* Decorative Glow Blobs */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -left-16 top-0 size-64 rounded-full bg-primary/10 blur-3xl"
+          className="pointer-events-none absolute -left-20 -top-20 size-80 rounded-full bg-primary/20 blur-3xl animate-soft-float"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-16 bottom-0 size-64 rounded-full bg-secondary/10 blur-3xl"
+          className="pointer-events-none absolute -right-20 -bottom-20 size-80 rounded-full bg-secondary/25 blur-3xl"
         />
-        <div className="relative mx-auto max-w-2xl">
-          <h2 className="font-display text-2xl text-foreground sm:text-4xl">
-            Your groceries are just a few clicks away.
+
+        <div className="relative mx-auto max-w-2xl flex flex-col items-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-primary mb-4 backdrop-blur-md">
+            <Sparkles className="size-3.5" /> Guaranteed Evening Delivery
+          </span>
+
+          <h2 className="font-display text-3xl text-foreground sm:text-5xl font-bold leading-tight">
+            Your groceries are just a{" "}
+            <span className="text-primary bg-gradient-to-r from-primary to-emerald-600 dark:to-emerald-400 bg-clip-text text-transparent">
+              few clicks away.
+            </span>
           </h2>
-          <p className="mt-3 text-sm text-muted-foreground sm:text-base">
-            Shop fresh products and get everything you need delivered to your door.
+
+          <p className="mt-4 text-sm text-muted-foreground sm:text-base leading-relaxed max-w-lg">
+            Shop farm-fresh produce, weekly staples &amp; monthly pantry stock-ups delivered straight to your door in our 7:00 PM – 10:00 PM evening slot.
           </p>
-          <Link
-            href="/products"
-            className="mt-7 inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-base font-semibold text-primary-foreground shadow-[var(--shadow-button)] transition-all duration-300 hover:brightness-105 active:scale-[0.98]"
-          >
-            Start Shopping
-            <ArrowRight className="size-4" />
-          </Link>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href="/products"
+              className="inline-flex h-12 items-center gap-2.5 rounded-2xl bg-primary px-8 text-base font-bold text-primary-foreground shadow-button transition-all duration-300 hover:scale-105 active:scale-95"
+            >
+              <ShoppingBag className="size-5" />
+              Start Shopping Now
+              <ArrowRight className="size-4" />
+            </Link>
+          </div>
+
+          <div className="mt-8 flex items-center justify-center gap-6 text-xs font-medium text-muted-foreground border-t border-border/50 pt-4 w-full max-w-md">
+            <span className="flex items-center gap-1.5">
+              <Truck className="size-3.5 text-primary" /> Free Delivery &gt; Rs 499
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="size-3.5 text-primary" /> 100% Quality Inspected
+            </span>
+          </div>
         </div>
       </div>
     </section>
   );
 }
-

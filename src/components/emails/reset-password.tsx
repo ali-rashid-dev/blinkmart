@@ -113,10 +113,10 @@ const ForgotPasswordEmail = (props: ForgotPasswordEmailProps) => {
                 This email was sent to {userEmail}
               </Text>
               <Text className="m-0 mb-[8px] text-[12px] text-gray-500 leading-[16px]">
-                BlinkMart, 123 Business Street, City, State 12345
+                Kit&amp;Co, 123 Business Street, City, State 12345
               </Text>
-              <Text className="m-0 text-[12px] text-gray-500 leading-[16px]">
-                © 2026 BlinkMart. All rights reserved.{" "}
+              <Text className="text-center text-xs text-slate-400 mt-1">
+                © 2026 Kit&amp;Co. All rights reserved.{" "}
                 <Link className="text-gray-500" href="#">
                   Unsubscribe
                 </Link>

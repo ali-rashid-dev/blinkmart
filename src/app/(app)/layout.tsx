@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
-  title: 'BlinkMart',
+  title: 'Kit&Co',
   description: 'A modern shopping experience',
 };
 

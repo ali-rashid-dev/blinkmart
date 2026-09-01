@@ -195,7 +195,7 @@ export default function CheckoutPage() {
                 </span>
                 <div>
                   <h2 className="font-display text-lg font-bold text-foreground">Fixed Delivery Window</h2>
-                  <p className="text-xs text-muted-foreground">Every BlinkMart order delivers in our evening slot</p>
+                  <p className="text-xs text-muted-foreground">Every Kit&amp;Co order delivers in our evening slot</p>
                 </div>
               </div>
               <span className="rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary">

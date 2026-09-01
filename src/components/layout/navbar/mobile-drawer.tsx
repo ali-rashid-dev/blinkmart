@@ -70,7 +70,7 @@ export function MobileDrawer({ session, onLogout, categories }: MobileDrawerProp
             </div>
             <div>
               <span className="font-display text-lg font-bold text-foreground">
-                BlinkMart
+                Kit&amp;Co
               </span>
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground -mt-0.5">
                 Fresh &amp; Fast

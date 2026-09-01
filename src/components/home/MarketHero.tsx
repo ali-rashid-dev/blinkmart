@@ -1,70 +1,78 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Clock, Leaf, Truck } from "lucide-react";
-
-const HERO_IMAGE_URL = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&auto=format&fit=crop&q=80";
-
-const trustPoints = [
-  { Icon: Leaf, label: "Farm-fresh daily" },
-  { Icon: Truck, label: "Free delivery over Rs 1,000" },
-  { Icon: Clock, label: "Express & Scheduled Slots" },
-];
+import { ArrowRight, Leaf, Moon, ShieldCheck, Truck } from "lucide-react";
+import { getHomePageSettings, type HomePageSettings } from "@/lib/home/home-config";
 
 export function MarketHero() {
+  const [cfg, setCfg] = useState<HomePageSettings>(getHomePageSettings);
+
+  useEffect(() => {
+    setCfg(getHomePageSettings());
+  }, []);
+
+  const trustPoints = [
+    { Icon: Leaf, label: "Farm-fresh handpicked harvest" },
+    { Icon: Moon, label: `${cfg.deliverySlotLabel} Evening Slot` },
+    { Icon: Truck, label: `Free delivery over Rs ${cfg.freeDeliveryThreshold}` },
+  ];
+
   return (
     <section
-      aria-label="Fresh groceries delivered daily"
-      className="mx-auto w-full max-w-7xl px-4 pt-8 sm:px-6 sm:pt-12"
+      aria-label="Fresh groceries delivered daily in the evening window"
+      className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 sm:pt-8"
     >
       <div className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-secondary text-secondary-foreground">
         <Image
-          src={HERO_IMAGE_URL}
+          src={cfg.heroImageUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&auto=format&fit=crop&q=80"}
           alt="Baskets of fresh seasonal fruit and vegetables at the market"
           fill
           priority
-          className="object-cover opacity-40"
+          className="object-cover opacity-35"
         />
         <div
           aria-hidden="true"
           className="absolute inset-0 bg-gradient-to-r from-secondary via-secondary/90 to-secondary/40"
         />
 
-        <div className="relative grid gap-8 px-6 py-12 sm:px-10 sm:py-16 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:py-20">
+        <div className="relative grid gap-8 px-6 py-10 sm:px-10 sm:py-14 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:py-16">
           <div className="max-w-xl">
             <span className="inline-flex items-center gap-2 rounded-full border border-secondary-foreground/25 bg-secondary-foreground/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em]">
-              <Leaf aria-hidden="true" className="size-3.5" />
-              BlinkMart Express Delivery
+              <Moon aria-hidden="true" className="size-3.5 text-primary" />
+              Evening Delivery Slot ({cfg.deliverySlotLabel})
             </span>
 
-            <p className="mt-5 font-display text-4xl leading-[1.05] sm:text-5xl lg:text-6xl">
-              Fresh groceries,
-              <span className="block text-primary">delivered in minutes.</span>
-            </p>
+            <h1 className="mt-4 font-display text-4xl leading-[1.08] sm:text-5xl lg:text-6xl">
+              {cfg.heroTitle}{" "}
+              <span className="block text-primary">{cfg.heroHighlight}</span>
+            </h1>
 
             <p className="mt-4 max-w-md text-base leading-relaxed text-secondary-foreground/80">
-              Fresh produce, dairy, bakery and pantry staples — handpicked each morning and delivered straight to your door.
+              {cfg.heroSubtitle}
             </p>
 
-            <div className="mt-7 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-wrap gap-3">
               <Link
-                href="/products"
-                className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-card)] transition-transform duration-300 hover:-translate-y-0.5"
+                href={cfg.heroCtaLink || "/products"}
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-button transition-transform duration-300 hover:-translate-y-0.5"
               >
-                Start shopping
+                {cfg.heroCtaText || "Explore Market"}
                 <ArrowRight aria-hidden="true" className="size-4" />
               </Link>
               <Link
                 href="/orders"
                 className="inline-flex items-center gap-2 rounded-full border border-secondary-foreground/30 px-6 py-3 text-sm font-semibold transition-colors hover:bg-secondary-foreground/10"
               >
-                Track an order
+                Track Active Order
               </Link>
             </div>
 
             <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-3">
               {trustPoints.map(({ Icon, label }) => (
                 <li key={label} className="flex items-center gap-2 text-sm text-secondary-foreground/80">
-                  <Icon aria-hidden="true" className="size-4 text-primary" />
+                  <Icon aria-hidden="true" className="size-4 text-primary shrink-0" />
                   {label}
                 </li>
               ))}
@@ -74,16 +82,16 @@ export function MarketHero() {
           <div className="hidden items-end lg:flex">
             <dl className="ml-auto grid w-full max-w-xs gap-3">
               {[
-                { k: "1,000+", v: "Products on the shelf" },
-                { k: "30 min", v: "Average delivery time" },
-                { k: "4.9 / 5", v: "Rated by happy shoppers" },
+                { k: cfg.deliverySlotLabel, v: "Fixed Evening Slot" },
+                { k: `${cfg.cutoffHour > 12 ? cfg.cutoffHour - 12 : cfg.cutoffHour}:00 PM`, v: "Order Cutoff Time" },
+                { k: "100%", v: "Handpicked Fresh Produce" },
               ].map((s) => (
                 <div
                   key={s.k}
                   className="rounded-2xl border border-secondary-foreground/15 bg-secondary-foreground/10 px-5 py-4 backdrop-blur-sm"
                 >
-                  <dt className="font-display text-2xl">{s.k}</dt>
-                  <dd className="text-xs uppercase tracking-[0.12em] text-secondary-foreground/70">
+                  <dt className="font-display text-2xl font-bold">{s.k}</dt>
+                  <dd className="text-xs uppercase tracking-[0.12em] text-secondary-foreground/70 mt-0.5">
                     {s.v}
                   </dd>
                 </div>
@@ -95,4 +103,3 @@ export function MarketHero() {
     </section>
   );
 }
-

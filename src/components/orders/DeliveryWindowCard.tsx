@@ -24,7 +24,7 @@ export function DeliveryWindowCard({
           {!compact && (
             <p className="mt-1 flex items-start gap-1.5 text-xs leading-relaxed text-muted-foreground">
               <Info aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
-              Every BlinkMart basket is delivered in one fixed evening window. Orders placed after
+              Every Kit&amp;Co basket is delivered in one fixed evening window. Orders placed after
               5:00 PM move to the next day&apos;s run.
             </p>
           )}

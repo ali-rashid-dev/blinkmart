@@ -19,7 +19,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   }
 
   const categoryName = product.category?.name || "Groceries";
-  const brandName = product.brand?.name || "BlinkMart";
+  const brandName = product.brand?.name || "Kit&Co";
   const price = Number(product.price);
   const formattedPrice = `Rs ${Math.round(price)}`;
 

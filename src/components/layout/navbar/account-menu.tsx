@@ -60,14 +60,13 @@ export function AccountMenu({ session }: AccountMenuProps) {
   // ── Guest state ─────────────────────────────────────────────────────────────
   if (!isLoggedIn) {
     return (
-      <div className="flex items-center gap-2">
-        <Link
-          href="/login"
-          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-lg hover:bg-accent"
-        >
-          Sign in
-        </Link>
-      </div>
+      <Link
+        href="/login"
+        aria-label="Sign in"
+        className="relative inline-flex size-11 items-center justify-center rounded-2xl border border-border bg-card text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+      >
+        <User className="size-5" aria-hidden="true" />
+      </Link>
     );
   }
 

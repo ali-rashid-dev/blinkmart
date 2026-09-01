@@ -4,21 +4,24 @@ import { CategoryStrip } from "@/components/home/CategoryStrip";
 import { PromoBanner } from "@/components/home/PromoBanner";
 import { ProductRow } from "@/components/home/ProductRow";
 import { DealOfTheDay } from "@/components/home/DealOfTheDay";
-import { ShopByNeed } from "@/components/home/ShopByNeed";
 import { WhyShopWithUs } from "@/components/home/WhyShopWithUs";
 import { FinalCta } from "@/components/home/FinalCta";
+import { DeliverySlotBanner } from "@/components/home/DeliverySlotBanner";
+import { ActiveOrderTracker } from "@/components/home/ActiveOrderTracker";
+import { RepeatOrderCard } from "@/components/home/RepeatOrderCard";
+import { MobileHomeView } from "@/components/home/MobileHomeView";
 import { listCustomerCategories } from "@/repositories/category.repository";
 import { listCustomerProducts } from "@/repositories/product.repository";
 import { toCustomerProduct } from "@/components/products/data";
 
 export const metadata: Metadata = {
-  title: "BlinkMart — Fresh Groceries Delivered Daily",
+  title: "Kit&Co — Weekly & Monthly Grocery Delivery (7–10 PM Slot)",
   description:
-    "Shop handpicked fruit, vegetables, dairy, bakery, meat and pantry staples with daily deals and fast delivery from BlinkMart.",
+    "Shop handpicked fruit, vegetables, weekly dairy boxes, and monthly bulk pantry stock-ups with guaranteed evening delivery (7:00 PM – 10:00 PM) and same-day 5:00 PM cutoff.",
   openGraph: {
-    title: "BlinkMart — Fresh Groceries Delivered Daily",
+    title: "Kit&Co — Weekly & Monthly Grocery Delivery (7–10 PM Slot)",
     description:
-      "Shop handpicked fresh produce, dairy, bakery and household essentials with fast delivery.",
+      "Weekly fresh produce boxes and monthly pantry stock-ups delivered in our guaranteed evening slot.",
   },
 };
 
@@ -35,41 +38,56 @@ export default async function HomePage() {
   }
 
   try {
-    dbProducts = await listCustomerProducts({ take: 20 });
+    dbProducts = await listCustomerProducts({ take: 24 });
   } catch (error) {
     console.error("Error loading products for home page:", error);
   }
 
   const allCustomerProducts = dbProducts.map(toCustomerProduct);
 
-  const bestSellers = allCustomerProducts.slice(0, 5);
-  const freshArrivals = allCustomerProducts.slice(5, 10);
-
+  const bestSellers = allCustomerProducts.slice(0, 6);
+  const freshArrivals = allCustomerProducts.slice(6, 12);
   const dealProduct = allCustomerProducts.length > 0 ? allCustomerProducts[0] : null;
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-background">
-      <h1 className="sr-only">BlinkMart — fresh groceries delivered daily</h1>
-      <MarketHero />
-      <CategoryStrip categories={dbCategories} />
-      <PromoBanner />
-      <ProductRow
-        title="Best Sellers"
-        subtitle="Popular picks our customers love."
-        products={bestSellers}
-        ctaLabel="View All Products"
+      <h1 className="sr-only">Kit&Co — Weekly &amp; Monthly Grocery Delivery</h1>
+
+      {/* ── 1. Dedicated Mobile View ───────────────────────────────────────── */}
+      <MobileHomeView
+        categories={dbCategories}
+        products={allCustomerProducts}
+        dealProduct={dealProduct}
       />
-      <DealOfTheDay product={dealProduct} />
-      <ShopByNeed />
-      <ProductRow
-        title="Fresh Arrivals"
-        subtitle="New products added to our shelves."
-        products={freshArrivals.length > 0 ? freshArrivals : bestSellers}
-        ctaLabel="See New Arrivals"
-      />
-      <WhyShopWithUs />
-      <FinalCta />
+
+      {/* ── 2. Desktop Layout ──────────────────────────────────────────────── */}
+      <div className="hidden lg:block">
+        <MarketHero />
+
+        <div className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 flex flex-col gap-6">
+          <ActiveOrderTracker />
+          <RepeatOrderCard />
+          <DeliverySlotBanner />
+        </div>
+
+        <CategoryStrip categories={dbCategories} />
+        <PromoBanner />
+        <ProductRow
+          title="Weekly Staples & Best Sellers"
+          subtitle="Customer favorite fresh produce, dairy & recurring household items."
+          products={bestSellers}
+          ctaLabel="View All Products"
+        />
+        <DealOfTheDay product={dealProduct} />
+        <ProductRow
+          title="Monthly Stock-Up Essentials"
+          subtitle="Bulk pantry items, flour, rice, oils, and restocked shelves."
+          products={freshArrivals.length > 0 ? freshArrivals : bestSellers}
+          ctaLabel="See All Items"
+        />
+        <WhyShopWithUs />
+        <FinalCta />
+      </div>
     </main>
   );
 }
-

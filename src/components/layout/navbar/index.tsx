@@ -65,24 +65,17 @@ export function Navbar() {
       >
         <div className="container mx-auto px-4 lg:px-6">
           <div className="flex items-center gap-3 h-16">
-
-            {/* Mobile hamburger */}
-            <div className="lg:hidden">
-              <MobileDrawer session={session} onLogout={handleLogout} categories={categories} />
-            </div>
-
-            {/* Brand logo — desktop only */}
             <Link
               href="/"
               className="hidden lg:flex items-center gap-2.5 shrink-0"
-              aria-label="BlinkMart Home"
+              aria-label="Kit&Co Home"
             >
               <div className="size-9 rounded-xl bg-primary text-primary-foreground grid place-items-center shadow-button shrink-0">
                 <ShoppingBag className="size-5" />
               </div>
               <div>
                 <span className="font-display text-xl font-bold text-foreground leading-none">
-                  BlinkMart
+                  Kit&amp;Co
                 </span>
                 <p className="text-[10px] uppercase tracking-widest text-muted-foreground leading-none mt-0.5">
                   Fresh &amp; Fast

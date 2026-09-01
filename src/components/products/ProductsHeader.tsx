@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { CartBadge } from "@/components/cart/CartBadge";
 
 export function ProductsHeader({ total }: { total: number }) {
   return (
@@ -23,25 +22,29 @@ export function ProductsHeader({ total }: { total: number }) {
         </ol>
       </nav>
 
-      <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
-        <div className="min-w-0">
-          <h1 className="font-display text-3xl leading-tight text-foreground sm:text-4xl">
-            The market shelf
-          </h1>
-          <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">
-            Handpicked produce, pantry staples and small-batch finds — refreshed every morning.
-          </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-3">
-          <p className="rounded-2xl border border-border bg-card px-3 py-2 text-center">
-            <span className="block font-display text-xl text-foreground">{total}</span>
-            <span className="block text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-              products
-            </span>
-          </p>
-          <CartBadge />
-        </div>
-      </div>
+      <div className="mt-3 hidden grid-cols-[minmax(0,1fr)_auto] items-end gap-4 lg:grid">
+  <div className="min-w-0">
+    <h1 className="font-display text-3xl leading-tight text-foreground sm:text-4xl">
+      The market shelf
+    </h1>
+
+    <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">
+      Handpicked produce, pantry staples and small-batch finds — refreshed every morning.
+    </p>
+  </div>
+
+  <div className="flex shrink-0 items-center gap-3">
+    <p className="rounded-2xl border border-border bg-card px-3 py-2 text-center">
+      <span className="block font-display text-xl text-foreground">
+        {total}
+      </span>
+
+      <span className="block text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+        products
+      </span>
+    </p>
+  </div>
+</div>
     </header>
   );
 }

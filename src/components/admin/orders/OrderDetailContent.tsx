@@ -363,7 +363,7 @@ export function OrderDetailContent({ orderId }: { orderId: string }) {
           <div className="space-y-6">
             <div className="flex justify-between items-start border-b border-gray-300 pb-4">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight text-gray-900">BlinkMart</h2>
+                <h2 className="text-2xl font-bold tracking-tight text-gray-900">Kit&amp;Co</h2>
                 <p className="text-xs text-gray-500">Order Delivery & Packing Slip</p>
               </div>
               <div className="text-right">
@@ -422,7 +422,7 @@ export function OrderDetailContent({ orderId }: { orderId: string }) {
             </div>
 
             <div className="pt-6 text-center text-[10px] text-gray-500 border-t border-gray-200">
-              Thank you for ordering with BlinkMart. If you have questions, please contact customer support.
+              Thank you for ordering with Kit&amp;Co. If you have questions, please contact customer support.
             </div>
 
             <div className="no-print flex justify-end gap-2 pt-2">

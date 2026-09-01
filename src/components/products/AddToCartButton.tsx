@@ -14,6 +14,7 @@ export function AddToCartButton({
   productId,
   quantity = 1,
   onAdd,
+  className,
 }: {
   label: string;
   disabled?: boolean;
@@ -22,6 +23,7 @@ export function AddToCartButton({
   productId?: string;
   quantity?: number;
   onAdd?: () => void;
+  className?: string;
 }) {
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -59,6 +61,7 @@ export function AddToCartButton({
         compact ? "h-9" : size === "lg" ? "h-12 text-base" : "h-10",
         state === "done" && "bg-success shadow-none",
         state === "error" && "bg-destructive shadow-none",
+        className
       )}
     >
       <span

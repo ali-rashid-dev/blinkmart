@@ -7,8 +7,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
-  title: "BlinkMart Admin",
-  description: "BlinkMart administration panel",
+  title: "Kit&Co Admin",
+  description: "Kit&Co administration panel",
 };
 
 interface RootLayoutProps {

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Users, Tag, Store, Package, ShoppingBag,
-  BarChart3, Bell, Menu, LogOut, ChevronLeft, ChevronRight, TrendingUp,
+  BarChart3, Bell, Menu, LogOut, ChevronLeft, ChevronRight, TrendingUp, Sliders,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,7 @@ import { authClient } from "@/lib/auth-client";
 
 const nav = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/homepage", label: "Home Control", icon: Sliders },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/customers", label: "Customers", icon: Users },
