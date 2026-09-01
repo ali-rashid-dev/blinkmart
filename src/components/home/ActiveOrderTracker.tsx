@@ -109,7 +109,7 @@ export function ActiveOrderTracker() {
         <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/40">
           <span className="flex items-center gap-1">
             <Clock className="size-3.5 text-primary" />
-            Scheduled Window: <strong className="text-foreground font-semibold">7:00 PM – 10:00 PM</strong>
+            Scheduled Window: <strong className="text-foreground font-semibold">{activeOrder.deliverySlot || "7:00 PM – 10:00 PM"}</strong>
           </span>
           <span>
             {activeOrder.items.length} {activeOrder.items.length === 1 ? "item" : "items"} • Rs {Math.round(activeOrder.total)}

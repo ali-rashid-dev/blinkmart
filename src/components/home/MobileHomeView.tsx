@@ -18,9 +18,8 @@ import {
 import { DeliverySlotBanner } from "./DeliverySlotBanner";
 import { ActiveOrderTracker } from "./ActiveOrderTracker";
 import { RepeatOrderCard } from "./RepeatOrderCard";
-import { WeeklyMonthlyToggle, type GroceryShoppingMode } from "./WeeklyMonthlyToggle";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
-import { getHomePageSettings, type HomePageSettings } from "@/lib/home/home-config";
+import { getHomePageSettings, formatCutoffHour, type HomePageSettings } from "@/lib/home/home-config";
 import type { CustomerProduct } from "@/components/products/data";
 import type { HomeCategory } from "./CategoryStrip";
 
@@ -45,7 +44,6 @@ export function MobileHomeView({
   dealProduct,
 }: MobileHomeViewProps) {
   const [selectedChip, setSelectedChip] = useState("All Products");
-  const [shoppingMode, setShoppingMode] = useState<GroceryShoppingMode>("weekly");
   const [cfg, setCfg] = useState<HomePageSettings>(getHomePageSettings);
 
   useEffect(() => {
@@ -79,7 +77,7 @@ export function MobileHomeView({
               <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
             </div>
             <p className="text-xs font-semibold text-foreground truncate">
-              Slot: {cfg.deliverySlotLabel} • Cutoff {cfg.cutoffHour > 12 ? cfg.cutoffHour - 12 : cfg.cutoffHour}:00 PM
+              Slot: {cfg.deliverySlotLabel} • Cutoff {formatCutoffHour(cfg.cutoffHour)}
             </p>
           </div>
         </div>
@@ -101,17 +99,12 @@ export function MobileHomeView({
       {/* ── 4. Delivery Slot & Cutoff Banner ───────────────────────── */}
       <DeliverySlotBanner />
 
-      {/* ── 5. Weekly vs Monthly Mode Switcher ─────────────────────── */}
-      <div className="flex justify-center">
-        <WeeklyMonthlyToggle mode={shoppingMode} onChange={setShoppingMode} className="w-full justify-center" />
-      </div>
-
-      {/* ── 6. Category Aisles Bubbles ─────────────────────────────── */}
+      {/* ── 5. Category Aisles Bubbles ─────────────────────────────── */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-bold text-foreground flex items-center gap-1.5">
             <Leaf className="size-4 text-primary" />
-            {shoppingMode === "weekly" ? "Weekly Produce & Fresh Aisles" : "Monthly Pantry Aisles"}
+            Shop Fresh Produce & Essentials
           </h2>
           <Link
             href="/products"
@@ -228,11 +221,11 @@ export function MobileHomeView({
         })}
       </div>
 
-      {/* ── 9. Product Grid ────────────────────────────────────────── */}
+      {/* ── 8. Product Grid ──────────────────────────────────────── */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-bold text-foreground">
-            {shoppingMode === "weekly" ? "Weekly Staples" : "Monthly Bulk Pack Essentials"}
+            Featured Items
           </h2>
           <span className="text-xs text-muted-foreground">
             {displayProducts.length} items

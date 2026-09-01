@@ -27,7 +27,7 @@ export function DeliverySlotBanner() {
     );
   }
 
-  const cutoffHour = cfg.cutoffHour || 17;
+  const cutoffHour = cfg.cutoffHour ?? 17;
   const hours = now.getHours();
   const isBeforeCutoff = hours < cutoffHour;
 

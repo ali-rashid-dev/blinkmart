@@ -16,6 +16,17 @@ export interface HomePageSettings {
   monthlyPromoSubtitle: string;
 }
 
+/**
+ * Format a 24-hour cutoff hour (0-23) to a readable AM/PM time string.
+ * Examples: 9 -> "9:00 AM", 17 -> "5:00 PM", 0 -> "12:00 AM", 12 -> "12:00 PM"
+ */
+export function formatCutoffHour(hour: number): string {
+  if (hour === 0) return "12:00 AM";
+  if (hour === 12) return "12:00 PM";
+  if (hour > 12) return `${hour - 12}:00 PM`;
+  return `${hour}:00 AM`;
+}
+
 export const DEFAULT_HOME_SETTINGS: HomePageSettings = {
   heroTitle: "Handpicked fresh groceries,",
   heroHighlight: "delivered tonight.",

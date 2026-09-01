@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Leaf, Moon, ShieldCheck, Truck } from "lucide-react";
-import { getHomePageSettings, type HomePageSettings } from "@/lib/home/home-config";
+import { getHomePageSettings, formatCutoffHour, type HomePageSettings } from "@/lib/home/home-config";
 
 export function MarketHero() {
   const [cfg, setCfg] = useState<HomePageSettings>(getHomePageSettings);
@@ -83,7 +83,7 @@ export function MarketHero() {
             <dl className="ml-auto grid w-full max-w-xs gap-3">
               {[
                 { k: cfg.deliverySlotLabel, v: "Fixed Evening Slot" },
-                { k: `${cfg.cutoffHour > 12 ? cfg.cutoffHour - 12 : cfg.cutoffHour}:00 PM`, v: "Order Cutoff Time" },
+                { k: formatCutoffHour(cfg.cutoffHour), v: "Order Cutoff Time" },
                 { k: "100%", v: "Handpicked Fresh Produce" },
               ].map((s) => (
                 <div

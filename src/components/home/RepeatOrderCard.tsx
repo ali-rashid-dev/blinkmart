@@ -16,8 +16,8 @@ export function RepeatOrderCard() {
 
   if (loading || !orders) return null;
 
-  // Find latest past order
-  const pastOrder = orders.find((o) => o.status !== "cancelled");
+  // Find latest delivered order
+  const pastOrder = orders.find((o) => o.status === "delivered");
   if (!pastOrder || pastOrder.items.length === 0) return null;
 
   const handleReorder = async () => {
