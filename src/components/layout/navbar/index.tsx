@@ -14,12 +14,14 @@ import { CategoryDropdown } from "./category-dropdown";
 import { AccountMenu } from "./account-menu";
 import { MobileDrawer } from "./mobile-drawer";
 import { MobileBottomNav } from "./mobile-bottom-nav";
+import { useNavbarCategories } from "./use-navbar-categories";
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
 
 export function Navbar() {
   const router = useRouter();
   const { data: session } = authClient.useSession();
+  const { categories } = useNavbarCategories();
 
   const handleLogout = async () => {
     await authClient.signOut({
@@ -66,7 +68,7 @@ export function Navbar() {
 
             {/* Mobile hamburger */}
             <div className="lg:hidden">
-              <MobileDrawer session={session} onLogout={handleLogout} />
+              <MobileDrawer session={session} onLogout={handleLogout} categories={categories} />
             </div>
 
             {/* Brand logo — desktop only */}
@@ -90,7 +92,7 @@ export function Navbar() {
 
             {/* Desktop categories */}
             <div className="hidden lg:flex ml-2">
-              <CategoryDropdown />
+              <CategoryDropdown categories={categories} />
             </div>
 
             {/* Search bar */}

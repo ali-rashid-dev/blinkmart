@@ -33,7 +33,8 @@ export function useNavbarCategories() {
     getNavbarCategoriesAction()
       .then((items) => {
         if (!isMounted) return;
-        if (items && items.length > 0) {
+        // Treat empty array as a successful query; clear fallback categories
+        if (items !== null && items !== undefined) {
           const parsed: NavbarCategoryItem[] = items.map((c) => {
             const { emoji, label } = parseCategoryEmoji(c.name, c.slug);
             return {
@@ -48,6 +49,7 @@ export function useNavbarCategories() {
         }
       })
       .catch((err) => {
+        // On failure, retain fallback categories
         console.error("Failed to load real categories:", err);
       })
       .finally(() => {

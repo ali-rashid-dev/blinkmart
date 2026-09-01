@@ -1,9 +1,32 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
+import { getSession } from "@/lib/authz";
+import { prisma } from "@/lib/prisma";
 
 const f = createUploadthing();
 
-const auth = (req: Request) => ({ id: "fakeId" }); // Fake auth function
+const auth = async (req: Request) => {
+  try {
+    const session = await getSession();
+    
+    if (!session?.user) {
+      return null;
+    }
+
+    const dbUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { role: true },
+    });
+
+    if (!dbUser || dbUser.role !== "ADMIN") {
+      return null;
+    }
+
+    return { id: session.user.id };
+  } catch {
+    return null;
+  }
+};
 
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {

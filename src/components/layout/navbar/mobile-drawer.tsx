@@ -19,11 +19,12 @@ import {
 } from "@/components/ui/sheet";
 import { QUICK_LINKS } from "./constants";
 import type { NavSession } from "./constants";
-import { useNavbarCategories } from "./use-navbar-categories";
+import type { NavbarCategoryItem } from "./use-navbar-categories";
 
 interface MobileDrawerProps {
   session: NavSession;
   onLogout: () => void;
+  categories: NavbarCategoryItem[];
 }
 
 const ACCOUNT_LINKS = [
@@ -32,9 +33,8 @@ const ACCOUNT_LINKS = [
   { label: "Notifications",href: "/notification",  icon: Bell },
 ] as const;
 
-export function MobileDrawer({ session, onLogout }: MobileDrawerProps) {
+export function MobileDrawer({ session, onLogout, categories }: MobileDrawerProps) {
   const [open, setOpen] = useState(false);
-  const { categories } = useNavbarCategories();
 
   const name      = session?.user?.name  ?? null;
   const email     = session?.user?.email ?? null;

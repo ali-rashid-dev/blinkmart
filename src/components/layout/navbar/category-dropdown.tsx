@@ -5,13 +5,16 @@ import { Package, ShoppingBag, ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useNavbarCategories } from "./use-navbar-categories";
+import type { NavbarCategoryItem } from "./use-navbar-categories";
 
-export function CategoryDropdown() {
+interface CategoryDropdownProps {
+  categories: NavbarCategoryItem[];
+}
+
+export function CategoryDropdown({ categories }: CategoryDropdownProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-  const { categories } = useNavbarCategories();
 
   // Close on outside click
   useEffect(() => {
