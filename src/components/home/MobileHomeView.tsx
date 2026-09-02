@@ -54,10 +54,10 @@ export function MobileHomeView({
     selectedChip === "All Products"
       ? products
       : products.filter(
-          (p) =>
-            p.categoryName?.toLowerCase().includes(selectedChip.toLowerCase()) ||
-            p.name.toLowerCase().includes(selectedChip.toLowerCase())
-        );
+        (p) =>
+          p.categoryName?.toLowerCase().includes(selectedChip.toLowerCase()) ||
+          p.name.toLowerCase().includes(selectedChip.toLowerCase())
+      );
 
   const displayProducts = filteredProducts.length > 0 ? filteredProducts : products;
 
@@ -209,11 +209,10 @@ export function MobileHomeView({
               key={chip}
               type="button"
               onClick={() => setSelectedChip(chip)}
-              className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
-                isActive
+              className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${isActive
                   ? "bg-primary text-primary-foreground shadow-button"
                   : "bg-card text-muted-foreground border border-border/80 hover:text-foreground"
-              }`}
+                }`}
             >
               {chip}
             </button>

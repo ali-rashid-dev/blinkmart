@@ -1,6 +1,10 @@
-import Link from "next/link";
+"use client";
+
+import { useRouter } from "next/navigation";
 import { ArrowLeft, ShoppingBag } from "lucide-react";
 import { formatPrice } from "@/lib/cart/store";
+import { authClient } from "@/lib/auth-client";
+import { useLoginDialog } from "@/components/auth/LoginDialogContext";
 
 export function CartSummary({
   subtotal,
@@ -11,6 +15,19 @@ export function CartSummary({
   total: number;
   itemCount: number;
 }) {
+  const router = useRouter();
+  const { data: session } = authClient.useSession();
+  const { openDialog } = useLoginDialog();
+
+  const handleCheckout = () => {
+    if (!session?.user) {
+      // User is not logged in — open the login dialog instead of navigating
+      openDialog("/checkout");
+    } else {
+      router.push("/checkout");
+    }
+  };
+
   return (
     <section
       aria-labelledby="order-summary-heading"
@@ -46,21 +63,23 @@ export function CartSummary({
       </dl>
 
       <div className="mt-5 flex flex-col gap-2.5">
-        <Link
-          href="/checkout"
+        <button
+          id="proceed-to-checkout-btn"
+          type="button"
+          onClick={handleCheckout}
           className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-button)] transition-transform hover:scale-[1.01]"
         >
           <ShoppingBag className="size-4" aria-hidden="true" />
           Proceed to Checkout
-        </Link>
+        </button>
 
-        <Link
+        <a
           href="/products"
           className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-accent"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           Continue Shopping
-        </Link>
+        </a>
       </div>
     </section>
   );

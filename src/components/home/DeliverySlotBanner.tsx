@@ -43,7 +43,7 @@ export function DeliverySlotBanner() {
   const remainingSecs = Math.floor((remainingMs % (1000 * 60)) / 1000);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-card to-secondary/10 p-4 sm:p-5 shadow-soft">
+    <div className="relative overflow-hidden rounded-2xl border border-primary/20 p-4 sm:p-5 shadow-soft">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         {/* Left Side: Delivery Slot Info */}
         <div className="flex items-start gap-3">
