@@ -22,6 +22,8 @@ export function CompleteProfileBanner() {
   const isProfilePage = pathname === "/profile";
 
   useEffect(() => {
+    let isStale = false;
+
     if (isPending) return;
     // Not logged in — hide banner
     if (!session?.user) {
@@ -38,6 +40,8 @@ export function CompleteProfileBanner() {
 
     getProfile()
       .then((result) => {
+        if (isStale) return;
+
         if (!result.success) {
           setState("hidden");
           return;
@@ -65,8 +69,14 @@ export function CompleteProfileBanner() {
         }
       })
       .catch(() => {
+        if (isStale) return;
+
         setState("hidden");
       });
+
+    return () => {
+      isStale = true;
+    };
   }, [session, isPending, isProfilePage]);
 
   const dismiss = () => setState("dismissed");
