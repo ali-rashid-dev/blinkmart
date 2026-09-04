@@ -108,6 +108,7 @@ export async function createCategory(input: CreateCategoryInput): Promise<Catego
     return await dbCreate({
       name: input.name,
       slug,
+      emoji: input.emoji ?? null,
       imageUrl: input.imageUrl ?? null,
       sortOrder: input.sortOrder ?? 0,
       isActive: input.isActive ?? true,
@@ -158,6 +159,7 @@ export async function updateCategory(input: UpdateCategoryInput): Promise<Catego
     return await dbUpdate(input.id, {
       ...(input.name !== undefined && { name: input.name }),
       ...(slug !== undefined && { slug }),
+      ...(input.emoji !== undefined && { emoji: input.emoji }),
       ...(input.imageUrl !== undefined && { imageUrl: input.imageUrl }),
       ...(input.sortOrder !== undefined && { sortOrder: input.sortOrder }),
       ...(input.isActive !== undefined && { isActive: input.isActive }),

@@ -102,6 +102,7 @@ model Category {
   id        String   @id @default(cuid())
   name      String   @unique @db.Citext
   slug      String   @unique @db.Citext
+  emoji     String?  @default("🛒")
   imageUrl  String?
   isActive  Boolean  @default(true)
   sortOrder Int      @default(0)

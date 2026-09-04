@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { parseCategoryEmoji } from "@/components/products/filters";
 import { getNavbarCategoriesAction } from "./actions";
 
 export type NavbarCategoryItem = {
@@ -12,20 +11,8 @@ export type NavbarCategoryItem = {
   slug: string;
 };
 
-// Fallback category items used during SSR or before initial DB fetch completes
-const FALLBACK_CATEGORIES: NavbarCategoryItem[] = [
-  { id: "1", label: "Fresh Produce",       emoji: "🥦", href: "/products?category=sabzi-fresh-produce", slug: "sabzi-fresh-produce" },
-  { id: "2", label: "Dairy & Eggs",        emoji: "🥛", href: "/products?category=dairy-eggs",          slug: "dairy-eggs" },
-  { id: "3", label: "Roti & Bakery",       emoji: "🥖", href: "/products?category=roti-bread-bakery",   slug: "roti-bread-bakery" },
-  { id: "4", label: "Meat & Fish",         emoji: "🥩", href: "/products?category=meat-chicken-fish",   slug: "meat-chicken-fish" },
-  { id: "5", label: "Daal & Pantry",       emoji: "🫙", href: "/products?category=daal-chawal-pantry",   slug: "daal-chawal-pantry" },
-  { id: "6", label: "Juices & Beverages",  emoji: "🥤", href: "/products?category=juices-beverages",    slug: "juices-beverages" },
-  { id: "7", label: "Snacks & Sweets",     emoji: "🍿", href: "/products?category=snacks-namkeen-sweets", slug: "snacks-namkeen-sweets" },
-  { id: "8", label: "Frozen Foods",        emoji: "🧊", href: "/products?category=frozen-foods",        slug: "frozen-foods" },
-];
-
 export function useNavbarCategories() {
-  const [categories, setCategories] = useState<NavbarCategoryItem[]>(FALLBACK_CATEGORIES);
+  const [categories, setCategories] = useState<NavbarCategoryItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,24 +20,19 @@ export function useNavbarCategories() {
     getNavbarCategoriesAction()
       .then((items) => {
         if (!isMounted) return;
-        // Treat empty array as a successful query; clear fallback categories
         if (items !== null && items !== undefined) {
-          const parsed: NavbarCategoryItem[] = items.map((c) => {
-            const { emoji, label } = parseCategoryEmoji(c.name, c.slug);
-            return {
-              id: c.id,
-              label: label || c.name,
-              emoji: emoji || "🛒",
-              href: `/products?category=${encodeURIComponent(c.slug)}`,
-              slug: c.slug,
-            };
-          });
+          const parsed: NavbarCategoryItem[] = items.map((c) => ({
+            id: c.id,
+            label: c.name,
+            emoji: c.emoji || "🛒",
+            href: `/products?category=${encodeURIComponent(c.slug)}`,
+            slug: c.slug,
+          }));
           setCategories(parsed);
         }
       })
       .catch((err) => {
-        // On failure, retain fallback categories
-        console.error("Failed to load real categories:", err);
+        console.error("Failed to load categories from database:", err);
       })
       .finally(() => {
         if (isMounted) setLoading(false);

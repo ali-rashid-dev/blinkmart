@@ -9,6 +9,7 @@ export async function getNavbarCategoriesAction() {
       id: c.id,
       name: c.name,
       slug: c.slug,
+      emoji: c.emoji,
       imageUrl: c.imageUrl,
     }));
   } catch (error) {

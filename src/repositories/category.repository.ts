@@ -8,6 +8,7 @@ export type CategoryRecord = {
   id: string;
   name: string;
   slug: string;
+  emoji: string | null;
   imageUrl: string | null;
   isActive: boolean;
   sortOrder: number;
@@ -19,6 +20,7 @@ export type CustomerCategoryRecord = {
   id: string;
   name: string;
   slug: string;
+  emoji: string | null;
   imageUrl: string | null;
 };
 
@@ -28,6 +30,7 @@ export type CustomerCategoryRecord = {
 export async function createCategory(data: {
   name: string;
   slug: string;
+  emoji?: string | null;
   imageUrl?: string | null;
   sortOrder?: number;
   isActive?: boolean;
@@ -36,6 +39,7 @@ export async function createCategory(data: {
     data: {
       name: data.name,
       slug: data.slug,
+      emoji: data.emoji ?? "🛒",
       imageUrl: data.imageUrl ?? null,
       sortOrder: data.sortOrder ?? 0,
       isActive: data.isActive ?? true,
@@ -48,6 +52,7 @@ export async function updateCategory(
   data: {
     name?: string;
     slug?: string;
+    emoji?: string | null;
     imageUrl?: string | null;
     sortOrder?: number;
     isActive?: boolean;
@@ -58,6 +63,7 @@ export async function updateCategory(
     data: {
       ...(data.name !== undefined && { name: data.name }),
       ...(data.slug !== undefined && { slug: data.slug }),
+      ...(data.emoji !== undefined && { emoji: data.emoji }),
       ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
       ...(data.sortOrder !== undefined && { sortOrder: data.sortOrder }),
       ...(data.isActive !== undefined && { isActive: data.isActive }),
@@ -187,6 +193,6 @@ export async function listCustomerCategories(
   return prisma.category.findMany({
     where: { isActive: true, ...searchWhere },
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-    select: { id: true, name: true, slug: true, imageUrl: true },
+    select: { id: true, name: true, slug: true, emoji: true, imageUrl: true },
   });
 }

@@ -59,7 +59,7 @@ export function CategoryDropdown({ categories }: CategoryDropdownProps) {
         <div
           className={cn(
             "absolute left-0 top-full mt-2 z-50",
-            "w-64 max-h-96 overflow-y-auto rounded-xl border border-border bg-popover shadow-lg",
+            "w-64 max-h-96 overflow-y-auto scrollbar-none rounded-xl border border-border bg-popover shadow-lg",
             "animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-150"
           )}
         >

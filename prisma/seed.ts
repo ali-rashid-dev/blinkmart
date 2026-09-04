@@ -42,16 +42,16 @@ const userData = [
 ];
 
 const categoryData = [
-  { name: "🥦 Sabzi & Fresh Produce", slug: "sabzi-fresh-produce", sortOrder: 1, isActive: true },
-  { name: "🥛 Dairy & Eggs", slug: "dairy-eggs", sortOrder: 2, isActive: true },
-  { name: "🥖 Roti, Bread & Bakery", slug: "roti-bread-bakery", sortOrder: 3, isActive: true },
-  { name: "🥩 Meat, Chicken & Fish", slug: "meat-chicken-fish", sortOrder: 4, isActive: true },
-  { name: "🫙 Daal, Chawal & Pantry", slug: "daal-chawal-pantry", sortOrder: 5, isActive: true },
-  { name: "🥤 Juices & Beverages", slug: "juices-beverages", sortOrder: 6, isActive: true },
-  { name: "🍿 Snacks, Namkeen & Sweets", slug: "snacks-namkeen-sweets", sortOrder: 7, isActive: true },
-  { name: "🧊 Frozen Foods", slug: "frozen-foods", sortOrder: 8, isActive: true },
-  { name: "🧼 Household & Cleaning", slug: "household-cleaning", sortOrder: 9, isActive: true },
-  { name: "💆 Personal Care & Beauty", slug: "personal-care-beauty", sortOrder: 10, isActive: true },
+  { name: "Sabzi & Fresh Produce", slug: "sabzi-fresh-produce", emoji: "🥦", sortOrder: 1, isActive: true },
+  { name: "Dairy & Eggs", slug: "dairy-eggs", emoji: "🥛", sortOrder: 2, isActive: true },
+  { name: "Roti, Bread & Bakery", slug: "roti-bread-bakery", emoji: "🥖", sortOrder: 3, isActive: true },
+  { name: "Meat, Chicken & Fish", slug: "meat-chicken-fish", emoji: "🥩", sortOrder: 4, isActive: true },
+  { name: "Daal, Chawal & Pantry", slug: "daal-chawal-pantry", emoji: "🫙", sortOrder: 5, isActive: true },
+  { name: "Juices & Beverages", slug: "juices-beverages", emoji: "🥤", sortOrder: 6, isActive: true },
+  { name: "Snacks, Namkeen & Sweets", slug: "snacks-namkeen-sweets", emoji: "🍿", sortOrder: 7, isActive: true },
+  { name: "Frozen Foods", slug: "frozen-foods", emoji: "🧊", sortOrder: 8, isActive: true },
+  { name: "Household & Cleaning", slug: "household-cleaning", emoji: "🧼", sortOrder: 9, isActive: true },
+  { name: "Personal Care & Beauty", slug: "personal-care-beauty", emoji: "💆", sortOrder: 10, isActive: true },
 ];
 
 const brandData = [
@@ -73,8 +73,8 @@ export async function main() {
   const seededUsers: Record<string, { id: string }> = {};
   for (const user of userData) {
     const record = await prisma.user.upsert({
-      where: { email: user.email },
-      update: { role: user.role, name: user.name },
+      where: { id: user.id },
+      update: { role: user.role, name: user.name, email: user.email },
       create: user,
     });
     seededUsers[user.email] = record;
@@ -88,6 +88,7 @@ export async function main() {
       where: { slug: cat.slug },
       update: {
         name: cat.name,
+        emoji: cat.emoji,
         sortOrder: cat.sortOrder,
         isActive: cat.isActive,
       },

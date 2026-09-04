@@ -76,11 +76,10 @@ export function ProductsClient({
       return [];
     }
     return rawCategories.map((c) => {
-      const { emoji, label } = parseCategoryEmoji(c.name, c.slug);
       return {
         id: c.id,
-        label,
-        emoji,
+        label: c.name,
+        emoji: c.emoji || "🛒",
       };
     });
   }, [rawCategories]);

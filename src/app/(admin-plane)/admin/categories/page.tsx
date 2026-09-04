@@ -59,6 +59,7 @@ import { UploadButton } from "@/lib/uploadthing";
 type CategoryFormValues = {
   name: string;
   slug: string;
+  emoji: string;
   imageUrl: string;
   sortOrder: number;
   isActive: boolean;
@@ -85,6 +86,7 @@ function CategoryFormDialog({
       defaultValues: {
         name: defaultValues?.name ?? "",
         slug: defaultValues?.slug ?? "",
+        emoji: defaultValues?.emoji ?? "🛒",
         imageUrl: defaultValues?.imageUrl ?? "",
         sortOrder: defaultValues?.sortOrder ?? 0,
         isActive: defaultValues?.isActive ?? true,
@@ -109,6 +111,7 @@ function CategoryFormDialog({
       reset({
         name: defaultValues?.name ?? "",
         slug: defaultValues?.slug ?? "",
+        emoji: defaultValues?.emoji ?? "🛒",
         imageUrl: defaultValues?.imageUrl ?? "",
         sortOrder: defaultValues?.sortOrder ?? 0,
         isActive: defaultValues?.isActive ?? true,
@@ -136,15 +139,26 @@ function CategoryFormDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Name */}
-          <div className="space-y-1.5">
-            <Label htmlFor="cat-name">Category Name <span className="text-destructive">*</span></Label>
-            <Input
-              id="cat-name"
-              {...register("name", { required: "Name is required", minLength: { value: 2, message: "At least 2 characters" } })}
-              placeholder="Fruits & Vegetables"
-            />
-            {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+          {/* Name & Emoji */}
+          <div className="grid grid-cols-[1fr_80px] gap-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="cat-name">Category Name <span className="text-destructive">*</span></Label>
+              <Input
+                id="cat-name"
+                {...register("name", { required: "Name is required", minLength: { value: 2, message: "At least 2 characters" } })}
+                placeholder="Fruits & Vegetables"
+              />
+              {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="cat-emoji">Emoji</Label>
+              <Input
+                id="cat-emoji"
+                {...register("emoji")}
+                placeholder="🥦"
+                className="text-center"
+              />
+            </div>
           </div>
 
           {/* Slug */}
@@ -521,7 +535,10 @@ export default function CategoriesPage() {
                           <ImageIcon className="h-4 w-4 text-muted-foreground" />
                         )}
                       </div>
-                      <span className="font-medium">{cat.name}</span>
+                      <span className="font-medium">
+                        {cat.emoji && <span className="mr-1.5">{cat.emoji}</span>}
+                        {cat.name}
+                      </span>
                     </div>
                   </td>
 
@@ -559,6 +576,7 @@ export default function CategoriesPage() {
                         defaultValues={{
                           name: cat.name,
                           slug: cat.slug,
+                          emoji: cat.emoji ?? "🛒",
                           imageUrl: cat.imageUrl ?? "",
                           sortOrder: cat.sortOrder,
                           isActive: cat.isActive,
