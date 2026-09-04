@@ -6,18 +6,29 @@ import { formatPrice } from "@/lib/cart/store";
 import { authClient } from "@/lib/auth-client";
 import { useLoginDialog } from "@/components/auth/LoginDialogContext";
 
+import { calculateDeliveryFee, calculatePlatformFee, getNextDeliveryTier } from "@/lib/orders/eligibility";
+
 export function CartSummary({
   subtotal,
-  total,
+  deliveryFee: propDeliveryFee,
+  platformFee: propPlatformFee,
+  total: propTotal,
   itemCount,
 }: {
   subtotal: number;
-  total: number;
+  deliveryFee?: number;
+  platformFee?: number;
+  total?: number;
   itemCount: number;
 }) {
   const router = useRouter();
   const { data: session } = authClient.useSession();
   const { openDialog } = useLoginDialog();
+
+  const deliveryFee = propDeliveryFee ?? calculateDeliveryFee(subtotal);
+  const platformFee = propPlatformFee ?? calculatePlatformFee(subtotal);
+  const total = propTotal ?? Math.round((subtotal + deliveryFee + platformFee) * 100) / 100;
+  const tierInfo = getNextDeliveryTier(subtotal);
 
   const handleCheckout = () => {
     if (!session?.user) {
@@ -52,6 +63,39 @@ export function CartSummary({
             {formatPrice(subtotal)}
           </dd>
         </div>
+
+        <div className="flex items-baseline justify-between gap-3">
+          <dt className="text-muted-foreground">Delivery Fee</dt>
+          <dd className="font-semibold tabular-nums text-foreground">
+            {deliveryFee === 0 ? (
+              <span className="font-bold text-success">FREE</span>
+            ) : (
+              formatPrice(deliveryFee)
+            )}
+          </dd>
+        </div>
+
+        {subtotal > 0 && (
+          <div className="flex items-baseline justify-between gap-3">
+            <dt className="text-muted-foreground">Platform Fee</dt>
+            <dd className="font-semibold tabular-nums text-foreground">
+              {formatPrice(platformFee)}
+            </dd>
+          </div>
+        )}
+
+        {tierInfo && (
+          <p className="rounded-lg bg-accent/60 p-2 text-xs text-muted-foreground">
+            {tierInfo.isFree ? (
+              <span className="font-medium text-success">🎉 You qualify for FREE evening delivery!</span>
+            ) : (
+              <>
+                Add <span className="font-semibold text-foreground">{formatPrice(tierInfo.amountNeeded)}</span> more for {tierInfo.nextFee === 0 ? "FREE" : formatPrice(tierInfo.nextFee)} delivery!
+              </>
+            )}
+          </p>
+        )}
+
         <div className="border-t border-border pt-3">
           <div className="flex items-baseline justify-between gap-3">
             <dt className="font-semibold text-foreground">Total</dt>

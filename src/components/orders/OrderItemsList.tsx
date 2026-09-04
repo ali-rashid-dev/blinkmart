@@ -41,12 +41,15 @@ export function OrderItemsList({ items }: { items: OrderItem[] }) {
 export function OrderTotals({
   subtotal,
   deliveryFee,
+  platformFee,
   total,
 }: {
   subtotal: number;
   deliveryFee: number;
+  platformFee?: number;
   total: number;
 }) {
+  const pFee = platformFee ?? (subtotal > 0 ? 20 : 0);
   return (
     <dl className="space-y-2 text-sm">
       <div className="flex items-baseline justify-between gap-3">
@@ -55,8 +58,16 @@ export function OrderTotals({
       </div>
       <div className="flex items-baseline justify-between gap-3">
         <dt className="text-muted-foreground">Delivery fee</dt>
-        <dd className="font-semibold tabular-nums text-foreground">{formatMoney(deliveryFee)}</dd>
+        <dd className="font-semibold tabular-nums text-foreground">
+          {deliveryFee === 0 ? <span className="font-bold text-success">FREE</span> : formatMoney(deliveryFee)}
+        </dd>
       </div>
+      {pFee > 0 && (
+        <div className="flex items-baseline justify-between gap-3">
+          <dt className="text-muted-foreground">Platform fee</dt>
+          <dd className="font-semibold tabular-nums text-foreground">{formatMoney(pFee)}</dd>
+        </div>
+      )}
       <div className="flex items-baseline justify-between gap-3 border-t border-border pt-2">
         <dt className="font-semibold text-foreground">Total</dt>
         <dd className="font-display text-xl tabular-nums text-foreground">{formatMoney(total)}</dd>

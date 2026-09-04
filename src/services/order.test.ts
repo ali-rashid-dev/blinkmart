@@ -2,6 +2,12 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { getAvailableDeliveryDates, canCancel, type Order } from "../lib/orders/types";
 import {
+  calculateDeliveryFee,
+  calculatePlatformFee,
+  calculateOrderTotals,
+  getNextDeliveryTier,
+} from "../lib/orders/eligibility";
+import {
   placeOrderSchema,
   cancelOrderSchema,
   getAdminOrdersSchema,
@@ -107,8 +113,9 @@ describe("Order Module Service & Utilities", () => {
       deliveryDate: "2026-08-19",
       deliverySlot: "7:00 PM – 10:00 PM",
       subtotal: 40,
-      deliveryFee: 0,
-      total: 40,
+      deliveryFee: 100,
+      platformFee: 20,
+      total: 160,
       address: {
         fullName: "Jane Doe",
         phone: "+1234567890",
@@ -211,6 +218,88 @@ describe("Order Module Service & Utilities", () => {
 
     const invalidDate = { deliveryDate: "2026-02-31" };
     assert.equal(getAdminOrdersSchema.safeParse(invalidDate).success, false);
+  });
+
+  it("correctly calculates tiered delivery fee and platform fee", () => {
+    // Tier 1: 0 - 999 -> Delivery Rs 100, Platform Rs 20
+    assert.equal(calculateDeliveryFee(500), 100);
+    assert.equal(calculatePlatformFee(500), 20);
+    assert.deepEqual(calculateOrderTotals(500), {
+      subtotal: 500,
+      deliveryFee: 100,
+      platformFee: 20,
+      total: 620,
+    });
+
+    // Tier 2: 1000 - 1999 -> Delivery Rs 70, Platform Rs 20
+    assert.equal(calculateDeliveryFee(1500), 70);
+    assert.equal(calculatePlatformFee(1500), 20);
+    assert.deepEqual(calculateOrderTotals(1500), {
+      subtotal: 1500,
+      deliveryFee: 70,
+      platformFee: 20,
+      total: 1590,
+    });
+
+    // Tier 3: 2000 - 2999 -> Delivery Rs 40, Platform Rs 20
+    assert.equal(calculateDeliveryFee(2500), 40);
+    assert.equal(calculatePlatformFee(2500), 20);
+    assert.deepEqual(calculateOrderTotals(2500), {
+      subtotal: 2500,
+      deliveryFee: 40,
+      platformFee: 20,
+      total: 2560,
+    });
+
+    // Tier 4: 3000+ -> Free delivery, Platform Rs 20
+    assert.equal(calculateDeliveryFee(3500), 0);
+    assert.equal(calculatePlatformFee(3500), 20);
+    assert.deepEqual(calculateOrderTotals(3500), {
+      subtotal: 3500,
+      deliveryFee: 0,
+      platformFee: 20,
+      total: 3520,
+    });
+
+    // Subtotal = 0 -> Delivery Rs 0, Platform Rs 0
+    assert.equal(calculateDeliveryFee(0), 0);
+    assert.equal(calculatePlatformFee(0), 0);
+    assert.deepEqual(calculateOrderTotals(0), {
+      subtotal: 0,
+      deliveryFee: 0,
+      platformFee: 0,
+      total: 0,
+    });
+  });
+
+  it("calculates next delivery tier thresholds correctly", () => {
+    assert.deepEqual(getNextDeliveryTier(500), {
+      nextThreshold: 1000,
+      amountNeeded: 500,
+      isFree: false,
+      nextFee: 70,
+    });
+
+    assert.deepEqual(getNextDeliveryTier(1500), {
+      nextThreshold: 2000,
+      amountNeeded: 500,
+      isFree: false,
+      nextFee: 40,
+    });
+
+    assert.deepEqual(getNextDeliveryTier(2500), {
+      nextThreshold: 3000,
+      amountNeeded: 500,
+      isFree: true,
+      nextFee: 0,
+    });
+
+    assert.deepEqual(getNextDeliveryTier(3500), {
+      nextThreshold: 3000,
+      amountNeeded: 0,
+      isFree: true,
+      nextFee: 0,
+    });
   });
 });
 

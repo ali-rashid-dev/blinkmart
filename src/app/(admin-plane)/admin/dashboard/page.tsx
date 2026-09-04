@@ -16,6 +16,7 @@ import {
   TrendingUp,
   PackageCheck,
   Truck,
+  Receipt,
   CheckCircle2,
   XCircle,
   AlertCircle,
@@ -118,7 +119,7 @@ export default function DashboardPage() {
       )}
 
       {/* KPI Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Revenue</span>
@@ -210,6 +211,68 @@ export default function DashboardPage() {
             )}
           </div>
           <p className="mt-2 text-xs text-muted-foreground">Registered customer accounts</p>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:shadow-md">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Monthly Delivery Fee</span>
+            <div className="rounded-xl bg-cyan-500/10 p-2 text-cyan-600 dark:text-cyan-400">
+              <Truck className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-end justify-between">
+            <div className="font-display text-2xl font-bold text-foreground">
+              {data ? data.kpis.monthlyDeliveryFee.value : "—"}
+            </div>
+            {data && (
+              <div
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                  data.kpis.monthlyDeliveryFee.delta >= 0
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                }`}
+              >
+                {data.kpis.monthlyDeliveryFee.delta >= 0 ? (
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                ) : (
+                  <ArrowDownRight className="h-3.5 w-3.5" />
+                )}
+                {data.kpis.monthlyDeliveryFee.delta >= 0 ? `+${data.kpis.monthlyDeliveryFee.delta}%` : `${data.kpis.monthlyDeliveryFee.delta}%`}
+              </div>
+            )}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">Delivery charges (current month)</p>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:shadow-md">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Monthly Platform Fee</span>
+            <div className="rounded-xl bg-indigo-500/10 p-2 text-indigo-600 dark:text-indigo-400">
+              <Receipt className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-end justify-between">
+            <div className="font-display text-2xl font-bold text-foreground">
+              {data ? data.kpis.monthlyPlatformFee.value : "—"}
+            </div>
+            {data && (
+              <div
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                  data.kpis.monthlyPlatformFee.delta >= 0
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                }`}
+              >
+                {data.kpis.monthlyPlatformFee.delta >= 0 ? (
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                ) : (
+                  <ArrowDownRight className="h-3.5 w-3.5" />
+                )}
+                {data.kpis.monthlyPlatformFee.delta >= 0 ? `+${data.kpis.monthlyPlatformFee.delta}%` : `${data.kpis.monthlyPlatformFee.delta}%`}
+              </div>
+            )}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">Platform fees (current month)</p>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:shadow-md">

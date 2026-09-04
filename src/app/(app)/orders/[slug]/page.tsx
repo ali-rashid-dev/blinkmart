@@ -89,6 +89,7 @@ export default function OrderDetailPage({
                   <OrderTotals
                     subtotal={order.subtotal}
                     deliveryFee={order.deliveryFee}
+                    platformFee={order.platformFee}
                     total={order.total}
                   />
                 </div>

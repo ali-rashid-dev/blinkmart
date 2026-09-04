@@ -206,6 +206,8 @@ test("Cart Service Unit & Integration Tests", async (t) => {
     const totals = calculateCartTotals(mockLines);
     assert.equal(totals.itemCount, 5);
     assert.equal(totals.subtotal, 30.99);
-    assert.equal(totals.total, 30.99);
+    assert.equal(totals.deliveryFee, 100);
+    assert.equal(totals.platformFee, 20);
+    assert.equal(totals.total, 150.99);
   });
 });

@@ -16,6 +16,7 @@ import {
   type AddToCartInput,
   type UpdateCartQuantityInput,
 } from "@/validations/cart";
+import { calculateDeliveryFee, calculatePlatformFee } from "@/lib/orders/eligibility";
 
 export class ProductNotFoundError extends Error {
   constructor(public productId: string) {
@@ -54,6 +55,8 @@ export interface CartLineItem {
 
 export interface CartTotals {
   subtotal: number;
+  deliveryFee: number;
+  platformFee: number;
   tax: number;
   total: number;
   itemCount: number;
@@ -76,11 +79,15 @@ export function calculateCartTotals(lines: CartLineItem[]): CartTotals {
 
   // Round currency to 2 decimal places cleanly
   subtotal = Math.round(subtotal * 100) / 100;
+  const deliveryFee = calculateDeliveryFee(subtotal);
+  const platformFee = calculatePlatformFee(subtotal);
   const tax = 0; // Tax can be expanded if needed
-  const total = Math.round((subtotal + tax) * 100) / 100;
+  const total = Math.round((subtotal + deliveryFee + platformFee + tax) * 100) / 100;
 
   return {
     subtotal,
+    deliveryFee,
+    platformFee,
     tax,
     total,
     itemCount,

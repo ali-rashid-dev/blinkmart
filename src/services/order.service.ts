@@ -72,6 +72,7 @@ export function mapPrismaOrderToDomainOrder(dbOrder: OrderWithItems): Order {
   const status = DB_STATUS_TO_DOMAIN[dbOrder.status] ?? "placed";
   const subtotal = Number(dbOrder.subtotal);
   const deliveryFee = Number(dbOrder.deliveryFee);
+  const platformFee = Number(dbOrder.platformFee ?? 20);
   const total = Number(dbOrder.total);
 
   const items: OrderItem[] = dbOrder.items.map((item) => ({
@@ -106,6 +107,7 @@ export function mapPrismaOrderToDomainOrder(dbOrder: OrderWithItems): Order {
     cancelledAt: dbOrder.cancelledAt ? dbOrder.cancelledAt.toISOString() : null,
     subtotal,
     deliveryFee,
+    platformFee,
     total,
     address: {
       fullName: dbOrder.fullName,

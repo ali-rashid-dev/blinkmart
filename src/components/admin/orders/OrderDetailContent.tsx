@@ -322,6 +322,10 @@ export function OrderDetailContent({ orderId }: { orderId: string }) {
             <span>Delivery Fee</span>
             <span>{order.deliveryFee === 0 ? "FREE" : `Rs ${Math.round(order.deliveryFee)}`}</span>
           </div>
+          <div className="flex justify-between text-muted-foreground">
+            <span>Platform Fee</span>
+            <span>Rs {Math.round(order.platformFee ?? 20)}</span>
+          </div>
           <div className="flex justify-between text-base font-bold text-foreground pt-2 border-t border-border">
             <span>Total Order Amount</span>
             <span className="text-primary font-serif">Rs {Math.round(order.total)}</span>

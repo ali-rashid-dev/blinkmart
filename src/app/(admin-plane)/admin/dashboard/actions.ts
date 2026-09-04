@@ -54,6 +54,8 @@ export type DashboardData = {
     totalOrders: { value: string; rawValue: number; delta: number };
     activeCustomers: { value: string; rawValue: number; delta: number };
     catalogProducts: { value: string; rawValue: number; activeCount: number };
+    monthlyDeliveryFee: { value: string; rawValue: number; delta: number };
+    monthlyPlatformFee: { value: string; rawValue: number; delta: number };
   };
   statusBreakdown: {
     placed: number;
@@ -85,10 +87,8 @@ export async function getAdminDashboardAction(): Promise<
   try {
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const thirtyDaysAgo = new Date(now);
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const sixtyDaysAgo = new Date(now);
-    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+    const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfPriorMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
     // Fetch parallel DB queries
     const [
@@ -104,20 +104,20 @@ export async function getAdminDashboardAction(): Promise<
       recentOrdersRaw,
     ] = await Promise.all([
       prisma.order.findMany({
-        where: { createdAt: { gte: thirtyDaysAgo } },
+        where: { createdAt: { gte: startOfCurrentMonth } },
         include: { items: true, user: { select: { name: true, email: true } } },
         orderBy: { createdAt: "desc" },
       }),
       prisma.order.findMany({
-        where: { createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } },
-        select: { total: true, status: true },
+        where: { createdAt: { gte: startOfPriorMonth, lt: startOfCurrentMonth } },
+        select: { total: true, deliveryFee: true, platformFee: true, status: true },
       }),
       prisma.order.count({
         where: { createdAt: { gte: startOfToday } },
       }),
       prisma.user.count({ where: { role: "USER" } }),
       prisma.user.count({
-        where: { role: "USER", createdAt: { lt: thirtyDaysAgo } },
+        where: { role: "USER", createdAt: { lt: startOfCurrentMonth } },
       }),
       prisma.product.count(),
       prisma.product.count({ where: { enabled: true } }),
@@ -152,6 +152,25 @@ export async function getAdminDashboardAction(): Promise<
       priorOrdersCount > 0
         ? Number((((ordersCount - priorOrdersCount) / priorOrdersCount) * 100).toFixed(1))
         : ordersCount > 0
+        ? 100
+        : 0;
+
+    // Monthly Delivery Fee & Platform Fee calculations
+    const currentDeliveryFee = currentValidOrders.reduce((sum, o) => sum + Number(o.deliveryFee), 0);
+    const priorDeliveryFee = priorValidOrders.reduce((sum, o) => sum + Number(o.deliveryFee), 0);
+    const deliveryFeeDelta =
+      priorDeliveryFee > 0
+        ? Number((((currentDeliveryFee - priorDeliveryFee) / priorDeliveryFee) * 100).toFixed(1))
+        : currentDeliveryFee > 0
+        ? 100
+        : 0;
+
+    const currentPlatformFee = currentValidOrders.reduce((sum, o) => sum + Number(o.platformFee ?? 20), 0);
+    const priorPlatformFee = priorValidOrders.reduce((sum, o) => sum + Number(o.platformFee ?? 20), 0);
+    const platformFeeDelta =
+      priorPlatformFee > 0
+        ? Number((((currentPlatformFee - priorPlatformFee) / priorPlatformFee) * 100).toFixed(1))
+        : currentPlatformFee > 0
         ? 100
         : 0;
 
@@ -253,6 +272,16 @@ export async function getAdminDashboardAction(): Promise<
             value: totalProducts.toLocaleString("en-US"),
             rawValue: totalProducts,
             activeCount: activeProductsCount,
+          },
+          monthlyDeliveryFee: {
+            value: formatCurrency(currentDeliveryFee),
+            rawValue: currentDeliveryFee,
+            delta: deliveryFeeDelta,
+          },
+          monthlyPlatformFee: {
+            value: formatCurrency(currentPlatformFee),
+            rawValue: currentPlatformFee,
+            delta: platformFeeDelta,
           },
         },
         statusBreakdown,

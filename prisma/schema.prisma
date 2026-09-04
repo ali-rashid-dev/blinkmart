@@ -196,6 +196,7 @@ model Order {
   status       OrderStatus @default(PLACED)
   subtotal     Decimal     @db.Decimal(10, 2)
   deliveryFee  Decimal     @db.Decimal(10, 2) @default(0.00)
+  platformFee  Decimal     @db.Decimal(10, 2) @default(20.00)
   total        Decimal     @db.Decimal(10, 2)
   deliveryDate DateTime
   deliverySlot String      @default("7:00 PM – 10:00 PM")

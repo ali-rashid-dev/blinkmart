@@ -7,7 +7,7 @@ export interface HomePageSettings {
   heroImageUrl: string;
   deliverySlotLabel: string;
   cutoffHour: number; // e.g. 17 for 5:00 PM
-  freeDeliveryThreshold: number; // e.g. 499
+  freeDeliveryThreshold: number; // e.g. 4999
   dealBadgeText: string;
   dealProductId?: string | null;
   weeklyPromoTitle: string;
@@ -36,7 +36,7 @@ export const DEFAULT_HOME_SETTINGS: HomePageSettings = {
   heroImageUrl: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&auto=format&fit=crop&q=80",
   deliverySlotLabel: "7:00 PM – 10:00 PM",
   cutoffHour: 17,
-  freeDeliveryThreshold: 499,
+  freeDeliveryThreshold: 4999,
   dealBadgeText: "20% OFF Daily Offer",
   dealProductId: null,
   weeklyPromoTitle: "Weekly Fresh Produce Basket",

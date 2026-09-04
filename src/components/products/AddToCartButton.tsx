@@ -37,7 +37,6 @@ export function AddToCartButton({
       await cartStore.add(productId, quantity);
       setState("done");
       toast.success(`${label} added to cart`, {
-        description: `Qty: ${quantity}`,
         duration: 2000,
       });
       onAdd?.();

@@ -2,8 +2,8 @@ import prisma from "@/lib/prisma";
 import { OrderCannotCancelError, EmptyCartError } from "@/services/order.errors";
 import {
   filterOrderableCartItems,
-  FREE_DELIVERY_THRESHOLD,
-  DEFAULT_DELIVERY_FEE,
+  calculateDeliveryFee,
+  calculatePlatformFee,
 } from "@/lib/orders/eligibility";
 import type { Prisma, OrderStatus } from "@/generated/prisma/client";
 import type { CartWithItems } from "@/repositories/cart.repository";
@@ -71,8 +71,9 @@ export async function createOrderInDb(params: {
           0
         );
         const subtotal = Math.round(rawSubtotal * 100) / 100;
-        const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DEFAULT_DELIVERY_FEE;
-        const total = Math.round((subtotal + deliveryFee) * 100) / 100;
+        const deliveryFee = calculateDeliveryFee(subtotal);
+        const platformFee = calculatePlatformFee(subtotal);
+        const total = Math.round((subtotal + deliveryFee + platformFee) * 100) / 100;
         const itemIds = validItems.map((item) => item.id);
         const order = await tx.order.create({
           data: {
@@ -81,6 +82,7 @@ export async function createOrderInDb(params: {
             status: "PLACED",
             subtotal,
             deliveryFee,
+            platformFee,
             total,
             deliveryDate,
             deliverySlot: "7:00 PM – 10:00 PM",

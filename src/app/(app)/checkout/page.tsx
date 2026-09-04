@@ -18,7 +18,11 @@ import { toast } from "sonner";
 import { cartStore, cartTotals, formatPrice, useCartState } from "@/lib/cart/store";
 import { formatMoney } from "@/lib/orders/store";
 import { getAvailableDeliveryDates, DELIVERY_WINDOW, type DeliveryDateOption } from "@/lib/orders/types";
-import { DEFAULT_DELIVERY_FEE, FREE_DELIVERY_THRESHOLD } from "@/lib/orders/eligibility";
+import {
+  calculateDeliveryFee,
+  calculatePlatformFee,
+  getNextDeliveryTier,
+} from "@/lib/orders/eligibility";
 import { placeOrderAction } from "./actions";
 import { getProfile } from "../profile/actions";
 
@@ -28,8 +32,10 @@ export default function CheckoutPage() {
   const activeLines = lines.filter((l) => l.enabled);
   const { subtotal, itemCount } = cartTotals(activeLines);
 
-  const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DEFAULT_DELIVERY_FEE;
-  const total = Math.round((subtotal + deliveryFee) * 100) / 100;
+  const deliveryFee = calculateDeliveryFee(subtotal);
+  const platformFee = calculatePlatformFee(subtotal);
+  const total = Math.round((subtotal + deliveryFee + platformFee) * 100) / 100;
+  const tierInfo = getNextDeliveryTier(subtotal);
 
   // Delivery dates based on 5:00 PM cutoff rule
   const [deliveryDateOptions, setDeliveryDateOptions] = useState<DeliveryDateOption[]>([]);
@@ -428,9 +434,24 @@ export default function CheckoutPage() {
                 </dd>
               </div>
 
-              {deliveryFee > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  Add {formatMoney(FREE_DELIVERY_THRESHOLD - subtotal)} more for FREE evening delivery!
+              {subtotal > 0 && (
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Platform Fee</dt>
+                  <dd className="font-semibold tabular-nums text-foreground">
+                    {formatMoney(platformFee)}
+                  </dd>
+                </div>
+              )}
+
+              {tierInfo && (
+                <p className="rounded-lg bg-accent/50 p-2 text-xs text-muted-foreground">
+                  {tierInfo.isFree ? (
+                    <span className="font-medium text-success">🎉 You qualify for FREE evening delivery!</span>
+                  ) : (
+                    <>
+                      Add <span className="font-semibold text-foreground">{formatMoney(tierInfo.amountNeeded)}</span> more for {tierInfo.nextFee === 0 ? "FREE" : formatMoney(tierInfo.nextFee)} delivery!
+                    </>
+                  )}
                 </p>
               )}
 

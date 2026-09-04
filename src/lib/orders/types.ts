@@ -77,6 +77,7 @@ export interface Order {
   cancelledAt?: string | null;
   subtotal: number;
   deliveryFee: number;
+  platformFee: number;
   total: number;
   address: OrderAddress;
   items: OrderItem[];

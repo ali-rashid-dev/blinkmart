@@ -9,6 +9,7 @@ import {
   removeFromCartAction,
   clearCartAction,
 } from "@/app/(app)/cart/actions";
+import { calculateDeliveryFee, calculatePlatformFee } from "@/lib/orders/eligibility";
 
 export type PendingKind = "update" | "remove";
 
@@ -17,6 +18,8 @@ const initialState: CartState = {
   lines: [],
   totals: {
     subtotal: 0,
+    deliveryFee: 0,
+    platformFee: 0,
     tax: 0,
     total: 0,
     itemCount: 0,
@@ -209,10 +212,12 @@ export function cartTotals(lines: CartLine[]): CartTotals {
   }
 
   subtotal = Math.round(subtotal * 100) / 100;
+  const deliveryFee = calculateDeliveryFee(subtotal);
+  const platformFee = calculatePlatformFee(subtotal);
   const tax = 0;
-  const total = Math.round((subtotal + tax) * 100) / 100;
+  const total = Math.round((subtotal + deliveryFee + platformFee + tax) * 100) / 100;
 
-  return { subtotal, tax, total, itemCount };
+  return { subtotal, deliveryFee, platformFee, tax, total, itemCount };
 }
 
 import { formatCurrency } from "@/lib/currency";

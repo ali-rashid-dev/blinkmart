@@ -14,6 +14,8 @@ export interface CartLine {
 
 export interface CartTotals {
   subtotal: number;
+  deliveryFee: number;
+  platformFee: number;
   tax: number;
   total: number;
   itemCount: number;

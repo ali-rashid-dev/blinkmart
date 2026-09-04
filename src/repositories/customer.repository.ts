@@ -48,6 +48,7 @@ export type CustomerOrder = {
   total: number;
   subtotal: number;
   deliveryFee: number;
+  platformFee: number;
   createdAt: Date;
   items: CustomerOrderItem[];
 };
@@ -268,6 +269,7 @@ export async function getCustomerByIdRepository(id: string): Promise<CustomerDet
       total: Number(o.total),
       subtotal: Number(o.subtotal),
       deliveryFee: Number(o.deliveryFee),
+      platformFee: Number(o.platformFee ?? 20),
       createdAt: o.createdAt,
       items: o.items.map((i) => ({
         id: i.id,
