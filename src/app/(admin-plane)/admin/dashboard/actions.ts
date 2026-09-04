@@ -94,6 +94,7 @@ export async function getAdminDashboardAction(): Promise<
     const [
       allOrders,
       priorOrders,
+      salesTrendOrders,
       ordersToday,
       totalUsers,
       priorUsers,
@@ -111,6 +112,15 @@ export async function getAdminDashboardAction(): Promise<
       prisma.order.findMany({
         where: { createdAt: { gte: startOfPriorMonth, lt: startOfCurrentMonth } },
         select: { total: true, deliveryFee: true, platformFee: true, status: true },
+      }),
+      prisma.order.findMany({
+        where: {
+          createdAt: {
+            gte: new Date(startOfToday.getTime() - 6 * 24 * 60 * 60 * 1000),
+            lt: new Date(startOfToday.getTime() + 24 * 60 * 60 * 1000),
+          },
+        },
+        select: { total: true, status: true, createdAt: true },
       }),
       prisma.order.count({
         where: { createdAt: { gte: startOfToday } },
@@ -165,8 +175,8 @@ export async function getAdminDashboardAction(): Promise<
         ? 100
         : 0;
 
-    const currentPlatformFee = currentValidOrders.reduce((sum, o) => sum + Number(o.platformFee ?? 20), 0);
-    const priorPlatformFee = priorValidOrders.reduce((sum, o) => sum + Number(o.platformFee ?? 20), 0);
+    const currentPlatformFee = currentValidOrders.reduce((sum, o) => sum + Number(o.platformFee || 0), 0);
+    const priorPlatformFee = priorValidOrders.reduce((sum, o) => sum + Number(o.platformFee || 0), 0);
     const platformFeeDelta =
       priorPlatformFee > 0
         ? Number((((currentPlatformFee - priorPlatformFee) / priorPlatformFee) * 100).toFixed(1))
@@ -213,7 +223,7 @@ export async function getAdminDashboardAction(): Promise<
       last7Days.push(dateIso);
     }
 
-    allOrders.forEach((o) => {
+    salesTrendOrders.forEach((o) => {
       if (o.status === "CANCELLED") return;
       const d = new Date(o.createdAt);
       const dateIso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
