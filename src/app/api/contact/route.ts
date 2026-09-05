@@ -7,6 +7,73 @@ interface ContactRequest {
   phone: string;
   subject: string;
   message: string;
+  website?: string;
+  turnstileToken?: string;
+}
+
+const contactRequests = new Map<string, number[]>();
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 5;
+
+function getClientKey(request: NextRequest) {
+  return (
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "unknown"
+  );
+}
+
+function isRateLimited(clientKey: string) {
+  const now = Date.now();
+  const recentRequests = (contactRequests.get(clientKey) || []).filter(
+    (timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS
+  );
+
+  if (recentRequests.length >= RATE_LIMIT_MAX_REQUESTS) {
+    contactRequests.set(clientKey, recentRequests);
+    return true;
+  }
+
+  recentRequests.push(now);
+  contactRequests.set(clientKey, recentRequests);
+  return false;
+}
+
+async function passesBotVerification(request: NextRequest, body: ContactRequest) {
+  if (body.website) {
+    return false;
+  }
+
+  const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+  if (!turnstileSecret) {
+    return true;
+  }
+
+  if (!body.turnstileToken) {
+    return false;
+  }
+
+  const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      secret: turnstileSecret,
+      response: body.turnstileToken,
+      remoteip: getClientKey(request),
+    }),
+  });
+
+  if (!response.ok) {
+    return false;
+  }
+
+  const result: unknown = await response.json();
+  return (
+    typeof result === "object" &&
+    result !== null &&
+    "success" in result &&
+    result.success === true
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -25,6 +92,20 @@ export async function POST(request: NextRequest) {
     if (!body.email && !body.phone) {
       return NextResponse.json(
         { error: "At least one contact method (email or phone) is required" },
+        { status: 400 }
+      );
+    }
+
+    if (isRateLimited(getClientKey(request))) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
+    if (!(await passesBotVerification(request, body))) {
+      return NextResponse.json(
+        { error: "Request verification failed" },
         { status: 400 }
       );
     }
