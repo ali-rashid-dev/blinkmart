@@ -98,6 +98,14 @@ model Verification {
   @@index([identifier])
 }
 
+model NewsletterSubscription {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("newsletter_subscription")
+}
+
 model Category {
   id        String   @id @default(cuid())
   name      String   @unique @db.Citext

@@ -44,6 +44,9 @@ export function DealOfTheDay({ product, compareAtPrice }: DealOfTheDayProps) {
   const p = product;
   const soldOut = !p.enabled;
   const originalPrice = compareAtPrice ?? Math.round(p.price / 0.8);
+  const discountPercent = originalPrice > 0
+    ? Math.max(0, Math.round((1 - p.price / originalPrice) * 100))
+    : 0;
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
@@ -67,7 +70,7 @@ export function DealOfTheDay({ product, compareAtPrice }: DealOfTheDayProps) {
             </div>
           )}
           <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-destructive/90 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-destructive-foreground">
-            <Flame className="size-3" />−20% OFF
+            <Flame className="size-3" />−{discountPercent}% OFF
           </span>
         </div>
 

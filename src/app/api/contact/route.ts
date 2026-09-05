@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Resend } from "resend";
 
 interface ContactRequest {
   name: string;
@@ -28,15 +29,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Persist contact submission to database or send email notification
-    // For now, just log it
+    const resend = new Resend(process.env.RESEND_API_KEY as string);
+    const requestId = crypto.randomUUID();
+    const { error } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+      to: process.env.SUPPORT_EMAIL || "support@kitandco.pk",
+      replyTo: body.email || undefined,
+      subject: `[Contact ${requestId}] ${body.subject}`,
+      text: [
+        `Name: ${body.name}`,
+        `Email: ${body.email || "N/A"}`,
+        `Phone: ${body.phone || "N/A"}`,
+        `Message: ${body.message}`,
+      ].join("\n"),
+    });
+
+    if (error) {
+      throw error;
+    }
+
     console.log("Contact form submission:", {
-      timestamp: new Date().toISOString(),
-      name: body.name,
-      email: body.email || "N/A",
-      phone: body.phone || "N/A",
-      subject: body.subject,
-      message: body.message,
+      requestId,
+      deliveryStatus: "sent",
     });
 
     return NextResponse.json(

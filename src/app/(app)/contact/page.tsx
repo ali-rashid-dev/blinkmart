@@ -57,7 +57,6 @@ export default function ContactPage() {
       }
 
       setSubmitted(true);
-      setFormData({ name: "", email: "", phone: "", subject: "Order Inquiry", message: "" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred while submitting the form");
     } finally {
@@ -77,7 +76,7 @@ export default function ContactPage() {
           Get in Touch with Our Team
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-          Need help with an ongoing evening order in Faisalabad, product feedback, or partnership queries? We're available 7 days a week.
+          Need help with an ongoing evening order in Faisalabad, product feedback, or partnership queries? We&apos;re available 7 days a week.
         </p>
       </div>
 
@@ -151,7 +150,7 @@ export default function ContactPage() {
           ) : (
             <>
               {error && (
-                <div className="flex flex-col items-start gap-2 p-4 rounded-2xl bg-destructive/10 border border-destructive/30">
+                <div role="alert" className="flex flex-col items-start gap-2 p-4 rounded-2xl bg-destructive/10 border border-destructive/30">
                   <div className="flex items-center gap-2">
                     <AlertCircle className="size-5 text-destructive shrink-0" />
                     <p className="text-xs font-semibold text-destructive">{error}</p>
@@ -247,6 +246,7 @@ export default function ContactPage() {
                 <span>{loading ? "Sending..." : "Send Message"}</span>
                 {!loading && <Send className="size-4" />}
               </button>
+              </form>
             </>
           )}
         </div>

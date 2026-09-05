@@ -38,7 +38,7 @@ export const DEFAULT_HOME_SETTINGS: HomePageSettings = {
   heroImageUrl: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&auto=format&fit=crop&q=80",
   deliverySlotLabel: "7:00 PM – 10:00 PM",
   cutoffHour: 17,
-  freeDeliveryThreshold: 3000+,
+  freeDeliveryThreshold: 3000,
   showDealOfTheDay: true,
   dealBadgeText: "20% OFF Daily Offer",
   dealProductId: null,
