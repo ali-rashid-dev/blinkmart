@@ -11,6 +11,7 @@ export interface HomePageSettings {
   showDealOfTheDay: boolean;
   dealBadgeText: string;
   dealProductId?: string | null;
+  dealCompareAtPrice?: number | null; // Original/compare-at price for strikethrough display
   weeklyPromoTitle: string;
   weeklyPromoSubtitle: string;
   monthlyPromoTitle: string;
@@ -41,6 +42,7 @@ export const DEFAULT_HOME_SETTINGS: HomePageSettings = {
   showDealOfTheDay: true,
   dealBadgeText: "20% OFF Daily Offer",
   dealProductId: null,
+  dealCompareAtPrice: null,
   weeklyPromoTitle: "Weekly Fresh Produce Basket",
   weeklyPromoSubtitle: "Handpicked fruits & vegetables delivered every week with 15% subscriber savings.",
   monthlyPromoTitle: "Monthly Super Pantry Stock-Up",

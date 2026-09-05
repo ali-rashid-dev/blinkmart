@@ -29,6 +29,7 @@ export default function AdminHomepageControlPage() {
   const [saved, setSaved] = useState(false);
   const [products, setProducts] = useState<SerializedProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [productLoadError, setProductLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     setSettings(getHomePageSettings());
@@ -39,9 +40,21 @@ export default function AdminHomepageControlPage() {
         const res = await getAdminProductsAction({ limit: 100 });
         if (res.success && res.data) {
           setProducts(res.data.items);
+          setProductLoadError(null);
+        } else {
+          const errorMsg = res.error?.message || "Failed to load products";
+          setProductLoadError(errorMsg);
+          toast.error("Failed to load products", {
+            description: errorMsg,
+          });
         }
       } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : "Failed to load products for deal selector";
         console.error("Failed to load products for deal selector:", err);
+        setProductLoadError(errorMsg);
+        toast.error("Error loading products", {
+          description: errorMsg,
+        });
       } finally {
         setLoadingProducts(false);
       }
@@ -279,7 +292,7 @@ export default function AdminHomepageControlPage() {
               <select
                 value={settings.dealProductId || ""}
                 onChange={(e) => updateField("dealProductId", e.target.value || null)}
-                disabled={loadingProducts}
+                disabled={loadingProducts || productLoadError !== null}
                 className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
               >
                 <option value="">-- Select Product for Deal of the Day --</option>
@@ -292,6 +305,8 @@ export default function AdminHomepageControlPage() {
               <p className="mt-1 text-xs text-muted-foreground">
                 {loadingProducts
                   ? "Loading products..."
+                  : productLoadError
+                  ? `Error loading products: ${productLoadError}`
                   : "Select the specific product you want to spotlight on the homepage."}
               </p>
             </div>
@@ -310,6 +325,25 @@ export default function AdminHomepageControlPage() {
               />
               <p className="mt-1 text-xs text-muted-foreground">
                 Custom badge text shown over the product image.
+              </p>
+            </div>
+
+            {/* Deal Compare-At Price */}
+            <div>
+              <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1.5">
+                Original/Compare-At Price (Optional)
+              </label>
+              <input
+                type="number"
+                value={settings.dealCompareAtPrice || ""}
+                onChange={(e) => updateField("dealCompareAtPrice", e.target.value ? Number(e.target.value) : null)}
+                placeholder="e.g. 500 (for strikethrough)"
+                step="0.01"
+                min="0"
+                className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                The original price to show as strikethrough. Leave empty to hide the strikethrough price.
               </p>
             </div>
           </div>
@@ -355,9 +389,11 @@ export default function AdminHomepageControlPage() {
                   </h4>
                   <p className="text-xs font-semibold text-foreground">
                     Rs {Math.round(selectedDealProduct.price)}{" "}
-                    <span className="text-muted-foreground text-[11px] line-through font-normal">
-                      Rs {Math.round(selectedDealProduct.price / 0.8)}
-                    </span>
+                    {settings.dealCompareAtPrice && settings.dealCompareAtPrice > selectedDealProduct.price && (
+                      <span className="text-muted-foreground text-[11px] line-through font-normal">
+                        Rs {Math.round(settings.dealCompareAtPrice)}
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>

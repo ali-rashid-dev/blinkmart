@@ -35,10 +35,9 @@ export function HomeLayout({
   products,
   bestSellers,
   freshArrivals,
-  dealProduct: defaultDealProduct,
+  dealProduct: serverDealProduct,
 }: HomeLayoutProps) {
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
-  const [dealProduct, setDealProduct] = useState<CustomerProduct | null>(defaultDealProduct);
   const [showDealOfTheDay, setShowDealOfTheDay] = useState<boolean>(true);
 
   useEffect(() => {
@@ -55,17 +54,10 @@ export function HomeLayout({
   }, []);
 
   useEffect(() => {
-    // Read homepage settings for Deal of the Day toggle and admin-selected dealProductId
+    // Read homepage settings for Deal of the Day toggle
     const cfg = getHomePageSettings();
     setShowDealOfTheDay(cfg.showDealOfTheDay !== false);
-
-    if (cfg.dealProductId) {
-      const found = products.find((p) => p.id === cfg.dealProductId);
-      setDealProduct(found || null);
-    } else {
-      setDealProduct(null);
-    }
-  }, [products]);
+  }, []);
 
   // Wait for client-side hydration to determine layout
   if (isMobile === null) {
@@ -79,7 +71,7 @@ export function HomeLayout({
         categories={categories}
         products={products}
         bestSellers={bestSellers}
-        dealProduct={showDealOfTheDay ? dealProduct : null}
+        dealProduct={showDealOfTheDay ? serverDealProduct : null}
       />
     );
   }
@@ -103,7 +95,7 @@ export function HomeLayout({
         products={bestSellers}
         ctaLabel="View All Products"
       />
-      {showDealOfTheDay && dealProduct && <DealOfTheDay product={dealProduct} />}
+      {showDealOfTheDay && serverDealProduct && <DealOfTheDay product={serverDealProduct} />}
       <ProductRow
         title="Monthly Stock-Up Essentials"
         subtitle="Bulk pantry items, flour, rice, oils, and restocked shelves."
