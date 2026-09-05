@@ -28,15 +28,21 @@ export default async function HomePage() {
   }
 
   try {
-    dbProducts = await listCustomerProducts({ take: 24 });
+    dbProducts = await listCustomerProducts({ take: 30 });
   } catch (error) {
     console.error("Error loading products for home page:", error);
   }
 
   const allCustomerProducts = dbProducts.map(toCustomerProduct);
 
-  const bestSellers = allCustomerProducts.slice(0, 6);
-  const freshArrivals = allCustomerProducts.slice(6, 12);
+  const bestSellers = allCustomerProducts.slice(0, 10);
+  let freshArrivals = allCustomerProducts.slice(10, 20);
+  if (freshArrivals.length < 10 && allCustomerProducts.length > 0) {
+    const remainingNeeded = 10 - freshArrivals.length;
+    const padding = allCustomerProducts.slice(0, remainingNeeded);
+    freshArrivals = [...freshArrivals, ...padding].slice(0, 10);
+  }
+
   const dealProduct = allCustomerProducts.length > 0 ? allCustomerProducts[0] : null;
 
   return (
