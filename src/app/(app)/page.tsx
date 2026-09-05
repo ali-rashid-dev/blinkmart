@@ -43,8 +43,6 @@ export default async function HomePage() {
     freshArrivals = [...freshArrivals, ...padding].slice(0, 10);
   }
 
-  const dealProduct = allCustomerProducts.length > 0 ? allCustomerProducts[0] : null;
-
   return (
     <>
       <h1 className="sr-only">Kit&Co — Weekly &amp; Monthly Grocery Delivery</h1>
@@ -53,7 +51,7 @@ export default async function HomePage() {
         products={allCustomerProducts}
         bestSellers={bestSellers}
         freshArrivals={freshArrivals}
-        dealProduct={dealProduct}
+        dealProduct={null}
       />
     </>
   );

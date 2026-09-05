@@ -26,40 +26,23 @@ import type { HomeCategory } from "./CategoryStrip";
 interface MobileHomeViewProps {
   categories: HomeCategory[];
   products: CustomerProduct[];
+  bestSellers?: CustomerProduct[];
   dealProduct: CustomerProduct | null;
 }
-
-const GROCERY_CHIPS = [
-  "All Products",
-  "Fresh Vegetables",
-  "Fruits & Berries",
-  "Dairy & Eggs",
-  "Fresh Bakery",
-  "Daily Essentials",
-];
 
 export function MobileHomeView({
   categories = [],
   products = [],
+  bestSellers = [],
   dealProduct,
 }: MobileHomeViewProps) {
-  const [selectedChip, setSelectedChip] = useState("All Products");
   const [cfg, setCfg] = useState<HomePageSettings>(getHomePageSettings);
 
   useEffect(() => {
     setCfg(getHomePageSettings());
   }, []);
 
-  const filteredProducts =
-    selectedChip === "All Products"
-      ? products
-      : products.filter(
-        (p) =>
-          p.categoryName?.toLowerCase().includes(selectedChip.toLowerCase()) ||
-          p.name.toLowerCase().includes(selectedChip.toLowerCase())
-      );
-
-  const displayProducts = filteredProducts.length > 0 ? filteredProducts : products;
+  const displayProducts = bestSellers.length > 0 ? bestSellers : products;
 
   return (
     <div className="lg:hidden flex flex-col gap-5 px-4 pt-4 pb-8">
@@ -142,7 +125,7 @@ export function MobileHomeView({
       </div>
 
       {/* ── 7. Flash Deal Spotlight ────────────────────────────────── */}
-      {dealProduct && (
+      {cfg.showDealOfTheDay !== false && dealProduct && (
         <div className="overflow-hidden rounded-2xl border border-destructive/30 bg-gradient-to-br from-card via-card to-destructive/5 p-4 shadow-soft">
           <div className="flex items-center justify-between border-b border-border/50 pb-2 mb-3">
             <span className="inline-flex items-center gap-1 rounded-full bg-destructive text-destructive-foreground px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
@@ -200,31 +183,12 @@ export function MobileHomeView({
         </div>
       )}
 
-      {/* ── 8. Category Chips ─────────────────────────────────────── */}
-      <div className="flex items-center gap-2 overflow-x-auto scrollbar-none -mx-4 px-4 py-1">
-        {GROCERY_CHIPS.map((chip) => {
-          const isActive = selectedChip === chip;
-          return (
-            <button
-              key={chip}
-              type="button"
-              onClick={() => setSelectedChip(chip)}
-              className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${isActive
-                  ? "bg-primary text-primary-foreground shadow-button"
-                  : "bg-card text-muted-foreground border border-border/80 hover:text-foreground"
-                }`}
-            >
-              {chip}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── 8. Product Grid ──────────────────────────────────────── */}
+      {/* ── 8. Best Selling Products Grid ───────────────────────────── */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-bold text-foreground">
-            Featured Items
+          <h2 className="text-base font-bold text-foreground flex items-center gap-1.5">
+            <Flame className="size-4 text-amber-500 fill-amber-500/20" />
+            Best Selling Products
           </h2>
           <span className="text-xs text-muted-foreground">
             {displayProducts.length} items

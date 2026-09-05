@@ -8,6 +8,7 @@ export interface HomePageSettings {
   deliverySlotLabel: string;
   cutoffHour: number; // e.g. 17 for 5:00 PM
   freeDeliveryThreshold: number; // e.g. 4999
+  showDealOfTheDay: boolean;
   dealBadgeText: string;
   dealProductId?: string | null;
   weeklyPromoTitle: string;
@@ -37,6 +38,7 @@ export const DEFAULT_HOME_SETTINGS: HomePageSettings = {
   deliverySlotLabel: "7:00 PM – 10:00 PM",
   cutoffHour: 17,
   freeDeliveryThreshold: 4999,
+  showDealOfTheDay: true,
   dealBadgeText: "20% OFF Daily Offer",
   dealProductId: null,
   weeklyPromoTitle: "Weekly Fresh Produce Basket",

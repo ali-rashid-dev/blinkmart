@@ -38,7 +38,8 @@ export function HomeLayout({
   dealProduct: defaultDealProduct,
 }: HomeLayoutProps) {
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
-  const [dealProduct, setDealProduct] = useState(defaultDealProduct);
+  const [dealProduct, setDealProduct] = useState<CustomerProduct | null>(defaultDealProduct);
+  const [showDealOfTheDay, setShowDealOfTheDay] = useState<boolean>(true);
 
   useEffect(() => {
     // Set initial value based on window size
@@ -54,13 +55,15 @@ export function HomeLayout({
   }, []);
 
   useEffect(() => {
-    // Find deal product by configured dealProductId, or fall back to default
+    // Read homepage settings for Deal of the Day toggle and admin-selected dealProductId
     const cfg = getHomePageSettings();
+    setShowDealOfTheDay(cfg.showDealOfTheDay !== false);
+
     if (cfg.dealProductId) {
       const found = products.find((p) => p.id === cfg.dealProductId);
-      if (found) {
-        setDealProduct(found);
-      }
+      setDealProduct(found || null);
+    } else {
+      setDealProduct(null);
     }
   }, [products]);
 
@@ -75,7 +78,8 @@ export function HomeLayout({
       <MobileHomeView
         categories={categories}
         products={products}
-        dealProduct={dealProduct}
+        bestSellers={bestSellers}
+        dealProduct={showDealOfTheDay ? dealProduct : null}
       />
     );
   }
@@ -99,7 +103,7 @@ export function HomeLayout({
         products={bestSellers}
         ctaLabel="View All Products"
       />
-      <DealOfTheDay product={dealProduct} />
+      {showDealOfTheDay && dealProduct && <DealOfTheDay product={dealProduct} />}
       <ProductRow
         title="Monthly Stock-Up Essentials"
         subtitle="Bulk pantry items, flour, rice, oils, and restocked shelves."
