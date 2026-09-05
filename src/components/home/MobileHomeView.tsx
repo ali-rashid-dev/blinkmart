@@ -18,6 +18,7 @@ import {
 import { DeliverySlotBanner } from "./DeliverySlotBanner";
 import { ActiveOrderTracker } from "./ActiveOrderTracker";
 import { RepeatOrderCard } from "./RepeatOrderCard";
+import { Footer } from "@/components/layout/Footer";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
 import { getHomePageSettings, formatCutoffHour, type HomePageSettings } from "@/lib/home/home-config";
 import type { CustomerProduct } from "@/components/products/data";
@@ -247,6 +248,11 @@ export function MobileHomeView({
             </div>
           ))}
         </div>
+      </div>
+
+      {/* ── 9. Homepage Footer ────────────────────────────────────────── */}
+      <div className="-mx-4 -mb-8 mt-6">
+        <Footer />
       </div>
     </div>
   );

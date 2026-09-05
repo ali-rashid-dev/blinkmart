@@ -12,6 +12,7 @@ import { ActiveOrderTracker } from "./ActiveOrderTracker";
 import { RepeatOrderCard } from "./RepeatOrderCard";
 import { DeliverySlotBanner } from "./DeliverySlotBanner";
 import { MobileHomeView } from "./MobileHomeView";
+import { Footer } from "@/components/layout/Footer";
 import { getHomePageSettings } from "@/lib/home/home-config";
 import type { HomeCategory } from "./CategoryStrip";
 import type { CustomerProduct } from "@/components/products/data";
@@ -104,6 +105,7 @@ export function HomeLayout({
       />
       <WhyShopWithUs />
       <FinalCta />
+      <Footer />
     </main>
   );
 }

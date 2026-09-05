@@ -42,7 +42,7 @@ export default function AdminHomepageControlPage() {
           setProducts(res.data.items);
           setProductLoadError(null);
         } else {
-          const errorMsg = res.error?.message || "Failed to load products";
+          const errorMsg = (!res.success && res.error?.message) ? res.error.message : "Failed to load products";
           setProductLoadError(errorMsg);
           toast.error("Failed to load products", {
             description: errorMsg,
