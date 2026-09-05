@@ -9,6 +9,7 @@ import {
   Clock,
   Send,
   CheckCircle2,
+  AlertCircle,
   HelpCircle,
   MessageSquare,
   Building,
@@ -23,11 +24,44 @@ export default function ContactPage() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.name && (formData.email || formData.phone) && formData.message) {
+    setError(null);
+
+    // Validate client-side
+    if (!formData.name || !formData.message) {
+      setError("Name and message are required");
+      return;
+    }
+
+    if (!formData.email && !formData.phone) {
+      setError("Please provide either an email address or phone number");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit contact form");
+      }
+
       setSubmitted(true);
+      setFormData({ name: "", email: "", phone: "", subject: "Order Inquiry", message: "" });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred while submitting the form");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -115,7 +149,16 @@ export default function ContactPage() {
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <>
+              {error && (
+                <div className="flex flex-col items-start gap-2 p-4 rounded-2xl bg-destructive/10 border border-destructive/30">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="size-5 text-destructive shrink-0" />
+                    <p className="text-xs font-semibold text-destructive">{error}</p>
+                  </div>
+                </div>
+              )}
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="name" className="text-xs font-bold text-foreground">
@@ -134,7 +177,7 @@ export default function ContactPage() {
 
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="phone" className="text-xs font-bold text-foreground">
-                    Phone / WhatsApp Number
+                    Phone / WhatsApp Number (or email required)
                   </label>
                   <input
                     id="phone"
@@ -150,12 +193,11 @@ export default function ContactPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="email" className="text-xs font-bold text-foreground">
-                    Email Address *
+                    Email Address (or phone number required)
                   </label>
                   <input
                     id="email"
                     type="email"
-                    required
                     placeholder="ali@example.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -199,12 +241,13 @@ export default function ContactPage() {
 
               <button
                 type="submit"
-                className="mt-2 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-xs sm:text-sm font-semibold text-primary-foreground shadow-soft hover:bg-primary/90 transition-all hover:scale-[1.01]"
+                disabled={loading}
+                className="mt-2 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-xs sm:text-sm font-semibold text-primary-foreground shadow-soft hover:bg-primary/90 transition-all hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
-                <span>Send Message</span>
-                <Send className="size-4" />
+                <span>{loading ? "Sending..." : "Send Message"}</span>
+                {!loading && <Send className="size-4" />}
               </button>
-            </form>
+            </>
           )}
         </div>
 

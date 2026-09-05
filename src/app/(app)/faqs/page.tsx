@@ -65,7 +65,7 @@ const FAQ_DATA: FAQItem[] = [
 export default function FAQsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [openQuestion, setOpenQuestion] = useState<string | null>(FAQ_DATA[0]?.question ?? null);
 
   const filteredFaqs = FAQ_DATA.filter((faq) => {
     const matchesCategory = activeCategory === "all" || faq.category === activeCategory;
@@ -184,16 +184,16 @@ export default function FAQsPage() {
             </button>
           </div>
         ) : (
-          filteredFaqs.map((faq, idx) => {
-            const isOpen = openIndex === idx;
+          filteredFaqs.map((faq) => {
+            const isOpen = openQuestion === faq.question;
             return (
               <div
-                key={idx}
+                key={faq.question}
                 className="overflow-hidden rounded-2xl border border-border/80 bg-card transition-all"
               >
                 <button
                   type="button"
-                  onClick={() => setOpenIndex(isOpen ? null : idx)}
+                  onClick={() => setOpenQuestion(isOpen ? null : faq.question)}
                   className="flex w-full items-center justify-between gap-4 p-5 text-left text-xs sm:text-sm font-bold text-foreground hover:bg-accent/40 transition-colors"
                 >
                   <span>{faq.question}</span>

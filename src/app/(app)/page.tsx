@@ -58,6 +58,8 @@ export default async function HomePage() {
     freshArrivals = [...freshArrivals, ...padding].slice(0, 10);
   }
 
+  const settings = getHomePageSettings();
+
   return (
     <>
       <h1 className="sr-only">Kit&Co — Weekly &amp; Monthly Grocery Delivery</h1>
@@ -67,6 +69,7 @@ export default async function HomePage() {
         bestSellers={bestSellers}
         freshArrivals={freshArrivals}
         dealProduct={dealProduct}
+        dealCompareAtPrice={settings.dealCompareAtPrice ?? null}
       />
     </>
   );

@@ -12,9 +12,10 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 interface DealOfTheDayProps {
   product?: CustomerProduct | null;
+  compareAtPrice?: number | null;
 }
 
-export function DealOfTheDay({ product }: DealOfTheDayProps) {
+export function DealOfTheDay({ product, compareAtPrice }: DealOfTheDayProps) {
   const expiry = product?.dealExpiresAt ? new Date(product.dealExpiresAt).getTime() : null;
   const [left, setLeft] = useState(() =>
     expiry === null || Number.isNaN(expiry) ? 0 : Math.max(0, Math.ceil((expiry - Date.now()) / 1000)),
@@ -42,7 +43,7 @@ export function DealOfTheDay({ product }: DealOfTheDayProps) {
 
   const p = product;
   const soldOut = !p.enabled;
-  const originalPrice = Math.round(p.price / 0.8);
+  const originalPrice = compareAtPrice ?? Math.round(p.price / 0.8);
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16">

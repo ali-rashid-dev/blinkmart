@@ -41,7 +41,7 @@ export function Navbar() {
         <div className="container mx-auto px-6 flex items-center justify-between h-9 text-xs">
           <span className="flex items-center gap-1.5">
             <Truck className="size-3.5" />
-            Free delivery on orders above Rs.4999
+            Free delivery on orders above Rs.3000+
           </span>
           <div className="flex items-center gap-4">
             {QUICK_LINKS.map(({ label, href, icon: Icon }) => (

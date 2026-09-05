@@ -88,7 +88,7 @@ export default function AboutPage() {
             </div>
             <h3 className="font-bold text-base text-foreground">100% Freshness Guarantee</h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Fruits, vegetables, and meats sourced fresh every morning. If an item doesn't meet your quality standard, return it instant refund.
+              Fruits, vegetables, and meats sourced fresh every morning. If an item doesn't meet your quality standard, notify us within 24 hours for a full refund or store credit.
             </p>
           </div>
 
@@ -108,7 +108,7 @@ export default function AboutPage() {
             </div>
             <h3 className="font-bold text-base text-foreground">Transparent Fee Tiers</h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Low delivery fees starting at Rs. 40, and completely FREE delivery on all grocery orders above Rs. 3,000.
+              Low delivery fees starting at Rs. 40, and completely FREE delivery on all grocery orders totaling Rs. 3,000 and above.
             </p>
           </div>
         </div>

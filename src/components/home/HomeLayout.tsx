@@ -23,6 +23,7 @@ interface HomeLayoutProps {
   bestSellers: CustomerProduct[];
   freshArrivals: CustomerProduct[];
   dealProduct: CustomerProduct | null;
+  dealCompareAtPrice: number | null;
 }
 
 /**
@@ -37,6 +38,7 @@ export function HomeLayout({
   bestSellers,
   freshArrivals,
   dealProduct: serverDealProduct,
+  dealCompareAtPrice,
 }: HomeLayoutProps) {
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const [showDealOfTheDay, setShowDealOfTheDay] = useState<boolean>(true);
@@ -96,7 +98,7 @@ export function HomeLayout({
         products={bestSellers}
         ctaLabel="View All Products"
       />
-      {showDealOfTheDay && serverDealProduct && <DealOfTheDay product={serverDealProduct} />}
+      {showDealOfTheDay && serverDealProduct && <DealOfTheDay product={serverDealProduct} compareAtPrice={dealCompareAtPrice} />}
       <ProductRow
         title="Monthly Stock-Up Essentials"
         subtitle="Bulk pantry items, flour, rice, oils, and restocked shelves."

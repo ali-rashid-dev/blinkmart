@@ -128,7 +128,7 @@ export default function DeliveryInformationPage() {
             Daily 5:00 PM Order Cutoff
           </h3>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            All orders placed before <strong>5:00 PM PKT</strong> enter our same-day evening fulfillment run. Orders placed after 5:00 PM are automatically scheduled for the following evening's run.
+            All orders accepted before <strong>5:00 PM PKT</strong> enter our same-day evening fulfillment run. Orders accepted after 5:00 PM are automatically scheduled for the following evening's run.
           </p>
           <ul className="space-y-2 text-xs text-muted-foreground">
             <li className="flex items-center gap-2">

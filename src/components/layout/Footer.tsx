@@ -13,17 +13,44 @@ import {
   ShieldCheck,
   Truck,
   Lock,
+  AlertCircle,
 } from "lucide-react";
 
 export function Footer() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email.trim()) {
+    setError(null);
+
+    if (!email.trim()) {
+      setError("Please enter your email address");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to subscribe");
+      }
+
       setSubscribed(true);
       setEmail("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred while subscribing");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -207,23 +234,39 @@ export function Footer() {
                   <span>Thank you! You are now subscribed to Faisalabad grocery updates.</span>
                 </div>
               ) : (
-                <form onSubmit={handleSubscribe} className="flex gap-2">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="flex-1 h-9 rounded-xl border border-input bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
-                  />
-                  <button
-                    type="submit"
-                    className="h-9 px-3.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors flex items-center gap-1.5 shrink-0"
-                  >
-                    <span>Subscribe</span>
-                    <Send className="size-3" />
-                  </button>
-                </form>
+                <div className="flex flex-col gap-2">
+                  {error && (
+                    <div className="flex items-center gap-2 text-xs text-destructive">
+                      <AlertCircle className="size-4 shrink-0" />
+                      <span>{error}</span>
+                    </div>
+                  )}
+                  <form onSubmit={handleSubscribe} className="flex gap-2">
+                    <div className="flex-1 flex flex-col gap-1">
+                      <label htmlFor="newsletter-email" className="sr-only">
+                        Email address for newsletter
+                      </label>
+                      <input
+                        id="newsletter-email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        disabled={loading}
+                        className="h-9 rounded-xl border border-input bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="h-9 px-3.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors flex items-center gap-1.5 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
+                    >
+                      <span>{loading ? "..." : "Subscribe"}</span>
+                      {!loading && <Send className="size-3" />}
+                    </button>
+                  </form>
+                </div>
               )}
             </div>
           </div>

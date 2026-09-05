@@ -312,7 +312,7 @@ function ProductFormDialog({
                       min: { value: 1, message: "Price must be greater than Rs 0" },
                       setValueAs: (v) => (v === "" ? 0 : parseFloat(v)),
                     })}
-                    placeholder="4999"
+                    placeholder="3000+"
                   />
                 </div>
                 {errors.price && (
