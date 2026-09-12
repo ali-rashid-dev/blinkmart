@@ -98,11 +98,26 @@ export function filterProducts<T extends {
     }
 
     if (filters.categories.length > 0) {
-      const matchesCategory = filters.categories.some(
-        (catId) =>
-          p.categoryId === catId ||
-          p.categoryName?.toLowerCase() === catId.toLowerCase()
-      );
+      const matchesCategory = filters.categories.some((catFilter) => {
+        if (!catFilter) return false;
+        const filterLower = catFilter.toLowerCase();
+
+        // 1. Direct ID match
+        if (p.categoryId && p.categoryId.toLowerCase() === filterLower) return true;
+
+        // 2. Category name & slug matching
+        if (p.categoryName) {
+          const catNameLower = p.categoryName.toLowerCase();
+          if (catNameLower === filterLower) return true;
+
+          const slugified = catNameLower.replace(/[^a-z0-9]+/g, "-");
+          if (slugified === filterLower || slugified.includes(filterLower) || filterLower.includes(slugified)) return true;
+
+          if (catNameLower.includes(filterLower) || filterLower.includes(catNameLower)) return true;
+        }
+
+        return false;
+      });
       if (!matchesCategory) return false;
     }
 

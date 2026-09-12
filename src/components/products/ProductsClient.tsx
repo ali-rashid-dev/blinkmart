@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { LayoutGrid, Rows3, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProductsHeader } from "@/components/products/ProductsHeader";
@@ -40,13 +41,80 @@ export type ProductsClientProps = {
   // `fallbackProducts` (demo data). If an empty array (`[]`) is explicitly
   // provided, the component will honor that and render the EmptyState.
   initialProducts?: CustomerProduct[] | undefined;
+  initialCategory?: string;
+  initialSearch?: string;
+  initialBrand?: string;
 };
+
+function resolveCategoryParamToId(
+  param: string | null | undefined,
+  rawCategories: CustomerCategoryRecord[],
+  productList: CustomerProduct[]
+): string | null {
+  if (!param) return null;
+  const target = decodeURIComponent(param).trim().toLowerCase();
+  if (!target || target === "all") return null;
+
+  // 1. Check exact match on category ID
+  const byId = rawCategories.find((c) => c.id.toLowerCase() === target);
+  if (byId) return byId.id;
+
+  // 2. Check exact match on category slug
+  const bySlug = rawCategories.find((c) => c.slug.toLowerCase() === target);
+  if (bySlug) return bySlug.id;
+
+  // 3. Check exact match on category name
+  const byName = rawCategories.find((c) => c.name.toLowerCase() === target);
+  if (byName) return byName.id;
+
+  // 4. Check slugified category name match
+  const bySlugifiedName = rawCategories.find(
+    (c) => c.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") === target
+  );
+  if (bySlugifiedName) return bySlugifiedName.id;
+
+  // 5. Check alias / substring matching
+  const byAlias = rawCategories.find((c) => {
+    const slugLower = c.slug.toLowerCase();
+    const nameLower = c.name.toLowerCase();
+    return (
+      slugLower.includes(target) ||
+      target.includes(slugLower) ||
+      nameLower.includes(target) ||
+      target.includes(nameLower)
+    );
+  });
+  if (byAlias) return byAlias.id;
+
+  // 6. Check against productList categoryId or categoryName
+  const prodMatch = productList.find(
+    (p) =>
+      p.categoryId?.toLowerCase() === target ||
+      p.categoryName?.toLowerCase() === target ||
+      p.categoryName?.toLowerCase().includes(target)
+  );
+  if (prodMatch) return prodMatch.categoryId || prodMatch.categoryName || target;
+
+  return target;
+}
 
 export function ProductsClient({
   categories: rawCategories = [],
   brands: rawBrands = [],
   initialProducts,
+  initialCategory,
+  initialSearch,
+  initialBrand,
 }: ProductsClientProps) {
+  const searchParams = useSearchParams();
+  const urlCategory = searchParams ? (searchParams.get("category") || searchParams.get("categories")) : null;
+  const urlSearch = searchParams ? (searchParams.get("search") || searchParams.get("q")) : null;
+  const urlBrand = searchParams ? (searchParams.get("brand") || searchParams.get("brands")) : null;
+
+  const activeCategoryParam = urlCategory ?? initialCategory;
+  const activeSearchParam = urlSearch ?? initialSearch;
+  const activeBrandParam = urlBrand ?? initialBrand;
+
   // Treat an omitted `initialProducts` (undefined) as the signal to use
   // demo `fallbackProducts`. If callers explicitly pass an empty array,
   // preserve it so the EmptyState is reachable.
@@ -60,10 +128,21 @@ export function ProductsClient({
     return [Math.floor(min), Math.ceil(max)];
   }, [productList]);
 
-  const [filters, setFilters] = useState<Filters>(() => ({
-    ...initialFilters,
-    priceRange: priceBounds,
-  }));
+  const [filters, setFilters] = useState<Filters>(() => {
+    const resolvedCatId = resolveCategoryParamToId(
+      activeCategoryParam,
+      rawCategories,
+      productList
+    );
+    return {
+      ...initialFilters,
+      categories: resolvedCatId ? [resolvedCatId] : (activeCategoryParam ? [activeCategoryParam] : []),
+      search: activeSearchParam || "",
+      brands: activeBrandParam ? [activeBrandParam] : [],
+      priceRange: priceBounds,
+    };
+  });
+
   const [sort, setSort] = useState<SortValue>("featured");
   const [view, setView] = useState<"grid" | "compact">("grid");
   const [page, setPage] = useState(1);
@@ -112,6 +191,42 @@ export function ProductsClient({
   }, [navCategories, productList]);
 
   useEffect(() => {
+    const resolvedCatId = resolveCategoryParamToId(
+      activeCategoryParam,
+      rawCategories,
+      productList
+    );
+
+    setFilters((prev) => {
+      let nextCategories = prev.categories;
+      if (activeCategoryParam) {
+        const catValue = resolvedCatId || activeCategoryParam;
+        nextCategories = [catValue];
+      } else if (urlCategory === null && initialCategory === undefined) {
+        nextCategories = [];
+      }
+
+      const nextSearch = activeSearchParam !== undefined && activeSearchParam !== null ? activeSearchParam : prev.search;
+      const nextBrands = activeBrandParam ? [activeBrandParam] : prev.brands;
+
+      if (
+        JSON.stringify(prev.categories) === JSON.stringify(nextCategories) &&
+        prev.search === nextSearch &&
+        JSON.stringify(prev.brands) === JSON.stringify(nextBrands)
+      ) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        categories: nextCategories,
+        search: nextSearch,
+        brands: nextBrands,
+      };
+    });
+  }, [activeCategoryParam, activeSearchParam, activeBrandParam, rawCategories, productList, urlCategory, initialCategory]);
+
+  useEffect(() => {
     const t = setTimeout(() => setStatus("ready"), 400);
     return () => clearTimeout(t);
   }, []);
@@ -137,9 +252,37 @@ export function ProductsClient({
     setFilters(updater);
     setPage(1);
   };
+
+  const handleSelectCategory = (id: string) => {
+    const newCategories = id === "all" ? [] : [id];
+    update((f) => ({ ...f, categories: newCategories }));
+
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (id === "all" || newCategories.length === 0) {
+        url.searchParams.delete("category");
+        url.searchParams.delete("categories");
+      } else {
+        const catObj = rawCategories.find((c) => c.id === id);
+        url.searchParams.set("category", catObj?.slug || id);
+      }
+      window.history.replaceState(null, "", url.toString());
+    }
+  };
+
   const reset = () => {
     setFilters({ ...initialFilters, priceRange: priceBounds });
     setPage(1);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("category");
+      url.searchParams.delete("categories");
+      url.searchParams.delete("search");
+      url.searchParams.delete("q");
+      url.searchParams.delete("brand");
+      url.searchParams.delete("brands");
+      window.history.replaceState(null, "", url.toString());
+    }
   };
   const retry = () => {
     setStatus("loading");
@@ -180,9 +323,7 @@ export function ProductsClient({
             <CategoryNav
               categories={[{ id: "all", label: "All", emoji: "✨" }, ...navCategories]}
               selectedId={filters.categories[0] ?? "all"}
-              onSelect={(id) =>
-                update((f) => ({ ...f, categories: id === "all" ? [] : [id] }))
-              }
+              onSelect={handleSelectCategory}
             />
           </nav>
         )}
