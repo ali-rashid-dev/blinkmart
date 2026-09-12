@@ -52,7 +52,7 @@ function resolveCategoryParamToId(
   productList: CustomerProduct[]
 ): string | null {
   if (!param) return null;
-  const target = decodeURIComponent(param).trim().toLowerCase();
+  const target = param.trim().toLowerCase();
   if (!target || target === "all") return null;
 
   // 1. Check exact match on category ID
@@ -136,7 +136,7 @@ export function ProductsClient({
     );
     return {
       ...initialFilters,
-      categories: resolvedCatId ? [resolvedCatId] : (activeCategoryParam ? [activeCategoryParam] : []),
+      categories: resolvedCatId ? [resolvedCatId] : [],
       search: activeSearchParam || "",
       brands: activeBrandParam ? [activeBrandParam] : [],
       priceRange: priceBounds,
@@ -199,18 +199,31 @@ export function ProductsClient({
 
     setFilters((prev) => {
       let nextCategories = prev.categories;
-      if (activeCategoryParam) {
-        const catValue = resolvedCatId || activeCategoryParam;
+      const normalizedCategory = activeCategoryParam?.trim().toLowerCase();
+      if (normalizedCategory && normalizedCategory !== "all") {
+        const catValue = resolvedCatId || activeCategoryParam || "";
         nextCategories = [catValue];
-      } else if (urlCategory === null && initialCategory === undefined) {
+      } else {
         nextCategories = [];
       }
 
-      const nextSearch = activeSearchParam !== undefined && activeSearchParam !== null ? activeSearchParam : prev.search;
-      const nextBrands = activeBrandParam ? [activeBrandParam] : prev.brands;
+      if (JSON.stringify(prev.categories) === JSON.stringify(nextCategories)) {
+        return prev;
+      }
 
+      return {
+        ...prev,
+        categories: nextCategories,
+      };
+    });
+  }, [activeCategoryParam, rawCategories, productList]);
+
+  useEffect(() => {
+    const nextSearch = activeSearchParam ?? "";
+    const nextBrands = activeBrandParam ? [activeBrandParam] : [];
+
+    setFilters((prev) => {
       if (
-        JSON.stringify(prev.categories) === JSON.stringify(nextCategories) &&
         prev.search === nextSearch &&
         JSON.stringify(prev.brands) === JSON.stringify(nextBrands)
       ) {
@@ -219,12 +232,11 @@ export function ProductsClient({
 
       return {
         ...prev,
-        categories: nextCategories,
         search: nextSearch,
         brands: nextBrands,
       };
     });
-  }, [activeCategoryParam, activeSearchParam, activeBrandParam, rawCategories, productList, urlCategory, initialCategory]);
+  }, [activeSearchParam, activeBrandParam]);
 
   useEffect(() => {
     const t = setTimeout(() => setStatus("ready"), 400);
