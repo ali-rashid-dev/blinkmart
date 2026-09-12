@@ -13,50 +13,41 @@ import {
 } from "lucide-react";
 
 export function Footer() {
-
   return (
     <footer className="border-t border-border bg-card text-card-foreground">
       {/* ── Top Trust Badges Bar ────────────────────────────────────────────── */}
-      <div className="border-b border-border/60 bg-muted/40 py-6">
+      <div className="border-b border-border/60 bg-muted/40 py-5">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="flex items-center gap-3.5">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <Clock className="size-5" />
-              </div>
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div className="flex items-center gap-3">
+              <Clock className="size-5 shrink-0 text-primary" />
               <div>
-                <h4 className="text-sm font-bold text-foreground">7–10 PM Evening Slot</h4>
-                <p className="text-xs text-muted-foreground">Guaranteed delivery after cutoff at 5 PM</p>
+                <h4 className="text-xs font-bold text-foreground">7–10 PM Evening Slot</h4>
+                <p className="text-[11px] text-muted-foreground">Cutoff at 5 PM daily</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <Truck className="size-5" />
-              </div>
+            <div className="flex items-center gap-3">
+              <Truck className="size-5 shrink-0 text-primary" />
               <div>
-                <h4 className="text-sm font-bold text-foreground">Faisalabad-Wide Delivery</h4>
-                <p className="text-xs text-muted-foreground">Serving Kohinoor, D-Ground, Canal Rd &amp; more</p>
+                <h4 className="text-xs font-bold text-foreground">Faisalabad Coverage</h4>
+                <p className="text-[11px] text-muted-foreground">Delivering across main hubs</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <ShieldCheck className="size-5" />
-              </div>
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="size-5 shrink-0 text-primary" />
               <div>
-                <h4 className="text-sm font-bold text-foreground">Farm Fresh Quality</h4>
-                <p className="text-xs text-muted-foreground">Handpicked produce &amp; strict hygiene</p>
+                <h4 className="text-xs font-bold text-foreground">Farm Fresh Quality</h4>
+                <p className="text-[11px] text-muted-foreground">Handpicked daily produce</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <Lock className="size-5" />
-              </div>
+            <div className="flex items-center gap-3">
+              <Lock className="size-5 shrink-0 text-primary" />
               <div>
-                <h4 className="text-sm font-bold text-foreground">Transparent Fee Tiers</h4>
-                <p className="text-xs text-muted-foreground">Free delivery on orders Rs. 3,000+</p>
+                <h4 className="text-xs font-bold text-foreground">Free Delivery</h4>
+                <p className="text-[11px] text-muted-foreground">On orders Rs. 3,000+</p>
               </div>
             </div>
           </div>
@@ -64,148 +55,102 @@ export function Footer() {
       </div>
 
       {/* ── Main Footer Grid ────────────────────────────────────────────────── */}
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:py-16">
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-12">
-          {/* Column 1: Brand & About (4 cols) */}
-          <div className="lg:col-span-4 flex flex-col gap-4">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="flex size-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground font-bold shadow-soft">
-                <ShoppingBag className="size-5" />
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4">
+          {/* Column 1: Brand & Brief Slogan */}
+          <div className="flex flex-col gap-3">
+            <Link href="/" className="flex items-center gap-2 w-fit">
+              <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold">
+                <ShoppingBag className="size-4.5" />
               </div>
-              <div className="flex flex-col">
-                <span className="font-display text-xl font-bold tracking-tight text-foreground">
-                  Kit&amp;Co
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                  Grocery Delivery Faisalabad
-                </span>
-              </div>
+              <span className="font-display text-lg font-bold tracking-tight text-foreground">
+                Kit&amp;Co
+              </span>
             </Link>
-
-            <p className="text-xs leading-relaxed text-muted-foreground pr-2">
-              Faisalabad’s premier evening grocery delivery service. We bring fresh farm produce, dairy boxes, and bulk pantry stock-ups directly to your doorstep during guaranteed 7:00 PM – 10:00 PM evening slots.
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Faisalabad’s premier evening grocery delivery service. Fresh farm produce &amp; essentials delivered to your doorstep.
             </p>
-
-            {/* Helpline Details */}
-            <div className="flex flex-col gap-2 pt-2 text-xs">
-              <div className="flex items-center gap-2.5 text-muted-foreground">
-                <MapPin className="size-4 shrink-0 text-primary" />
-                <span>Canal Road Hub, Near Kohinoor City, Faisalabad</span>
-              </div>
-              <div className="flex items-center gap-2.5 text-muted-foreground">
-                <Phone className="size-4 shrink-0 text-primary" />
-                <span>+92 300 1234567 (8:00 AM – 11:00 PM Daily)</span>
-              </div>
-              <div className="flex items-center gap-2.5 text-muted-foreground">
-                <Mail className="size-4 shrink-0 text-primary" />
-                <span>support@kitandco.pk</span>
-              </div>
-            </div>
           </div>
 
-          {/* Column 2: Quick Links (2 cols) */}
-          <div className="lg:col-span-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground mb-4">
+          {/* Column 2: Navigation */}
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground mb-3">
               Navigation
             </h3>
-            <ul className="space-y-2.5 text-xs font-medium text-muted-foreground">
+            <ul className="space-y-2 text-xs font-medium text-muted-foreground">
               <li>
-                <Link href="/" className="transition-colors hover:text-primary">
-                  Home Page
+                <Link href="/" className="hover:text-primary transition-colors">
+                  Home
                 </Link>
               </li>
               <li>
-                <Link href="/products" className="transition-colors hover:text-primary">
-                  Shop All Products
+                <Link href="/products" className="hover:text-primary transition-colors">
+                  Shop Products
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="transition-colors hover:text-primary">
+                <Link href="/about" className="hover:text-primary transition-colors">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="/delivery-information" className="transition-colors hover:text-primary flex items-center gap-1">
-                  <span>Delivery Info</span>
-                  <span className="rounded-full bg-primary/10 px-1.5 py-0.2 text-[9px] font-bold text-primary">Faisalabad</span>
+                <Link href="/delivery-information" className="hover:text-primary transition-colors">
+                  Delivery Info
                 </Link>
               </li>
               <li>
-                <Link href="/faqs" className="transition-colors hover:text-primary">
+                <Link href="/faqs" className="hover:text-primary transition-colors">
                   FAQs &amp; Help
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 3: Customer Care & Legal (2 cols) */}
-          <div className="lg:col-span-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground mb-4">
-              Customer Care
+          {/* Column 3: Customer Support */}
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground mb-3">
+              Customer Support
             </h3>
-            <ul className="space-y-2.5 text-xs font-medium text-muted-foreground">
+            <ul className="space-y-2 text-xs font-medium text-muted-foreground">
               <li>
-                <Link href="/contact" className="transition-colors hover:text-primary">
+                <Link href="/contact" className="hover:text-primary transition-colors">
                   Contact Us
                 </Link>
               </li>
               <li>
-                <Link href="/orders" className="transition-colors hover:text-primary">
-                  Track My Order
+                <Link href="/orders" className="hover:text-primary transition-colors">
+                  Track Order
                 </Link>
               </li>
               <li>
-                <Link href="/cart" className="transition-colors hover:text-primary">
-                  View Cart
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms-and-conditions" className="transition-colors hover:text-primary">
+                <Link href="/terms-and-conditions" className="hover:text-primary transition-colors">
                   Terms &amp; Conditions
                 </Link>
               </li>
               <li>
-                <Link href="/privacy-policy" className="transition-colors hover:text-primary">
+                <Link href="/privacy-policy" className="hover:text-primary transition-colors">
                   Privacy Policy
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 4: Faisalabad Sectors (4 cols) */}
-          <div className="lg:col-span-4 flex flex-col gap-5">
-            <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground mb-2">
-                Faisalabad Delivery Sectors
-              </h3>
-              <p className="text-[11px] text-muted-foreground mb-2.5">
-                Active coverage hubs: Kohinoor City, D-Ground, Canal Road, People’s Colony #1 &amp; #2, Madina Town, Susan Road, Officers Colony &amp; Eden Gardens.
-              </p>
+          {/* Column 4: Contact & Hub Info */}
+          <div className="flex flex-col gap-2.5 text-xs text-muted-foreground">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground mb-0.5">
+              Contact &amp; Hub
+            </h3>
+            <div className="flex items-center gap-2">
+              <MapPin className="size-4 shrink-0 text-primary" />
+              <span>Canal Road Hub, Faisalabad</span>
             </div>
-          </div>
-        </div>
-
-        {/* ── Fee Summary & Payment Strip ────────────────────────────────────────── */}
-        <div className="mt-10 border-t border-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            <span className="font-semibold text-foreground">Delivery Rates:</span>
-            <span>Rs. 0–999: <strong className="text-foreground">Rs. 100</strong></span>
-            <span>•</span>
-            <span>Rs. 1,000–1,999: <strong className="text-foreground">Rs. 70</strong></span>
-            <span>•</span>
-            <span>Rs. 2,000–2,999: <strong className="text-foreground">Rs. 40</strong></span>
-            <span>•</span>
-            <span>Rs. 3,000+: <strong className="text-primary font-bold">FREE</strong></span>
-            <span>(Platform fee: Rs. 20)</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-medium">Accepted Payments:</span>
-            <div className="flex items-center gap-1.5 font-bold text-[10px] uppercase tracking-wider text-foreground">
-              <span className="rounded-md bg-accent px-2 py-1 border border-border">COD</span>
-              <span className="rounded-md bg-accent px-2 py-1 border border-border">JazzCash</span>
-              <span className="rounded-md bg-accent px-2 py-1 border border-border">EasyPaisa</span>
-              <span className="rounded-md bg-accent px-2 py-1 border border-border">Cards</span>
+            <div className="flex items-center gap-2">
+              <Phone className="size-4 shrink-0 text-primary" />
+              <span>+92 300 1234567</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Mail className="size-4 shrink-0 text-primary" />
+              <span>support@kitandco.pk</span>
             </div>
           </div>
         </div>
