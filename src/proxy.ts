@@ -26,6 +26,14 @@ const PUBLIC_PREFIXES = [
   "/product",
   "/products",
   "/cart",
+  "/about",
+  "/contact",
+  "/faqs",
+  "/privacy-policy",
+  "/terms-and-conditions",
+  "/delivery-information",
+  "/return-and-refund-policy",
+  "/support",
 ];
 
 function isPublicPath(pathname: string): boolean {
