@@ -5,7 +5,7 @@ import { Lock, Shield, Eye, Database, Smartphone, UserCheck } from "lucide-react
 export const metadata: Metadata = {
   title: "Privacy Policy — Kit&Co Grocery Delivery Faisalabad",
   description:
-    "Learn how Kit&Co (Blinkmart) collects, protects, and handles customer data and delivery address information in Faisalabad.",
+    "Learn how Kit&Co collects, protects, and handles customer data and delivery address information in Faisalabad.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -21,7 +21,7 @@ export default function PrivacyPolicyPage() {
           Privacy Policy
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground">
-          Effective date: September 2026 • Kit&amp;Co (Blinkmart) Faisalabad Operations.
+          Effective date: September 2026 • Kit&amp;Co Faisalabad Operations.
         </p>
       </div>
 

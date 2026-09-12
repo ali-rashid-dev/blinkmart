@@ -212,7 +212,7 @@ export function Footer() {
 
         {/* ── Copyright Line ─────────────────────────────────────────────────── */}
         <div className="mt-6 border-t border-border/50 pt-6 text-center text-[11px] text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p>© {new Date().getFullYear()} Kit&amp;Co (Blinkmart). All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Kit&amp;Co. All rights reserved.</p>
           <p>Targeting Grocery Delivery in Faisalabad, Punjab, Pakistan.</p>
         </div>
       </div>

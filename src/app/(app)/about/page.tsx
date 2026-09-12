@@ -17,7 +17,7 @@ import {
 export const metadata: Metadata = {
   title: "About Us — Kit&Co Grocery Delivery Faisalabad",
   description:
-    "Learn about Kit&Co (Blinkmart), Faisalabad's leading evening grocery delivery service specializing in fresh produce, daily essentials, and bulk pantry stock-ups.",
+    "Learn about Kit&Co, Faisalabad's leading evening grocery delivery service specializing in fresh produce, daily essentials, and bulk pantry stock-ups.",
 };
 
 export default function AboutPage() {

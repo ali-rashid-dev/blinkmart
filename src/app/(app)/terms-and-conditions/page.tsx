@@ -21,7 +21,7 @@ export default function TermsAndConditionsPage() {
           Terms &amp; Conditions
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground">
-          Last updated: September 2026 • Valid for Kit&amp;Co (Blinkmart) services in Faisalabad, Pakistan.
+          Last updated: September 2026 • Valid for Kit&amp;Co  services in Faisalabad, Pakistan.
         </p>
       </div>
 
@@ -44,7 +44,7 @@ export default function TermsAndConditionsPage() {
         <section className="flex flex-col gap-2">
           <h2 className="text-lg font-bold text-foreground font-display">1. Acceptance of Terms</h2>
           <p>
-            By accessing or using the Kit&amp;Co (Blinkmart) website, mobile application, or grocery delivery service, you agree to be bound by these Terms &amp; Conditions. If you do not agree to these terms, please refrain from placing orders through our service.
+            By accessing or using the Kit&amp;Co website, mobile application, or grocery delivery service, you agree to be bound by these Terms &amp; Conditions. If you do not agree to these terms, please refrain from placing orders through our service.
           </p>
         </section>
 

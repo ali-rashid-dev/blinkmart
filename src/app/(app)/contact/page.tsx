@@ -158,94 +158,94 @@ export default function ContactPage() {
                 </div>
               )}
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="name" className="text-xs font-bold text-foreground">
+                      Full Name *
+                    </label>
+                    <input
+                      id="name"
+                      type="text"
+                      required
+                      placeholder="e.g. Ali Ahmed"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="h-10 rounded-xl border border-input bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="phone" className="text-xs font-bold text-foreground">
+                      Phone / WhatsApp Number (or email required)
+                    </label>
+                    <input
+                      id="phone"
+                      type="tel"
+                      placeholder="0300 1234567"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="h-10 rounded-xl border border-input bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="email" className="text-xs font-bold text-foreground">
+                      Email Address (or phone number required)
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      placeholder="ali@example.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="h-10 rounded-xl border border-input bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="subject" className="text-xs font-bold text-foreground">
+                      Inquiry Topic
+                    </label>
+                    <select
+                      id="subject"
+                      value={formData.subject}
+                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                      className="h-10 rounded-xl border border-input bg-background px-3 text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
+                    >
+                      <option value="Order Inquiry">Order Inquiry / Delivery Status</option>
+                      <option value="Quality Concern">Product Quality / Item Issue</option>
+                      <option value="Refund Request">Refund / Payment Query</option>
+                      <option value="Faisalabad Coverage">Delivery Sector Coverage</option>
+                      <option value="Supplier/Vendor">Supplier / Vendor Partner</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="name" className="text-xs font-bold text-foreground">
-                    Full Name *
+                  <label htmlFor="message" className="text-xs font-bold text-foreground">
+                    Your Message *
                   </label>
-                  <input
-                    id="name"
-                    type="text"
+                  <textarea
+                    id="message"
                     required
-                    placeholder="e.g. Ali Ahmed"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="h-10 rounded-xl border border-input bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
+                    rows={4}
+                    placeholder="Describe your issue, order ID, or general question..."
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    className="rounded-xl border border-input bg-background p-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                   />
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="phone" className="text-xs font-bold text-foreground">
-                    Phone / WhatsApp Number (or email required)
-                  </label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    placeholder="0300 1234567"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="h-10 rounded-xl border border-input bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="email" className="text-xs font-bold text-foreground">
-                    Email Address (or phone number required)
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    placeholder="ali@example.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="h-10 rounded-xl border border-input bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="subject" className="text-xs font-bold text-foreground">
-                    Inquiry Topic
-                  </label>
-                  <select
-                    id="subject"
-                    value={formData.subject}
-                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                    className="h-10 rounded-xl border border-input bg-background px-3 text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
-                  >
-                    <option value="Order Inquiry">Order Inquiry / Delivery Status</option>
-                    <option value="Quality Concern">Product Quality / Item Issue</option>
-                    <option value="Refund Request">Refund / Payment Query</option>
-                    <option value="Faisalabad Coverage">Delivery Sector Coverage</option>
-                    <option value="Supplier/Vendor">Supplier / Vendor Partner</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="message" className="text-xs font-bold text-foreground">
-                  Your Message *
-                </label>
-                <textarea
-                  id="message"
-                  required
-                  rows={4}
-                  placeholder="Describe your issue, order ID, or general question..."
-                  value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className="rounded-xl border border-input bg-background p-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="mt-2 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-xs sm:text-sm font-semibold text-primary-foreground shadow-soft hover:bg-primary/90 transition-all hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              >
-                <span>{loading ? "Sending..." : "Send Message"}</span>
-                {!loading && <Send className="size-4" />}
-              </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="mt-2 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-xs sm:text-sm font-semibold text-primary-foreground shadow-soft hover:bg-primary/90 transition-all hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                >
+                  <span>{loading ? "Sending..." : "Send Message"}</span>
+                  {!loading && <Send className="size-4" />}
+                </button>
               </form>
             </>
           )}
@@ -276,7 +276,7 @@ export default function ContactPage() {
               Faisalabad Headquarters
             </h3>
             <div className="text-xs text-muted-foreground flex flex-col gap-2">
-              <p className="font-medium text-foreground">Kit&amp;Co (Blinkmart) Operations Center</p>
+              <p className="font-medium text-foreground">Kit&amp;Co Operations Center</p>
               <p>Canal Road Commercial Belt, Faisalabad, Punjab</p>
               <p className="pt-2 text-[11px]">Note: Deliveries are dispatched directly from our temperature-controlled hubs to maintain farm freshness.</p>
             </div>
