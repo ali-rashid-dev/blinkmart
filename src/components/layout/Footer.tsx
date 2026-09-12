@@ -1,58 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import {
   ShoppingBag,
   MapPin,
   Phone,
   Mail,
   Clock,
-  Send,
-  CheckCircle2,
   ShieldCheck,
   Truck,
   Lock,
-  AlertCircle,
 } from "lucide-react";
 
 export function Footer() {
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (!email.trim()) {
-      setError("Please enter your email address");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const response = await fetch("/api/newsletter/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to subscribe");
-      }
-
-      setSubscribed(true);
-      setEmail("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred while subscribing");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <footer className="border-t border-border bg-card text-card-foreground">
@@ -212,7 +172,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Column 4: Faisalabad Sectors & Newsletter (4 cols) */}
+          {/* Column 4: Faisalabad Sectors (4 cols) */}
           <div className="lg:col-span-4 flex flex-col gap-5">
             <div>
               <h3 className="text-xs font-bold uppercase tracking-wider text-foreground mb-2">
@@ -221,53 +181,6 @@ export function Footer() {
               <p className="text-[11px] text-muted-foreground mb-2.5">
                 Active coverage hubs: Kohinoor City, D-Ground, Canal Road, People’s Colony #1 &amp; #2, Madina Town, Susan Road, Officers Colony &amp; Eden Gardens.
               </p>
-            </div>
-
-            {/* Newsletter */}
-            <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground mb-2">
-                Get Weekly Deals &amp; Fresh Arrivals
-              </h3>
-              {subscribed ? (
-                <div className="flex items-center gap-2 rounded-xl bg-success/10 border border-success/30 p-3 text-xs text-success font-medium">
-                  <CheckCircle2 className="size-4 shrink-0" />
-                  <span>Thank you! You are now subscribed to Faisalabad grocery updates.</span>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  {error && (
-                    <div className="flex items-center gap-2 text-xs text-destructive">
-                      <AlertCircle className="size-4 shrink-0" />
-                      <span>{error}</span>
-                    </div>
-                  )}
-                  <form onSubmit={handleSubscribe} className="flex gap-2">
-                    <div className="flex-1 flex flex-col gap-1">
-                      <label htmlFor="newsletter-email" className="sr-only">
-                        Email address for newsletter
-                      </label>
-                      <input
-                        id="newsletter-email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        disabled={loading}
-                        className="h-9 rounded-xl border border-input bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="h-9 px-3.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors flex items-center gap-1.5 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
-                    >
-                      <span>{loading ? "..." : "Subscribe"}</span>
-                      {!loading && <Send className="size-3" />}
-                    </button>
-                  </form>
-                </div>
-              )}
             </div>
           </div>
         </div>
