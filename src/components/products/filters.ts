@@ -27,32 +27,6 @@ export function toggle<T>(list: T[], item: T): T[] {
   return list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
 }
 
-export function parseCategoryEmoji(name: string, slug?: string): { emoji: string; label: string } {
-  if (!name) return { emoji: "🛒", label: "" };
-
-  const emojiRegex = /^([\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}])\s*/u;
-  const match = name.match(emojiRegex);
-  if (match && match[1]) {
-    return {
-      emoji: match[1],
-      label: name.substring(match[0].length).trim(),
-    };
-  }
-
-  const lower = (name + " " + (slug || "")).toLowerCase();
-  if (lower.includes("produce") || lower.includes("fruit") || lower.includes("veg")) return { emoji: "🥦", label: name };
-  if (lower.includes("dairy") || lower.includes("milk") || lower.includes("egg")) return { emoji: "🥛", label: name };
-  if (lower.includes("bakery") || lower.includes("bread")) return { emoji: "🥖", label: name };
-  if (lower.includes("meat") || lower.includes("seafood") || lower.includes("fish")) return { emoji: "🥩", label: name };
-  if (lower.includes("pantry") || lower.includes("grain") || lower.includes("staple")) return { emoji: "🥫", label: name };
-  if (lower.includes("beverage") || lower.includes("drink") || lower.includes("juice")) return { emoji: "🥤", label: name };
-  if (lower.includes("snack") || lower.includes("sweet") || lower.includes("candy")) return { emoji: "🍿", label: name };
-  if (lower.includes("frozen") || lower.includes("ice")) return { emoji: "🧊", label: name };
-  if (lower.includes("house") || lower.includes("clean")) return { emoji: "🧼", label: name };
-  if (lower.includes("care") || lower.includes("beauty")) return { emoji: "💆", label: name };
-
-  return { emoji: "🛒", label: name };
-}
 
 export function buildChips(
   filters: Filters,

@@ -28,11 +28,11 @@ import {
   buildChips,
   filterProducts,
   initialFilters,
-  parseCategoryEmoji,
   sortProducts,
   type Filters,
   type SortValue,
 } from "@/components/products/filters";
+
 
 export type ProductsClientProps = {
   categories?: CustomerCategoryRecord[];
