@@ -1,23 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
 import {
-  Clock,
   Flame,
   Layout,
   Moon,
-  Save,
   Sliders,
-  Sparkles,
-  Truck,
-  CheckCircle2,
   Package,
   Power,
-  ImageIcon,
 } from "lucide-react";
-import { toast } from "sonner";
-import { getAdminProductsAction, type SerializedProduct } from "@/app/(admin-plane)/admin/products/actions";
 
 interface HomePageSettings {
   heroTitle: string;
@@ -60,58 +50,7 @@ const DEFAULT_SETTINGS: HomePageSettings = {
 };
 
 export default function AdminHomepageControlPage() {
-  const [settings, setSettings] = useState<HomePageSettings>(DEFAULT_SETTINGS);
-  const [saved, setSaved] = useState(false);
-  const [products, setProducts] = useState<SerializedProduct[]>([]);
-  const [loadingProducts, setLoadingProducts] = useState(true);
-  const [productLoadError, setProductLoadError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Fetch products for Deal of the Day selector
-    async function loadProducts() {
-      try {
-        const res = await getAdminProductsAction({ limit: 100 });
-        if (res.success && res.data) {
-          setProducts(res.data.items);
-          setProductLoadError(null);
-        } else {
-          const errorMsg = (!res.success && res.error?.message) ? res.error.message : "Failed to load products";
-          setProductLoadError(errorMsg);
-          toast.error("Failed to load products", {
-            description: errorMsg,
-          });
-        }
-      } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : "Failed to load products for deal selector";
-        console.error("Failed to load products for deal selector:", err);
-        setProductLoadError(errorMsg);
-        toast.error("Error loading products", {
-          description: errorMsg,
-        });
-      } finally {
-        setLoadingProducts(false);
-      }
-    }
-
-    loadProducts();
-  }, []);
-
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaved(true);
-    toast.success("Homepage settings saved successfully!", {
-      description: "Changes saved.",
-    });
-    setTimeout(() => setSaved(false), 3000);
-  };
-
-  const updateField = <K extends keyof HomePageSettings>(key: K, value: HomePageSettings[K]) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const selectedDealProduct = settings.dealProductId
-    ? products.find((p) => p.id === settings.dealProductId)
-    : null;
+  const settings = DEFAULT_SETTINGS;
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-8 p-6">
@@ -131,17 +70,9 @@ export default function AdminHomepageControlPage() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleSave}
-          className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-button transition-transform active:scale-95 shrink-0 cursor-pointer"
-        >
-          {saved ? <CheckCircle2 className="size-4" /> : <Save className="size-4" />}
-          {saved ? "Saved Live!" : "Save Changes"}
-        </button>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-8">
+      <div className="space-y-8">
         {/* Section 1: Hero Banner Management */}
         <div className="rounded-2xl border border-border bg-card p-6 shadow-xs space-y-4">
           <div className="flex items-center gap-2 border-b border-border/60 pb-3">
@@ -159,7 +90,7 @@ export default function AdminHomepageControlPage() {
               <input
                 type="text"
                 value={settings.heroTitle}
-                onChange={(e) => updateField("heroTitle", e.target.value)}
+                readOnly
                 className="w-full rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50"
               />
             </div>
@@ -171,7 +102,7 @@ export default function AdminHomepageControlPage() {
               <input
                 type="text"
                 value={settings.heroHighlight}
-                onChange={(e) => updateField("heroHighlight", e.target.value)}
+                readOnly
                 className="w-full rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50"
               />
             </div>
@@ -183,7 +114,7 @@ export default function AdminHomepageControlPage() {
               <textarea
                 rows={2}
                 value={settings.heroSubtitle}
-                onChange={(e) => updateField("heroSubtitle", e.target.value)}
+                readOnly
                 className="w-full rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50"
               />
             </div>
@@ -195,7 +126,7 @@ export default function AdminHomepageControlPage() {
               <input
                 type="text"
                 value={settings.heroCtaText}
-                onChange={(e) => updateField("heroCtaText", e.target.value)}
+                readOnly
                 className="w-full rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50"
               />
             </div>
@@ -207,7 +138,7 @@ export default function AdminHomepageControlPage() {
               <input
                 type="text"
                 value={settings.heroImageUrl}
-                onChange={(e) => updateField("heroImageUrl", e.target.value)}
+                readOnly
                 className="w-full rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50"
               />
             </div>
@@ -231,7 +162,7 @@ export default function AdminHomepageControlPage() {
               <input
                 type="text"
                 value={settings.deliverySlotLabel}
-                onChange={(e) => updateField("deliverySlotLabel", e.target.value)}
+                readOnly
                 className="w-full rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50"
               />
             </div>
@@ -245,7 +176,7 @@ export default function AdminHomepageControlPage() {
                 min={0}
                 max={23}
                 value={settings.cutoffHour}
-                onChange={(e) => updateField("cutoffHour", Number(e.target.value))}
+                readOnly
                 className="w-full rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50"
               />
             </div>
@@ -258,7 +189,7 @@ export default function AdminHomepageControlPage() {
                 type="number"
                 min={0}
                 value={settings.freeDeliveryThreshold}
-                onChange={(e) => updateField("freeDeliveryThreshold", Number(e.target.value))}
+                readOnly
                 className="w-full rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50"
               />
             </div>
@@ -286,22 +217,19 @@ export default function AdminHomepageControlPage() {
                 <Power className="size-3.5 text-muted-foreground" />
                 Status:
               </span>
-              <button
-                type="button"
-                onClick={() => updateField("showDealOfTheDay", !settings.showDealOfTheDay)}
+              <div
                 className={`relative inline-flex h-7 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
                   settings.showDealOfTheDay ? "bg-emerald-600" : "bg-muted-foreground/30"
                 }`}
                 role="switch"
                 aria-checked={settings.showDealOfTheDay}
               >
-                <span className="sr-only">Toggle Deal of the Day</span>
                 <span
                   className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
                     settings.showDealOfTheDay ? "translate-x-7" : "translate-x-0"
                   }`}
                 />
-              </button>
+              </div>
               <span
                 className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                   settings.showDealOfTheDay
@@ -321,25 +249,11 @@ export default function AdminHomepageControlPage() {
                 <Package className="size-3.5 text-primary" />
                 Featured Deal Product (Set by Admin)
               </label>
-              <select
-                value={settings.dealProductId || ""}
-                onChange={(e) => updateField("dealProductId", e.target.value || null)}
-                disabled={loadingProducts || productLoadError !== null}
-                className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
-              >
-                <option value="">-- Select Product for Deal of the Day --</option>
-                {products.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} — Rs {Math.round(p.price)} {p.category?.name ? `(${p.category.name})` : ""}
-                  </option>
-                ))}
-              </select>
+              <div className="w-full rounded-xl border border-input bg-muted/40 px-3.5 py-2.5 text-sm text-muted-foreground">
+                No featured deal product configured
+              </div>
               <p className="mt-1 text-xs text-muted-foreground">
-                {loadingProducts
-                  ? "Loading products..."
-                  : productLoadError
-                  ? `Error loading products: ${productLoadError}`
-                  : "Select the specific product you want to spotlight on the homepage."}
+                Deal selections are not persisted or consumed by the storefront.
               </p>
             </div>
 
@@ -351,7 +265,7 @@ export default function AdminHomepageControlPage() {
               <input
                 type="text"
                 value={settings.dealBadgeText}
-                onChange={(e) => updateField("dealBadgeText", e.target.value)}
+                readOnly
                 placeholder="e.g. 20% OFF Daily Offer"
                 className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50"
               />
@@ -368,7 +282,7 @@ export default function AdminHomepageControlPage() {
               <input
                 type="number"
                 value={settings.dealCompareAtPrice || ""}
-                onChange={(e) => updateField("dealCompareAtPrice", e.target.value ? Number(e.target.value) : null)}
+                readOnly
                 placeholder="e.g. 500 (for strikethrough)"
                 step="0.01"
                 min="0"
@@ -388,46 +302,6 @@ export default function AdminHomepageControlPage() {
             {!settings.showDealOfTheDay ? (
               <div className="p-4 rounded-lg bg-destructive/5 border border-destructive/20 text-center text-xs font-semibold text-destructive">
                 Deal of the Day is currently turned <strong>OFF</strong>. It will be completely hidden from storefront visitors.
-              </div>
-            ) : selectedDealProduct ? (
-              <div className="flex items-center gap-4 bg-card p-3 rounded-lg border border-border shadow-xs">
-                <div className="relative size-16 shrink-0 rounded-md overflow-hidden bg-accent/50 border border-border">
-                  {selectedDealProduct.imageUrl ? (
-                    <Image
-                      src={selectedDealProduct.imageUrl}
-                      alt={selectedDealProduct.name}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-muted-foreground/40">
-                      <ImageIcon className="size-6" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-destructive text-destructive-foreground px-2 py-0.5 text-[10px] font-bold">
-                      <Flame className="size-3" /> {settings.dealBadgeText || "DEAL"}
-                    </span>
-                    {selectedDealProduct.category?.name && (
-                      <span className="text-[11px] font-semibold text-primary">
-                        {selectedDealProduct.category.name}
-                      </span>
-                    )}
-                  </div>
-                  <h4 className="font-display text-sm font-bold text-foreground truncate mt-1">
-                    {selectedDealProduct.name}
-                  </h4>
-                  <p className="text-xs font-semibold text-foreground">
-                    Rs {Math.round(selectedDealProduct.price)}{" "}
-                    {settings.dealCompareAtPrice && settings.dealCompareAtPrice > selectedDealProduct.price && (
-                      <span className="text-muted-foreground text-[11px] line-through font-normal">
-                        Rs {Math.round(settings.dealCompareAtPrice)}
-                      </span>
-                    )}
-                  </p>
-                </div>
               </div>
             ) : (
               <div className="p-4 rounded-lg bg-background border border-dashed border-border text-center text-xs font-medium text-muted-foreground">
@@ -450,7 +324,7 @@ export default function AdminHomepageControlPage() {
                 <input
                   type="text"
                   value={settings.weeklyPromoTitle}
-                  onChange={(e) => updateField("weeklyPromoTitle", e.target.value)}
+                  readOnly
                   className="w-full rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50"
                 />
               </div>
@@ -462,7 +336,7 @@ export default function AdminHomepageControlPage() {
                 <input
                   type="text"
                   value={settings.weeklyPromoSubtitle}
-                  onChange={(e) => updateField("weeklyPromoSubtitle", e.target.value)}
+                  readOnly
                   className="w-full rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50"
                 />
               </div>
@@ -474,7 +348,7 @@ export default function AdminHomepageControlPage() {
                 <input
                   type="text"
                   value={settings.monthlyPromoTitle}
-                  onChange={(e) => updateField("monthlyPromoTitle", e.target.value)}
+                  readOnly
                   className="w-full rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50"
                 />
               </div>
@@ -486,7 +360,7 @@ export default function AdminHomepageControlPage() {
                 <input
                   type="text"
                   value={settings.monthlyPromoSubtitle}
-                  onChange={(e) => updateField("monthlyPromoSubtitle", e.target.value)}
+                  readOnly
                   className="w-full rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50"
                 />
               </div>
@@ -494,17 +368,7 @@ export default function AdminHomepageControlPage() {
           </div>
         </div>
 
-        {/* Submit */}
-        <div className="flex justify-end pt-2">
-          <button
-            type="submit"
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-button transition-transform active:scale-95 cursor-pointer"
-          >
-            <Save className="size-4" />
-            Save Homepage Configuration
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   );
 }

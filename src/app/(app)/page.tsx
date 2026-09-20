@@ -42,7 +42,7 @@ export default async function HomePage() {
     freshArrivals = [...freshArrivals, ...padding].slice(0, 10);
   }
 
-  const dealProduct = allCustomerProducts[0] || null;
+  const dealProduct = null;
 
   return (
     <>

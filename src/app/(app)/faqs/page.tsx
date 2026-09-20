@@ -48,7 +48,7 @@ const FAQ_DATA: FAQItem[] = [
   {
     category: "quality",
     question: "What if an item in my order is damaged or missing?",
-    answer: "We offer an instant refund or replacement guarantee. If any item fails to meet your quality expectations, inform your rider upon delivery or contact our helpline at +92 300 1234567 within 24 hours.",
+    answer: "If any item is damaged or defective, contact our helpline at +92 300 1234567 within 24 hours for a full replacement.",
   },
   {
     category: "orders",

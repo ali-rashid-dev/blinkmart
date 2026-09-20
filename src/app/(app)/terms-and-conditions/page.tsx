@@ -112,7 +112,7 @@ export default function TermsAndConditionsPage() {
         <section className="flex flex-col gap-2">
           <h2 className="text-lg font-bold text-foreground font-display">6. Cancellations, Quality Guarantee &amp; Refunds</h2>
           <p>
-            Orders can be canceled free of charge prior to 5:00 PM PKT on the day of delivery. If an item delivered is damaged, spoiled, or missing, notify us within 24 hours for a full refund or store credit.
+            Orders can be canceled free of charge prior to 5:00 PM PKT on the day of delivery. If an item delivered is damaged or defective, notify us within 24 hours for a full replacement.
           </p>
         </section>
 

@@ -36,7 +36,7 @@ export function MarketHero() {
 
             <h1 className="mt-4 font-display text-4xl leading-[1.08] sm:text-5xl lg:text-6xl">
               Quality packaged groceries,{" "}
-              <span className="block text-primary">delivered tonight.</span>
+              <span className="block text-primary">delivered in your evening slot.</span>
             </h1>
 
             <p className="mt-4 max-w-md text-base leading-relaxed text-secondary-foreground/80">

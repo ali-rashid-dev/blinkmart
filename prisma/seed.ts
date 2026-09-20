@@ -144,6 +144,24 @@ const categoryData = [
 export async function main() {
   console.log("Seeding categories with Unsplash images & emojis...");
 
+  const legacyCategorySlugs = [
+    "sabzi-fresh-produce",
+    "dairy-eggs",
+    "roti-bread-bakery",
+    "meat-chicken-fish",
+    "daal-chawal-pantry",
+    "juices-beverages",
+    "snacks-namkeen-sweets",
+    "frozen-foods",
+    "household-cleaning",
+    "personal-care-beauty",
+  ];
+
+  await prisma.category.updateMany({
+    where: { slug: { in: legacyCategorySlugs } },
+    data: { isActive: false },
+  });
+
   for (const cat of categoryData) {
     const record = await prisma.category.upsert({
       where: { slug: cat.slug },
