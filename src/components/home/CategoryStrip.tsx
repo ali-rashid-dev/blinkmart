@@ -24,7 +24,7 @@ export function CategoryStrip({ categories = [] }: CategoryStripProps) {
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Aisles</p>
           <h2 className="mt-2 font-display text-3xl text-foreground sm:text-4xl">Shop by category</h2>
           <p className="mt-2 max-w-md text-sm text-muted-foreground">
-            Explore our wide range of fresh produce, dairy, bakery, meat, and pantry items.
+            Explore our wide range of grains, lentils, oils, spices, snacks, and household essentials.
           </p>
         </div>
         <Link

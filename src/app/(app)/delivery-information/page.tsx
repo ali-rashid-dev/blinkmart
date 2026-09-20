@@ -35,7 +35,7 @@ export default function DeliveryInformationPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            Kit&amp;Co provides reliable evening grocery delivery across Faisalabad. Order before our daily 5:00 PM cutoff to receive handpicked fresh produce, dairy, and bulk pantry stock-ups in our evening delivery slot (7:00 PM – 10:00 PM).
+            Kit&amp;Co provides reliable evening grocery delivery across Faisalabad. Order before our daily 5:00 PM cutoff to receive quality packaged groceries, staples, and bulk pantry stock-ups in our evening delivery slot (7:00 PM – 10:00 PM).
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -133,7 +133,7 @@ export default function DeliveryInformationPage() {
           <ul className="space-y-2 text-xs text-muted-foreground">
             <li className="flex items-center gap-2">
               <CheckCircle className="size-4 text-emerald-500 shrink-0" />
-              <span>Ensures max freshness for morning-picked fruits &amp; vegetables</span>
+              <span>Allows streamlined packing and quality check before evening dispatch</span>
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle className="size-4 text-emerald-500 shrink-0" />
@@ -159,7 +159,7 @@ export default function DeliveryInformationPage() {
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle className="size-4 text-emerald-500 shrink-0" />
-              <span>Temperature-controlled insulated bags keep dairy &amp; meat chilled</span>
+              <span>Sealed packaging protects groceries during transit</span>
             </li>
           </ul>
         </div>

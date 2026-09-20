@@ -38,8 +38,8 @@ export function Footer() {
             <div className="flex items-center gap-3">
               <ShieldCheck className="size-5 shrink-0 text-primary" />
               <div>
-                <h4 className="text-xs font-bold text-foreground">Farm Fresh Quality</h4>
-                <p className="text-[11px] text-muted-foreground">Handpicked daily produce</p>
+                <h4 className="text-xs font-bold text-foreground">Guaranteed Quality</h4>
+                <p className="text-[11px] text-muted-foreground">100% Sealed & Inspected</p>
               </div>
             </div>
 
@@ -68,7 +68,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Faisalabad’s premier evening grocery delivery service. Fresh farm produce &amp; essentials delivered to your doorstep.
+              Faisalabad’s premier evening grocery delivery service. Quality packaged groceries &amp; essentials delivered to your doorstep.
             </p>
           </div>
 

@@ -17,23 +17,56 @@ import {
   ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import {
-  getHomePageSettings,
-  saveHomePageSettings,
-  type HomePageSettings,
-} from "@/lib/home/home-config";
 import { getAdminProductsAction, type SerializedProduct } from "@/app/(admin-plane)/admin/products/actions";
 
+interface HomePageSettings {
+  heroTitle: string;
+  heroHighlight: string;
+  heroSubtitle: string;
+  heroCtaText: string;
+  heroCtaLink: string;
+  heroImageUrl: string;
+  deliverySlotLabel: string;
+  cutoffHour: number;
+  freeDeliveryThreshold: number;
+  showDealOfTheDay: boolean;
+  dealBadgeText: string;
+  dealProductId?: string | null;
+  dealCompareAtPrice?: number | null;
+  weeklyPromoTitle: string;
+  weeklyPromoSubtitle: string;
+  monthlyPromoTitle: string;
+  monthlyPromoSubtitle: string;
+}
+
+const DEFAULT_SETTINGS: HomePageSettings = {
+  heroTitle: "Quality packaged groceries,",
+  heroHighlight: "delivered tonight.",
+  heroSubtitle: "Flour, pulses, cooking oils, spices, tea, snacks, and daily household essentials — delivered in our guaranteed evening slot.",
+  heroCtaText: "Explore Market",
+  heroCtaLink: "/products",
+  heroImageUrl: "https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=1600&auto=format&fit=crop&q=80",
+  deliverySlotLabel: "7:00 PM – 10:00 PM",
+  cutoffHour: 17,
+  freeDeliveryThreshold: 3000,
+  showDealOfTheDay: true,
+  dealBadgeText: "20% OFF Daily Offer",
+  dealProductId: null,
+  dealCompareAtPrice: null,
+  weeklyPromoTitle: "Weekly Grocery Staples Pack",
+  weeklyPromoSubtitle: "Flour, rice, pulses & daily essentials delivered every week with 15% subscriber savings.",
+  monthlyPromoTitle: "Monthly Super Pantry Stock-Up",
+  monthlyPromoSubtitle: "Bulk bags of Atta, Rice, Cooking Oil & Spices delivered to your door.",
+};
+
 export default function AdminHomepageControlPage() {
-  const [settings, setSettings] = useState<HomePageSettings>(getHomePageSettings);
+  const [settings, setSettings] = useState<HomePageSettings>(DEFAULT_SETTINGS);
   const [saved, setSaved] = useState(false);
   const [products, setProducts] = useState<SerializedProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [productLoadError, setProductLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    setSettings(getHomePageSettings());
-
     // Fetch products for Deal of the Day selector
     async function loadProducts() {
       try {
@@ -65,10 +98,9 @@ export default function AdminHomepageControlPage() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    saveHomePageSettings(settings);
     setSaved(true);
     toast.success("Homepage settings saved successfully!", {
-      description: "Changes are now live across desktop and mobile home views.",
+      description: "Changes saved.",
     });
     setTimeout(() => setSaved(false), 3000);
   };

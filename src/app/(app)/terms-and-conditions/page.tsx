@@ -103,9 +103,9 @@ export default function TermsAndConditionsPage() {
         </section>
 
         <section className="flex flex-col gap-2">
-          <h2 className="text-lg font-bold text-foreground font-display">5. Product Pricing &amp; Fresh Weight Variances</h2>
+          <h2 className="text-lg font-bold text-foreground font-display">5. Product Pricing &amp; Taxes</h2>
           <p>
-            All prices listed are in Pakistani Rupees (PKR). Due to the nature of fresh fruits, vegetables, and meats, actual weight delivered may vary slightly by ±5%. You will only be billed for the actual weighed amount delivered.
+            All prices listed are in Pakistani Rupees (PKR) and include applicable taxes. We strive for 100% accuracy in item descriptions and list pricing across all packaged grocery lines.
           </p>
         </section>
 

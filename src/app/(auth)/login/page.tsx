@@ -57,8 +57,8 @@ export default function LoginPage() {
   return (
     <AuthLayout
       quote={{
-        headline: "Groceries picked at dawn, at your door by noon.",
-        body: "Seasonal produce from small farms, sourced with care and packed by hand.",
+        headline: "Quality groceries delivered on your schedule.",
+        body: "Flour, grains, spices, oils & daily essentials sourced with care and delivered to your doorstep.",
       }}
     >
       <h1 className="text-[2rem] leading-tight text-foreground">Welcome back</h1>

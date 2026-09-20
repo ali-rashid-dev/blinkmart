@@ -1,20 +1,7 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ShoppingBag, Sparkles, Truck } from "lucide-react";
-import {
-  getHomePageSettings,
-  type HomePageSettings,
-} from "@/lib/home/home-config";
 
 export function FinalCta() {
-  const [cfg, setCfg] = useState<HomePageSettings>(getHomePageSettings());
-
-  useEffect(() => {
-    setCfg(getHomePageSettings());
-  }, []);
-
   return (
     <section className="mx-auto w-full max-w-7xl px-4 pb-16 pt-4 sm:px-6 sm:pb-24">
       <div className="relative overflow-hidden rounded-[2.5rem] bg-secondary px-6 py-12 text-center shadow-card sm:px-12 sm:py-16">
@@ -36,9 +23,8 @@ export function FinalCta() {
 
           {/* Description */}
           <p className="mt-4 max-w-lg text-sm leading-relaxed text-secondary-foreground/70 sm:text-base">
-            Shop farm-fresh produce, weekly staples &amp; monthly pantry
-            stock-ups delivered straight to your door in our{" "}
-            {cfg.deliverySlotLabel} evening slot.
+            Shop top-quality packaged groceries, weekly staples &amp; monthly pantry
+            stock-ups delivered straight to your door in our 7:00 PM – 10:00 PM evening slot.
           </p>
 
           {/* CTA */}
@@ -57,7 +43,7 @@ export function FinalCta() {
           <div className="mt-8 flex w-full max-w-md items-center justify-center gap-6 border-t border-secondary-foreground/10 pt-4 text-xs font-medium text-secondary-foreground/70">
             <span className="flex items-center gap-1.5">
               <Truck className="size-3.5 text-primary" />
-              Free Delivery &gt; Rs {cfg.freeDeliveryThreshold}
+              Free Delivery &gt; Rs 3000
             </span>
 
             <span className="flex items-center gap-1.5">

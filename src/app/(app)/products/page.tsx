@@ -8,13 +8,13 @@ import { toCustomerProduct } from "@/components/products/data";
 import { ProductGridSkeleton } from "@/components/products/States";
 
 export const metadata: Metadata = {
-  title: "Shop Fresh Groceries — Kit&Co",
+  title: "Shop Groceries — Kit&Co",
   description:
-    "Browse handpicked organic produce, dairy, bakery and pantry staples. Filter by category, brand, price and rating.",
+    "Browse grains, pulses, cooking oils, spices, beverages and pantry staples. Filter by category, brand, price and rating.",
   openGraph: {
-    title: "Shop Fresh Groceries — Kit&Co",
+    title: "Shop Groceries — Kit&Co",
     description:
-      "Browse handpicked organic produce, dairy, bakery and pantry staples with same-day delivery.",
+      "Browse quality packaged groceries, beverages and pantry staples with guaranteed evening delivery.",
   },
 };
 

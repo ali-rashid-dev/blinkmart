@@ -23,13 +23,14 @@ export type NavSession = {
 // ─── Grocery categories ───────────────────────────────────────────────────────
 
 export const CATEGORIES = [
-  { label: "Fresh Produce", href: "/products?category=produce", icon: Leaf },
-  { label: "Dairy & Eggs",  href: "/products?category=dairy",   icon: Milk },
-  { label: "Fruits",        href: "/products?category=fruits",  icon: Apple },
-  { label: "Bakery",        href: "/products?category=bakery",  icon: Sandwich },
-  { label: "Meat & Fish",   href: "/products?category=meat",    icon: Beef },
-  { label: "Frozen",        href: "/products?category=frozen",  icon: IceCream },
-  { label: "Snacks",        href: "/products?category=snacks",  icon: Sparkles },
+  { label: "Flour & Grains",      href: "/products?category=flour-grains",     icon: Leaf },
+  { label: "Pulses & Lentils",    href: "/products?category=pulses-lentils",   icon: Package },
+  { label: "Cooking Oils & Ghee", href: "/products?category=cooking-oils-ghee",icon: Sandwich },
+  { label: "Spices & Seasonings", href: "/products?category=spices-seasonings",icon: Sparkles },
+  { label: "Tea & Beverages",     href: "/products?category=tea-coffee-beverages", icon: Milk },
+  { label: "Biscuits & Snacks",   href: "/products?category=biscuits-snacks",  icon: Sparkles },
+  { label: "Personal Care",       href: "/products?category=personal-care",    icon: User },
+  { label: "Home Cleaning",       href: "/products?category=home-cleaning",    icon: Home },
 ] as const;
 
 // ─── Desktop top-strip quick links ───────────────────────────────────────────

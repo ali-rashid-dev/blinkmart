@@ -20,7 +20,6 @@ import { ActiveOrderTracker } from "./ActiveOrderTracker";
 import { RepeatOrderCard } from "./RepeatOrderCard";
 import { Footer } from "@/components/layout/Footer";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
-import { getHomePageSettings, formatCutoffHour, type HomePageSettings } from "@/lib/home/home-config";
 import type { CustomerProduct } from "@/components/products/data";
 import type { HomeCategory } from "./CategoryStrip";
 
@@ -28,7 +27,7 @@ interface MobileHomeViewProps {
   categories: HomeCategory[];
   products: CustomerProduct[];
   bestSellers?: CustomerProduct[];
-  dealProduct: CustomerProduct | null;
+  dealProduct?: CustomerProduct | null;
 }
 
 export function MobileHomeView({
@@ -37,12 +36,6 @@ export function MobileHomeView({
   bestSellers = [],
   dealProduct,
 }: MobileHomeViewProps) {
-  const [cfg, setCfg] = useState<HomePageSettings>(getHomePageSettings);
-
-  useEffect(() => {
-    setCfg(getHomePageSettings());
-  }, []);
-
   const displayProducts = bestSellers.length > 0 ? bestSellers : products;
 
   return (
@@ -61,7 +54,7 @@ export function MobileHomeView({
               <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
             </div>
             <p className="text-xs font-semibold text-foreground truncate">
-              Slot: {cfg.deliverySlotLabel} • Cutoff {formatCutoffHour(cfg.cutoffHour)}
+              Slot: 7:00 PM – 10:00 PM • Cutoff 5:00 PM
             </p>
           </div>
         </div>
@@ -87,8 +80,8 @@ export function MobileHomeView({
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-bold text-foreground flex items-center gap-1.5">
-            <Leaf className="size-4 text-primary" />
-            Shop Fresh Produce & Essentials
+            <ShoppingBag className="size-4 text-primary" />
+            Shop Groceries & Essentials
           </h2>
           <Link
             href="/products"
@@ -126,14 +119,14 @@ export function MobileHomeView({
       </div>
 
       {/* ── 7. Flash Deal Spotlight ────────────────────────────────── */}
-      {cfg.showDealOfTheDay !== false && dealProduct && (
+      {dealProduct && (
         <div className="overflow-hidden rounded-2xl border border-destructive/30 bg-gradient-to-br from-card via-card to-destructive/5 p-4 shadow-soft">
           <div className="flex items-center justify-between border-b border-border/50 pb-2 mb-3">
             <span className="inline-flex items-center gap-1 rounded-full bg-destructive text-destructive-foreground px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
-              <Flame className="size-3" /> {cfg.dealBadgeText}
+              <Flame className="size-3" /> Flash Deal Offer
             </span>
             <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
-              <Moon className="size-3 text-primary" /> Tonight {cfg.deliverySlotLabel}
+              <Moon className="size-3 text-primary" /> Tonight 7:00 PM – 10:00 PM
             </span>
           </div>
 

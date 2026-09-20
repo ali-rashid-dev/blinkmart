@@ -13,7 +13,6 @@ import { RepeatOrderCard } from "./RepeatOrderCard";
 import { DeliverySlotBanner } from "./DeliverySlotBanner";
 import { MobileHomeView } from "./MobileHomeView";
 import { Footer } from "@/components/layout/Footer";
-import { getHomePageSettings } from "@/lib/home/home-config";
 import type { HomeCategory } from "./CategoryStrip";
 import type { CustomerProduct } from "@/components/products/data";
 
@@ -26,12 +25,6 @@ interface HomeLayoutProps {
   dealCompareAtPrice: number | null;
 }
 
-/**
- * Client-side responsive layout that chooses between mobile and desktop views
- * using media query decision, preventing duplicate widget mounting.
- * Shared widgets (ActiveOrderTracker, RepeatOrderCard, DeliverySlotBanner)
- * are only rendered once based on the device type.
- */
 export function HomeLayout({
   categories,
   products,
@@ -41,13 +34,10 @@ export function HomeLayout({
   dealCompareAtPrice,
 }: HomeLayoutProps) {
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
-  const [showDealOfTheDay, setShowDealOfTheDay] = useState<boolean>(true);
 
   useEffect(() => {
-    // Set initial value based on window size
     setIsMobile(window.innerWidth < 1024);
 
-    // Listen for resize events
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1024);
     };
@@ -56,30 +46,21 @@ export function HomeLayout({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  useEffect(() => {
-    // Read homepage settings for Deal of the Day toggle
-    const cfg = getHomePageSettings();
-    setShowDealOfTheDay(cfg.showDealOfTheDay !== false);
-  }, []);
-
-  // Wait for client-side hydration to determine layout
   if (isMobile === null) {
     return null;
   }
 
   if (isMobile) {
-    // Mobile view: render dedicated mobile layout which includes all shared widgets
     return (
       <MobileHomeView
         categories={categories}
         products={products}
         bestSellers={bestSellers}
-        dealProduct={showDealOfTheDay ? serverDealProduct : null}
+        dealProduct={serverDealProduct}
       />
     );
   }
 
-  // Desktop view: render full desktop layout with shared widgets
   return (
     <main className="min-h-screen overflow-x-hidden bg-background">
       <MarketHero />
@@ -94,11 +75,11 @@ export function HomeLayout({
       <PromoBanner />
       <ProductRow
         title="Weekly Staples & Best Sellers"
-        subtitle="Customer favorite fresh produce, dairy & recurring household items."
+        subtitle="Customer favorite packaged groceries, pantry staples & household items."
         products={bestSellers}
         ctaLabel="View All Products"
       />
-      {showDealOfTheDay && serverDealProduct && <DealOfTheDay product={serverDealProduct} compareAtPrice={dealCompareAtPrice} />}
+      {serverDealProduct && <DealOfTheDay product={serverDealProduct} compareAtPrice={dealCompareAtPrice} />}
       <ProductRow
         title="Monthly Stock-Up Essentials"
         subtitle="Bulk pantry items, flour, rice, oils, and restocked shelves."

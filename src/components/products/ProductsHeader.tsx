@@ -29,7 +29,7 @@ export function ProductsHeader({ total }: { total: number }) {
     </h1>
 
     <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">
-      Handpicked produce, pantry staples and small-batch finds — refreshed every morning.
+      Quality grains, spices, oils, beverages and pantry staples — ready for quick delivery.
     </p>
   </div>
 

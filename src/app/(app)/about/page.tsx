@@ -17,7 +17,7 @@ import {
 export const metadata: Metadata = {
   title: "About Us — Kit&Co Grocery Delivery Faisalabad",
   description:
-    "Learn about Kit&Co, Faisalabad's leading evening grocery delivery service specializing in fresh produce, daily essentials, and bulk pantry stock-ups.",
+    "Learn about Kit&Co, Faisalabad's leading evening grocery delivery service specializing in quality packaged groceries, daily essentials, and bulk pantry stock-ups.",
 };
 
 export default function AboutPage() {
@@ -36,7 +36,7 @@ export default function AboutPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            Kit&amp;Co was built with a simple promise: fresh, farm-quality produce and pantry staples delivered directly to your doorstep in Faisalabad when you are actually home—during guaranteed 7:00 PM to 10:00 PM evening slots.
+            Kit&amp;Co was built with a simple promise: quality packaged groceries, daily essentials and pantry staples delivered directly to your doorstep in Faisalabad when you are actually home—during guaranteed 7:00 PM to 10:00 PM evening slots.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -86,9 +86,9 @@ export default function AboutPage() {
             <div className="size-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
               <ShieldCheck className="size-6" />
             </div>
-            <h3 className="font-bold text-base text-foreground">100% Freshness Guarantee</h3>
+            <h3 className="font-bold text-base text-foreground">100% Quality Guarantee</h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Fruits, vegetables, and meats sourced fresh every morning. If an item doesn't meet your quality standard, notify us within 24 hours for a full refund or store credit.
+              Sealed packaged products sourced directly from trusted manufacturers. If an item is damaged or defective, notify us within 24 hours for a full replacement.
             </p>
           </div>
 
@@ -98,7 +98,7 @@ export default function AboutPage() {
             </div>
             <h3 className="font-bold text-base text-foreground">Faisalabad Local Reach</h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Dedicated cold-chain fulfillment centers strategically situated near Canal Road and Kohinoor City for rapid sector dispatch.
+              Dedicated fulfillment centers strategically situated near Canal Road and Kohinoor City for rapid sector dispatch.
             </p>
           </div>
 
@@ -144,19 +144,19 @@ export default function AboutPage() {
         <div className="flex flex-col gap-4">
           <span className="text-xs font-bold uppercase tracking-wider text-primary">Our Journey</span>
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
-            From Local Punjab Farms to Your Kitchen Table
+            From Trusted Manufacturers to Your Kitchen Table
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Founded with the goal of modernizing Faisalabad's food distribution, Kit&amp;Co connects Punjab’s finest farmers and trusted consumer goods manufacturers directly with households.
+            Founded with the goal of modernizing Faisalabad's grocery distribution, Kit&amp;Co connects trusted consumer goods manufacturers and distributors directly with households.
           </p>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            By operating a centralized warehouse model with evening delivery runs, we eliminate supermarket markups, maintain strict temperature control, and give working families their evenings back.
+            By operating a centralized warehouse model with evening delivery runs, we eliminate supermarket markups, maintain strict inventory control, and give working families their evenings back.
           </p>
 
           <ul className="space-y-2 pt-2 text-xs font-semibold text-foreground">
             <li className="flex items-center gap-2">
               <CheckCircle className="size-4 text-emerald-500 shrink-0" />
-              <span>Direct farmer sourcing for spinach, tomatoes, potatoes &amp; seasonal fruits</span>
+              <span>Direct brand sourcing for flour, rice, oils, spices &amp; household staples</span>
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle className="size-4 text-emerald-500 shrink-0" />

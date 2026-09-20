@@ -1,33 +1,23 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Leaf, Moon, ShieldCheck, Truck } from "lucide-react";
-import { getHomePageSettings, formatCutoffHour, type HomePageSettings } from "@/lib/home/home-config";
+import { ArrowRight, Moon, ShieldCheck, Truck } from "lucide-react";
 
 export function MarketHero() {
-  const [cfg, setCfg] = useState<HomePageSettings>(getHomePageSettings);
-
-  useEffect(() => {
-    setCfg(getHomePageSettings());
-  }, []);
-
   const trustPoints = [
-    { Icon: Leaf, label: "Farm-fresh handpicked harvest" },
-    { Icon: Moon, label: `${cfg.deliverySlotLabel} Evening Slot` },
-    { Icon: Truck, label: `Free delivery over Rs ${cfg.freeDeliveryThreshold}` },
+    { Icon: ShieldCheck, label: "100% Quality Inspected Essentials" },
+    { Icon: Moon, label: "7:00 PM – 10:00 PM Evening Slot" },
+    { Icon: Truck, label: "Free delivery over Rs 3000" },
   ];
 
   return (
     <section
-      aria-label="Fresh groceries delivered daily in the evening window"
+      aria-label="Quality groceries delivered daily in the evening window"
       className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 sm:pt-8"
     >
       <div className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-secondary text-secondary-foreground">
         <Image
-          src={cfg.heroImageUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&auto=format&fit=crop&q=80"}
-          alt="Baskets of fresh seasonal fruit and vegetables at the market"
+          src="https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=1600&auto=format&fit=crop&q=80"
+          alt="Selection of pantry essentials and packaged groceries"
           fill
           priority
           className="object-cover opacity-35"
@@ -41,24 +31,24 @@ export function MarketHero() {
           <div className="max-w-xl">
             <span className="inline-flex items-center gap-2 rounded-full border border-secondary-foreground/25 bg-secondary-foreground/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em]">
               <Moon aria-hidden="true" className="size-3.5 text-primary" />
-              Evening Delivery Slot ({cfg.deliverySlotLabel})
+              Evening Delivery Slot (7:00 PM – 10:00 PM)
             </span>
 
             <h1 className="mt-4 font-display text-4xl leading-[1.08] sm:text-5xl lg:text-6xl">
-              {cfg.heroTitle}{" "}
-              <span className="block text-primary">{cfg.heroHighlight}</span>
+              Quality packaged groceries,{" "}
+              <span className="block text-primary">delivered tonight.</span>
             </h1>
 
             <p className="mt-4 max-w-md text-base leading-relaxed text-secondary-foreground/80">
-              {cfg.heroSubtitle}
+              Flour, pulses, cooking oils, spices, tea, snacks, and daily household essentials — delivered in our guaranteed evening slot.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
-                href={cfg.heroCtaLink || "/products"}
+                href="/products"
                 className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-button transition-transform duration-300 hover:-translate-y-0.5"
               >
-                {cfg.heroCtaText || "Explore Market"}
+                Explore Market
                 <ArrowRight aria-hidden="true" className="size-4" />
               </Link>
               <Link
@@ -82,9 +72,9 @@ export function MarketHero() {
           <div className="hidden items-end lg:flex">
             <dl className="ml-auto grid w-full max-w-xs gap-3">
               {[
-                { k: cfg.deliverySlotLabel, v: "Fixed Evening Slot" },
-                { k: formatCutoffHour(cfg.cutoffHour), v: "Order Cutoff Time" },
-                { k: "100%", v: "Handpicked Fresh Produce" },
+                { k: "7:00 PM – 10:00 PM", v: "Fixed Evening Slot" },
+                { k: "5:00 PM", v: "Order Cutoff Time" },
+                { k: "100%", v: "Guaranteed Quality Essentials" },
               ].map((s) => (
                 <div
                   key={s.k}

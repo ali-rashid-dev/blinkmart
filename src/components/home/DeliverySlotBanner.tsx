@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Clock, Moon, ShieldCheck, Sparkles, Truck } from "lucide-react";
-import { getHomePageSettings, type HomePageSettings } from "@/lib/home/home-config";
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -10,11 +9,9 @@ function pad(n: number) {
 
 export function DeliverySlotBanner() {
   const [now, setNow] = useState<Date | null>(null);
-  const [cfg, setCfg] = useState<HomePageSettings>(getHomePageSettings);
 
   useEffect(() => {
     setNow(new Date());
-    setCfg(getHomePageSettings());
     const interval = setInterval(() => {
       setNow(new Date());
     }, 1000);
@@ -27,7 +24,7 @@ export function DeliverySlotBanner() {
     );
   }
 
-  const cutoffHour = cfg.cutoffHour ?? 17;
+  const cutoffHour = 17;
   const hours = now.getHours();
   const isBeforeCutoff = hours < cutoffHour;
 
@@ -54,7 +51,7 @@ export function DeliverySlotBanner() {
             <div className="flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-bold text-primary">
                 <Sparkles className="size-3" />
-                Evening Slot: {cfg.deliverySlotLabel}
+                Evening Slot: 7:00 PM – 10:00 PM
               </span>
               {isBeforeCutoff ? (
                 <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
@@ -70,8 +67,8 @@ export function DeliverySlotBanner() {
 
             <p className="mt-1 text-sm font-semibold text-foreground">
               {isBeforeCutoff
-                ? `Orders placed before ${cutoffHour > 12 ? cutoffHour - 12 : cutoffHour}:00 PM arrive in tonight's run.`
-                : `${cutoffHour > 12 ? cutoffHour - 12 : cutoffHour}:00 PM cutoff reached. Orders scheduled for tomorrow evening.`}
+                ? "Orders placed before 5:00 PM arrive in tonight's run."
+                : "5:00 PM cutoff reached. Orders scheduled for tomorrow evening."}
             </p>
           </div>
         </div>
@@ -82,7 +79,7 @@ export function DeliverySlotBanner() {
             <Clock className="size-4 text-primary shrink-0" />
             <div className="text-xs">
               <span className="text-muted-foreground block text-[10px] uppercase font-bold tracking-wider">
-                {cutoffHour > 12 ? cutoffHour - 12 : cutoffHour}:00 PM Cutoff In
+                5:00 PM Cutoff In
               </span>
               <span className="font-mono text-sm font-bold text-foreground tabular-nums">
                 {pad(remainingHours)}h {pad(remainingMins)}m {pad(remainingSecs)}s
@@ -103,15 +100,15 @@ export function DeliverySlotBanner() {
       <div className="mt-3 pt-3 border-t border-border/40 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-muted-foreground">
         <div className="flex items-center gap-1.5">
           <ShieldCheck className="size-3.5 text-primary shrink-0" />
-          <span>Handpicked Quality Inspected</span>
+          <span>100% Sealed & Quality Checked</span>
         </div>
         <div className="flex items-center gap-1.5">
           <Truck className="size-3.5 text-primary shrink-0" />
-          <span>Free Delivery &gt; Rs {cfg.freeDeliveryThreshold}</span>
+          <span>Free Delivery &gt; Rs 3000</span>
         </div>
         <div className="hidden sm:flex items-center gap-1.5">
           <Moon className="size-3.5 text-primary shrink-0" />
-          <span>Guaranteed {cfg.deliverySlotLabel} Window</span>
+          <span>Guaranteed 7:00 PM – 10:00 PM Window</span>
         </div>
       </div>
     </div>

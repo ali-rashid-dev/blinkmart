@@ -42,8 +42,8 @@ const FAQ_DATA: FAQItem[] = [
   },
   {
     category: "quality",
-    question: "How do you ensure fresh produce quality in Faisalabad's weather?",
-    answer: "We source fresh fruits, vegetables, and dairy directly from Punjab farms every morning. Deliveries are packed in temperature-controlled insulated containers to protect fresh items against heat during transit.",
+    question: "How do you ensure grocery quality and packaging standards?",
+    answer: "All products are sourced directly from authorized manufacturers and distributors. Packages are inspected and sealed before dispatch to ensure maximum quality and hygiene during transit.",
   },
   {
     category: "quality",
@@ -58,7 +58,7 @@ const FAQ_DATA: FAQItem[] = [
   {
     category: "orders",
     question: "Do you offer weekly or monthly recurring grocery stock-ups?",
-    answer: "Yes! You can easily repeat past orders with a single click from your profile or schedule recurring weekly staple boxes for milk, eggs, bread, and monthly bulk pantry items like flour, rice, and oil.",
+    answer: "Yes! You can easily repeat past orders with a single click from your profile or reorder monthly bulk pantry items like flour, rice, cooking oil, spices, and tea.",
   },
 ];
 

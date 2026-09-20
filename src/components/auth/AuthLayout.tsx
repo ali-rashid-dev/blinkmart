@@ -25,7 +25,7 @@ export function AuthLayout({
         <div className="relative h-full overflow-hidden rounded-[28px] border border-border">
           <Image
             src="/grocery-illustration.jpg"
-            alt="Illustration of a woven basket and paper bag filled with fresh produce, herbs and olive branches"
+            alt="Selection of pantry essentials and packaged groceries"
             width={1024}
             height={1536}
             className="size-full object-cover"
