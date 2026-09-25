@@ -23,7 +23,7 @@ export function DealOfTheDay({ product, compareAtPrice }: DealOfTheDayProps) {
     expiry === null || Number.isNaN(expiry) ? 0 : Math.max(0, Math.ceil((expiry - Date.now()) / 1000)),
   );
   const [qty, setQty] = useState(1);
-  const [failedImage, setFailedImage] = useState(false);
+  const [failedImage, setFailedImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (expiry === null || Number.isNaN(expiry)) return;
@@ -61,13 +61,13 @@ export function DealOfTheDay({ product, compareAtPrice }: DealOfTheDayProps) {
             aria-hidden="true"
             className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,var(--color-card),transparent_65%)]"
           />
-          {imageSrc && !failedImage ? (
+          {imageSrc && failedImage !== imageSrc ? (
             <Image
               src={imageSrc}
               alt={p.name}
               fill
               className="object-cover rounded-xl"
-              onError={() => setFailedImage(true)}
+              onError={() => setFailedImage(imageSrc)}
             />
           ) : (
             <div className="flex flex-col items-center justify-center text-muted-foreground/40">
