@@ -20,8 +20,21 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "fmcupnguk1.ufs.sh",
+        hostname: "*.uploadthing.com",
         pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.ufs.sh",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
       },
     ],
   },

@@ -9,7 +9,6 @@ import {
   reorderAction,
 } from "@/app/(app)/orders/actions";
 import { cartStore } from "@/lib/cart/store";
-import { toast } from "sonner";
 
 export interface OrdersState {
   loading: boolean;
@@ -129,7 +128,6 @@ export const ordersStore = {
       const res = await cancelOrderAction(orderId, reason);
 
       if (res.success) {
-        toast.success("Order cancelled successfully");
         updateState((prev) => {
           const nextById = { ...prev.byId, [res.data.id]: res.data, [res.data.code]: res.data };
 
@@ -141,11 +139,9 @@ export const ordersStore = {
         });
         return true;
       } else {
-        toast.error("Failed to cancel order", { description: res.error.message });
         return false;
       }
-    } catch (err) {
-      toast.error("Failed to cancel order");
+    } catch {
       return false;
     } finally {
       updateState((prev) => ({
@@ -165,17 +161,12 @@ export const ordersStore = {
       const res = await reorderAction(orderId);
 
       if (res.success) {
-        toast.success("Items added to your cart", {
-          description: `Reordered ${res.data.itemCount} items into your cart.`,
-        });
         void cartStore.load(true);
         return true;
       } else {
-        toast.error("Failed to reorder", { description: res.error.message });
         return false;
       }
-    } catch (err) {
-      toast.error("Failed to reorder");
+    } catch {
       return false;
     } finally {
       updateState((prev) => ({

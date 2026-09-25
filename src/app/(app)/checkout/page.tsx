@@ -14,7 +14,6 @@ import {
   ShieldCheck,
   ShoppingBag,
 } from "lucide-react";
-import { toast } from "sonner";
 import { cartStore, cartTotals, formatPrice, useCartState } from "@/lib/cart/store";
 import { formatMoney } from "@/lib/orders/store";
 import { getAvailableDeliveryDates, DELIVERY_WINDOW, type DeliveryDateOption } from "@/lib/orders/types";
@@ -113,9 +112,6 @@ export default function CheckoutPage() {
       });
 
       if (res.success) {
-        toast.success("Order placed successfully!", {
-          description: `Order ${res.data.code} scheduled for ${selectedDateIso}, 7:00 PM – 10:00 PM.`,
-        });
         void cartStore.load(true);
         router.push(`/orders/${res.data.id}`);
       } else {
@@ -123,7 +119,6 @@ export default function CheckoutPage() {
           setFieldErrors(res.error.fieldErrors);
         }
         setFormError(res.error.message);
-        toast.error("Could not place order", { description: res.error.message });
       }
     } catch {
       setFormError("An unexpected error occurred. Please try again.");

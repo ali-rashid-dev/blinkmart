@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Kit&Co Admin",
@@ -38,6 +39,7 @@ export default async function AppLayout({ children }: RootLayoutProps) {
   return (
     <>
       <AppShell>{children}</AppShell>
+      <Toaster richColors position="top-right" />
     </>
   );
 }

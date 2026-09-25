@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Check, Loader2, ShoppingBasket } from "lucide-react";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { cartStore } from "@/lib/cart/store";
 
@@ -36,15 +35,10 @@ export function AddToCartButton({
     try {
       await cartStore.add(productId, quantity);
       setState("done");
-      toast.success(`${label} added to cart`, {
-        duration: 2000,
-      });
       onAdd?.();
       timers.current.push(setTimeout(() => setState("idle"), 1600));
-    } catch (err) {
+    } catch {
       setState("error");
-      const msg = err instanceof Error ? err.message : "Failed to add to cart";
-      toast.error("Could not add item", { description: msg });
       timers.current.push(setTimeout(() => setState("idle"), 2000));
     }
   };

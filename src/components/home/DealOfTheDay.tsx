@@ -8,6 +8,8 @@ import { AddToCartButton } from "@/components/products/AddToCartButton";
 import type { CustomerProduct } from "@/components/products/data";
 import { SectionHeader } from "./SectionHeader";
 
+import { getSupportedImageSrc } from "@/lib/image";
+
 const pad = (n: number) => String(n).padStart(2, "0");
 
 interface DealOfTheDayProps {
@@ -21,6 +23,7 @@ export function DealOfTheDay({ product, compareAtPrice }: DealOfTheDayProps) {
     expiry === null || Number.isNaN(expiry) ? 0 : Math.max(0, Math.ceil((expiry - Date.now()) / 1000)),
   );
   const [qty, setQty] = useState(1);
+  const [failedImage, setFailedImage] = useState(false);
 
   useEffect(() => {
     if (expiry === null || Number.isNaN(expiry)) return;
@@ -47,6 +50,7 @@ export function DealOfTheDay({ product, compareAtPrice }: DealOfTheDayProps) {
   const discountPercent = originalPrice > 0
     ? Math.max(0, Math.round((1 - p.price / originalPrice) * 100))
     : 0;
+  const imageSrc = getSupportedImageSrc(p.imageUrl);
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
@@ -57,12 +61,13 @@ export function DealOfTheDay({ product, compareAtPrice }: DealOfTheDayProps) {
             aria-hidden="true"
             className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,var(--color-card),transparent_65%)]"
           />
-          {p.imageUrl ? (
+          {imageSrc && !failedImage ? (
             <Image
-              src={p.imageUrl}
+              src={imageSrc}
               alt={p.name}
               fill
               className="object-cover rounded-xl"
+              onError={() => setFailedImage(true)}
             />
           ) : (
             <div className="flex flex-col items-center justify-center text-muted-foreground/40">
