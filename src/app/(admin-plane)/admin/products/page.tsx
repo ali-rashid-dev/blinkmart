@@ -393,7 +393,7 @@ function ProductFormDialog({
             <div>
               <p className="text-sm font-medium text-foreground">Product Status</p>
               <p className="text-xs text-muted-foreground">
-                Active products are visible to customers on BlinkMart store.
+                Active products are visible to customers on kitcomart store.
               </p>
             </div>
             <Switch

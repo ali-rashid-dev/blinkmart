@@ -20,7 +20,7 @@ import {
   getCartFieldErrors,
 } from "@/validations/cart";
 
-const GUEST_CART_COOKIE = "blinkmart_cart_id";
+const GUEST_CART_COOKIE = "kitcomart_cart_id";
 
 export type CartActionErrorCode =
   | "UNAUTHORIZED"

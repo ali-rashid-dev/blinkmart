@@ -1,5 +1,5 @@
 /**
- * Uniform Currency Formatter for BlinkMart (Pakistan Rupee - Rs)
+ * Uniform Currency Formatter for kitcomart (Pakistan Rupee - Rs)
  */
 export function formatCurrency(amount: number | string | null | undefined): string {
   if (amount == null) return "Rs 0";

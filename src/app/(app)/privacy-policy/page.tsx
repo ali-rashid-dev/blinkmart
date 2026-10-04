@@ -3,9 +3,9 @@ import Link from "next/link";
 import { Lock, Shield, Eye, Database, Smartphone, UserCheck } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Kit&Co Grocery Delivery Faisalabad",
+  title: "Privacy Policy — kitcomart Grocery Delivery Faisalabad",
   description:
-    "Learn how Kit&Co collects, protects, and handles customer data and delivery address information in Faisalabad.",
+    "Learn how kitcomart collects, protects, and handles customer data and delivery address information in Faisalabad.",
 };
 
 export default function PrivacyPolicyPage() {

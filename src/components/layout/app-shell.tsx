@@ -15,10 +15,10 @@ import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth-client";
+import { Logo } from "@/components/ui/logo";
 
 const nav = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/homepage", label: "Home Control", icon: Sliders },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/customers", label: "Customers", icon: Users },
@@ -70,17 +70,18 @@ function NavList({ collapsed, onNavigate }: { collapsed?: boolean; onNavigate?: 
 
 function Brand({ collapsed }: { collapsed?: boolean }) {
   return (
-    <Link href="/" className={cn("flex items-center gap-2.5 px-5 py-5", collapsed && "justify-center px-3")}>
-      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground shadow-organic">
-        <span className="font-serif text-lg font-semibold">H</span>
-      </div>
-      {!collapsed && (
-        <div className="min-w-0">
-          <div className="font-serif text-lg leading-none">Harvest</div>
-          <div className="text-[11px] uppercase tracking-widest text-muted-foreground mt-1">Admin Panel</div>
+    <div className={cn("flex items-center gap-2.5 px-5 py-5 border-b border-border/50", collapsed && "justify-center px-2 py-4")}>
+      {collapsed ? (
+        <Logo href="/" variant="icon" size="sm" />
+      ) : (
+        <div className="flex flex-col gap-1">
+          <Logo href="/" variant="full" size="sm" />
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground pl-0.5">
+            Admin Panel
+          </span>
         </div>
       )}
-    </Link>
+    </div>
   );
 }
 

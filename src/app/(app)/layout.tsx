@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { AppClientShell } from './AppClientShell';
 
 export const metadata: Metadata = {
-  title: 'Kit&Co',
+  title: 'kitcomart',
   description: 'A modern shopping experience',
 };
 

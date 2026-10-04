@@ -8,11 +8,11 @@ import { toCustomerProduct } from "@/components/products/data";
 import { ProductGridSkeleton } from "@/components/products/States";
 
 export const metadata: Metadata = {
-  title: "Shop Groceries — Kit&Co",
+  title: "Shop Groceries — kitcomart",
   description:
     "Browse grains, pulses, cooking oils, spices, beverages and pantry staples. Filter by category, brand, price and rating.",
   openGraph: {
-    title: "Shop Groceries — Kit&Co",
+    title: "Shop Groceries — kitcomart",
     description:
       "Browse quality packaged groceries, beverages and pantry staples with guaranteed evening delivery.",
   },

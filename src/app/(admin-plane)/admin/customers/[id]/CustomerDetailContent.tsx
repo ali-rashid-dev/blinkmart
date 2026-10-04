@@ -282,7 +282,7 @@ function BanCustomerDialog({
             <ShieldAlert className="h-5 w-5" /> Ban Customer Account
           </DialogTitle>
           <DialogDescription>
-            This action will restrict customer access to BlinkMart and log out all active sessions.
+            This action will restrict customer access to kitcomart and log out all active sessions.
           </DialogDescription>
         </DialogHeader>
 
@@ -357,7 +357,7 @@ function UnbanCustomerDialog({
           <DialogTitle className="font-serif text-xl flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
             <ShieldCheck className="h-5 w-5" /> Unban Customer Account
           </DialogTitle>
-          <DialogDescription>Restore customer login and order privileges on BlinkMart.</DialogDescription>
+          <DialogDescription>Restore customer login and order privileges on kitcomart.</DialogDescription>
         </DialogHeader>
 
         {customer && (

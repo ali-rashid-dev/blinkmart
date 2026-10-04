@@ -5,11 +5,11 @@ import { listCustomerProducts } from "@/repositories/product.repository";
 import { toCustomerProduct } from "@/components/products/data";
 
 export const metadata: Metadata = {
-  title: "Kit&Co — Weekly & Monthly Grocery Delivery (7–10 PM Slot)",
+  title: "kitcomart — Weekly & Monthly Grocery Delivery (7–10 PM Slot)",
   description:
     "Shop flour, grains, pulses, cooking oils, spices, tea, and monthly bulk pantry stock-ups with guaranteed evening delivery (7:00 PM – 10:00 PM) and same-day 5:00 PM cutoff.",
   openGraph: {
-    title: "Kit&Co — Weekly & Monthly Grocery Delivery (7–10 PM Slot)",
+    title: "kitcomart — Weekly & Monthly Grocery Delivery (7–10 PM Slot)",
     description:
       "Weekly staple essentials and monthly pantry stock-ups delivered in our guaranteed evening slot.",
   },
@@ -46,7 +46,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <h1 className="sr-only">Kit&Co — Weekly &amp; Monthly Grocery Delivery</h1>
+      <h1 className="sr-only">kitcomart — Weekly &amp; Monthly Grocery Delivery</h1>
       <HomeLayout
         categories={dbCategories}
         products={allCustomerProducts}

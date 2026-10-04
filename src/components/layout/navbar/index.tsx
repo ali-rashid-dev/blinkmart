@@ -7,12 +7,12 @@ import { authClient } from "@/lib/auth-client";
 import { notificationsStore } from "@/lib/notifications/store";
 import { CartBadge } from "@/components/cart/CartBadge";
 import { NotificationBadge } from "@/components/notification/NotificationBadge";
+import { Logo } from "@/components/ui/logo";
 
 import { CATEGORIES, QUICK_LINKS } from "./constants";
 import { SearchBar } from "./search-bar";
 import { CategoryDropdown } from "./category-dropdown";
 import { AccountMenu } from "./account-menu";
-import { MobileDrawer } from "./mobile-drawer";
 import { MobileBottomNav } from "./mobile-bottom-nav";
 import { useNavbarCategories } from "./use-navbar-categories";
 
@@ -65,23 +65,15 @@ export function Navbar() {
       >
         <div className="container mx-auto px-4 lg:px-6">
           <div className="flex items-center gap-3 h-16">
-            <Link
-              href="/"
-              className="hidden lg:flex items-center gap-2.5 shrink-0"
-              aria-label="Kit&Co Home"
-            >
-              <div className="size-9 rounded-xl bg-primary text-primary-foreground grid place-items-center shadow-button shrink-0">
-                <ShoppingBag className="size-5" />
-              </div>
-              <div>
-                <span className="font-display text-xl font-bold text-foreground leading-none">
-                  Kit&amp;Co
-                </span>
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground leading-none mt-0.5">
-                  Fresh &amp; Fast
-                </p>
-              </div>
-            </Link>
+            {/* Mobile Drawer & Mobile Logo */}
+            <div className="lg:hidden flex items-center gap-2 shrink-0">
+              <Logo href="/" variant="full" size="sm" priority />
+            </div>
+
+            {/* Desktop Logo */}
+            <div className="hidden lg:flex items-center shrink-0">
+              <Logo href="/" variant="full" size="md" priority />
+            </div>
 
             {/* Desktop categories */}
             <div className="hidden lg:flex ml-2">

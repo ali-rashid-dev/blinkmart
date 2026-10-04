@@ -1,4 +1,4 @@
-# BlinkMart
+# kitcomart
 
 A full-stack grocery e-commerce platform with a customer storefront and a full admin panel, built with Next.js 16, Prisma 7, and Neon PostgreSQL.
 
@@ -105,8 +105,8 @@ src/
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/ali-rashid-dev/blinkmart.git
-cd blinkmart
+git clone https://github.com/ali-rashid-dev/kitcomart.git
+cd kitcomart
 pnpm install
 ```
 
