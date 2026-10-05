@@ -21,7 +21,7 @@ export default function TermsAndConditionsPage() {
           Terms &amp; Conditions
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground">
-          Last updated: September 2026 • Valid for Kit&amp;Co  services in Faisalabad, Pakistan.
+          Last updated: September 2026 • Valid for KitcoMart  services in Faisalabad, Pakistan.
         </p>
       </div>
 
@@ -44,14 +44,14 @@ export default function TermsAndConditionsPage() {
         <section className="flex flex-col gap-2">
           <h2 className="text-lg font-bold text-foreground font-display">1. Acceptance of Terms</h2>
           <p>
-            By accessing or using the Kit&amp;Co website, mobile application, or grocery delivery service, you agree to be bound by these Terms &amp; Conditions. If you do not agree to these terms, please refrain from placing orders through our service.
+            By accessing or using the KitcoMart website, mobile application, or grocery delivery service, you agree to be bound by these Terms &amp; Conditions. If you do not agree to these terms, please refrain from placing orders through our service.
           </p>
         </section>
 
         <section className="flex flex-col gap-2">
           <h2 className="text-lg font-bold text-foreground font-display">2. Service Scope &amp; Faisalabad Deliveries</h2>
           <p>
-            Kit&amp;Co operates an evening grocery delivery service serving selected residential and commercial zones across Faisalabad, Pakistan. We reserve the right to restrict delivery to designated postal sectors (including Kohinoor City, D-Ground, Canal Road, People's Colony, Madina Town, Susan Road, and neighboring areas).
+            KitcoMart operates an evening grocery delivery service serving selected residential and commercial zones across Faisalabad, Pakistan. We reserve the right to restrict delivery to designated postal sectors (including Kohinoor City, D-Ground, Canal Road, People's Colony, Madina Town, Susan Road, and neighboring areas).
           </p>
         </section>
 
@@ -119,7 +119,7 @@ export default function TermsAndConditionsPage() {
         <section className="flex flex-col gap-2">
           <h2 className="text-lg font-bold text-foreground font-display">7. Governing Law &amp; Jurisdiction</h2>
           <p>
-            These terms are governed by and construed in accordance with the laws of the Islamic Republic of Pakistan. Any legal disputes arising out of the use of Kit&amp;Co services shall be subject to the exclusive jurisdiction of the courts in Faisalabad, Punjab.
+            These terms are governed by and construed in accordance with the laws of the Islamic Republic of Pakistan. Any legal disputes arising out of the use of KitcoMart services shall be subject to the exclusive jurisdiction of the courts in Faisalabad, Punjab.
           </p>
         </section>
       </article>

@@ -35,7 +35,7 @@ export default function DeliveryInformationPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            Kit&amp;Co provides reliable evening grocery delivery across Faisalabad. Order before our daily 5:00 PM cutoff to receive quality packaged groceries, staples, and bulk pantry stock-ups in our evening delivery slot (7:00 PM – 10:00 PM).
+            KitcoMart provides reliable evening grocery delivery across Faisalabad. Order before our daily 5:00 PM cutoff to receive quality packaged groceries, staples, and bulk pantry stock-ups in our evening delivery slot (7:00 PM – 10:00 PM).
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">

@@ -88,7 +88,7 @@ export function LoginDialog() {
             <span className="flex size-8 items-center justify-center rounded-xl bg-primary-foreground/15 backdrop-blur-sm">
               <ShoppingBag className="size-4" />
             </span>
-            <span className="font-display text-base font-semibold tracking-tight">Kit&amp;Co</span>
+            <span className="font-display text-base font-semibold tracking-tight">KitcoMart</span>
           </div>
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-primary-foreground">

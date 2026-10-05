@@ -21,7 +21,7 @@ export default function PrivacyPolicyPage() {
           Privacy Policy
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground">
-          Effective date: September 2026 • Kit&amp;Co Faisalabad Operations.
+          Effective date: September 2026 • KitcoMart Faisalabad Operations.
         </p>
       </div>
 
@@ -104,7 +104,7 @@ export default function PrivacyPolicyPage() {
 
       {/* ── 4. Return to Home ──────────────────────────────────────────────── */}
       <div className="rounded-2xl border border-border bg-card p-6 text-xs text-muted-foreground flex items-center justify-between gap-4">
-        <span>Thank you for choosing Kit&amp;Co for your Faisalabad grocery needs.</span>
+        <span>Thank you for choosing KitcoMart for your Faisalabad grocery needs.</span>
         <Link href="/" className="font-bold text-primary hover:underline">
           Return to Homepage →
         </Link>

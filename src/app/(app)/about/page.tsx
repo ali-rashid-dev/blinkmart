@@ -36,7 +36,7 @@ export default function AboutPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            Kit&amp;Co was built with a simple promise: quality packaged groceries, daily essentials and pantry staples delivered directly to your doorstep in Faisalabad when you are actually home—during guaranteed 7:00 PM to 10:00 PM evening slots.
+            KitcoMart was built with a simple promise: quality packaged groceries, daily essentials and pantry staples delivered directly to your doorstep in Faisalabad when you are actually home—during guaranteed 7:00 PM to 10:00 PM evening slots.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -64,7 +64,7 @@ export default function AboutPage() {
       <section className="flex flex-col gap-6">
         <div className="text-center max-w-2xl mx-auto flex flex-col gap-2">
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
-            Why Faisalabad Families Rely on Kit&amp;Co
+            Why Faisalabad Families Rely on KitcoMart
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground">
             We focus on four unyielding operational standards that set us apart from traditional supermarkets.
@@ -147,7 +147,7 @@ export default function AboutPage() {
             From Trusted Manufacturers to Your Kitchen Table
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Founded with the goal of modernizing Faisalabad's grocery distribution, Kit&amp;Co connects trusted consumer goods manufacturers and distributors directly with households.
+            Founded with the goal of modernizing Faisalabad's grocery distribution, KitcoMart connects trusted consumer goods manufacturers and distributors directly with households.
           </p>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
             By operating a centralized warehouse model with evening delivery runs, we eliminate supermarket markups, maintain strict inventory control, and give working families their evenings back.

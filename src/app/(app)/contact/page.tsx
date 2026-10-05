@@ -276,7 +276,7 @@ export default function ContactPage() {
               Faisalabad Headquarters
             </h3>
             <div className="text-xs text-muted-foreground flex flex-col gap-2">
-              <p className="font-medium text-foreground">Kit&amp;Co Operations Center</p>
+              <p className="font-medium text-foreground">KitcoMart Operations Center</p>
               <p>Canal Road Commercial Belt, Faisalabad, Punjab</p>
               <p className="pt-2 text-[11px]">Note: Deliveries are dispatched directly from our temperature-controlled hubs to maintain farm freshness.</p>
             </div>
