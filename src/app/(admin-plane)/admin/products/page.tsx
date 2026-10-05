@@ -77,6 +77,7 @@ import type { CategoryRecord } from "@/repositories/category.repository";
 import type { BrandRecord } from "@/repositories/brand.repository";
 import { slugify } from "@/validations/product";
 import { getSupportedImageSrc } from "@/lib/image";
+import { formatCurrency } from "@/lib/currency";
 import { UploadButton } from "@/lib/uploadthing";
 
 // ──────────────────────────────────────────────────────────
@@ -1144,17 +1145,17 @@ export default function AdminProductsPage() {
                         {prod.salePrice && Number(prod.salePrice) < Number(prod.price) ? (
                           <div className="flex flex-col">
                             <div className="flex items-center gap-1.5">
-                              <span className="font-semibold">Rs {Math.round(Number(prod.salePrice))}</span>
+                              <span className="font-semibold">{formatCurrency(prod.salePrice)}</span>
                               <Badge variant="destructive" className="text-[10px] font-bold px-1.5 py-0">
                                 {Math.round(((Number(prod.price) - Number(prod.salePrice)) / Number(prod.price)) * 100)}% OFF
                               </Badge>
                             </div>
                             <span className="text-xs text-muted-foreground line-through">
-                              Rs {Math.round(Number(prod.price))}
+                              {formatCurrency(prod.price)}
                             </span>
                           </div>
                         ) : (
-                          <span className="font-semibold">Rs {Math.round(Number(prod.price))}</span>
+                          <span className="font-semibold">{formatCurrency(prod.price)}</span>
                         )}
                       </td>
 

@@ -12,6 +12,17 @@ export function slugify(text: string): string {
     .replace(/-+$/, "");
 }
 
+function parseSalePrice(val: string | number | null | undefined): number | null {
+  if (val === null || val === undefined) return null;
+  if (typeof val === "number") return val;
+
+  const trimmed = val.trim();
+  if (trimmed === "") return null;
+  if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(trimmed)) return Number.NaN;
+
+  return Number(trimmed);
+}
+
 export const createProductSchema = z.object({
   name: z
     .string()
@@ -41,10 +52,7 @@ export const createProductSchema = z.object({
   salePrice: z
     .union([z.number(), z.string(), z.null()])
     .optional()
-    .transform((val) => {
-      if (val === "" || val === null || val === undefined) return null;
-      return typeof val === "string" ? Number(val) : val;
-    })
+    .transform(parseSalePrice)
     .refine(
       (val) => val === null || (typeof val === "number" && val >= 0 && val <= 10000000),
       { message: "Sale price must be between Rs 0 and Rs 10,000,000" }
@@ -87,10 +95,7 @@ export const updateProductSchema = z.object({
   salePrice: z
     .union([z.number(), z.string(), z.null()])
     .optional()
-    .transform((val) => {
-      if (val === "" || val === null || val === undefined) return null;
-      return typeof val === "string" ? Number(val) : val;
-    })
+    .transform(parseSalePrice)
     .refine(
       (val) => val === null || (typeof val === "number" && val >= 0 && val <= 10000000),
       { message: "Sale price must be between Rs 0 and Rs 10,000,000" }
