@@ -10,7 +10,7 @@ import { cartStore, cartTotals, useCartState } from "@/lib/cart/store";
 
 export default function CartPage() {
   const { status, lines, pending } = useCartState();
-  const { subtotal, total, itemCount } = cartTotals(lines);
+  const { subtotal, originalSubtotal, discountAmount, discountPercent, total, itemCount } = cartTotals(lines);
 
   useEffect(() => {
     void cartStore.load();
@@ -30,7 +30,14 @@ export default function CartPage() {
         ) : (
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
             <CartItemList lines={lines} pending={pending} />
-            <CartSummary subtotal={subtotal} total={total} itemCount={itemCount} />
+            <CartSummary
+              subtotal={subtotal}
+              originalSubtotal={originalSubtotal}
+              discountAmount={discountAmount}
+              discountPercent={discountPercent}
+              total={total}
+              itemCount={itemCount}
+            />
           </div>
         )}
       </div>

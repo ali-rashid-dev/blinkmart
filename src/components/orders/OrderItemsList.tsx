@@ -25,7 +25,12 @@ export function OrderItemsList({ items }: { items: OrderItem[] }) {
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-foreground">{item.name}</p>
             <p className="truncate text-xs text-muted-foreground">
-              {item.unit} · {formatMoney(item.price)} × {item.quantity}
+              {item.unit} · {formatMoney(item.price)}
+              {item.originalPrice && item.originalPrice > item.price && (
+                <span className="ml-1 text-muted-foreground/70 line-through">
+                  {formatMoney(item.originalPrice)}
+                </span>
+              )} × {item.quantity}
             </p>
           </div>
           <p className="shrink-0 text-sm font-semibold tabular-nums text-foreground">
@@ -40,18 +45,45 @@ export function OrderItemsList({ items }: { items: OrderItem[] }) {
 
 export function OrderTotals({
   subtotal,
+  originalSubtotal,
+  discountAmount,
+  discountPercent,
   deliveryFee,
   platformFee,
   total,
 }: {
   subtotal: number;
+  originalSubtotal?: number;
+  discountAmount?: number;
+  discountPercent?: number;
   deliveryFee: number;
   platformFee?: number;
   total: number;
 }) {
   const pFee = platformFee ?? (subtotal > 0 ? 20 : 0);
+  const origSubtotal = originalSubtotal ?? subtotal;
+  const discAmount = discountAmount ?? (origSubtotal > subtotal ? Math.round((origSubtotal - subtotal) * 100) / 100 : 0);
+  const discPercent = discountPercent ?? (origSubtotal > 0 && discAmount > 0 ? Math.round((discAmount / origSubtotal) * 100) : 0);
+
   return (
     <dl className="space-y-2 text-sm">
+      {discAmount > 0 && (
+        <div className="flex items-baseline justify-between gap-3 text-xs text-muted-foreground">
+          <dt>Original Price (MRP)</dt>
+          <dd className="font-semibold tabular-nums line-through">{formatMoney(origSubtotal)}</dd>
+        </div>
+      )}
+      {discAmount > 0 && (
+        <div className="flex items-baseline justify-between gap-3 text-xs text-destructive font-medium">
+          <dt className="flex items-center gap-1.5">
+            <span>Discount Savings</span>
+            <span className="rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-bold text-destructive">
+              {discPercent}% OFF
+            </span>
+          </dt>
+          <dd className="font-semibold tabular-nums">− {formatMoney(discAmount)}</dd>
+        </div>
+      )}
       <div className="flex items-baseline justify-between gap-3">
         <dt className="text-muted-foreground">Subtotal</dt>
         <dd className="font-semibold tabular-nums text-foreground">{formatMoney(subtotal)}</dd>

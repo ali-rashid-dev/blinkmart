@@ -34,13 +34,20 @@ import type { ProductWithBrandAndCategory } from "@/repositories/product.reposit
  * This helper converts it to a plain `number`.
  */
 /** Prisma's Decimal serialized to a plain number for the client boundary. */
-export type SerializedProduct = Omit<ProductWithBrandAndCategory, "price"> & { price: number };
+export type SerializedProduct = Omit<ProductWithBrandAndCategory, "price" | "salePrice"> & {
+  price: number;
+  salePrice: number | null;
+};
 
 /** Paginated list with price already serialized. */
 export type SerializedPaginatedProducts = Omit<import("@/services/product.service").PaginatedProducts, "items"> & { items: SerializedProduct[] };
 
 function serializeProduct(p: ProductWithBrandAndCategory): SerializedProduct {
-  return { ...p, price: Number(p.price) };
+  return {
+    ...p,
+    price: Number(p.price),
+    salePrice: p.salePrice !== null && p.salePrice !== undefined ? Number(p.salePrice) : null,
+  };
 }
 
 // ──────────────────────────────────────────────────────────

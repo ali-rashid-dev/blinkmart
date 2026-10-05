@@ -29,7 +29,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { status, lines } = useCartState();
   const activeLines = lines.filter((l) => l.enabled);
-  const { subtotal, itemCount } = cartTotals(activeLines);
+  const { subtotal, originalSubtotal, discountAmount, discountPercent, itemCount } = cartTotals(activeLines);
 
   const deliveryFee = calculateDeliveryFee(subtotal);
   const platformFee = calculatePlatformFee(subtotal);
@@ -412,6 +412,29 @@ export default function CheckoutPage() {
             </ul>
 
             <dl className="mt-4 space-y-3 border-t border-border pt-4 text-sm">
+              {discountAmount > 0 && (
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Original Price (MRP)</dt>
+                  <dd className="font-semibold tabular-nums text-muted-foreground line-through">
+                    {formatMoney(originalSubtotal)}
+                  </dd>
+                </div>
+              )}
+
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-destructive font-medium">
+                  <dt className="flex items-center gap-1.5">
+                    <span>Discount Savings</span>
+                    <span className="rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-bold text-destructive">
+                      {discountPercent}% OFF
+                    </span>
+                  </dt>
+                  <dd className="font-semibold tabular-nums">
+                    − {formatMoney(discountAmount)}
+                  </dd>
+                </div>
+              )}
+
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">
                   Subtotal ({itemCount} {itemCount === 1 ? "item" : "items"})

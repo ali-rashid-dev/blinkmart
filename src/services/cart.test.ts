@@ -69,7 +69,7 @@ test("Cart Service Unit & Integration Tests", async (t) => {
     assert.equal(details.lines[0].quantity, 2);
     assert.equal(details.totals.itemCount, 2);
     assert.equal(details.totals.subtotal, 9.98);
-    assert.equal(details.totals.total, 9.98);
+    assert.equal(details.totals.total, 129.98);
   });
 
   await t.test("3. Add same item to cart again (increments quantity)", async () => {
@@ -180,12 +180,16 @@ test("Cart Service Unit & Integration Tests", async (t) => {
         productId: "p1",
         name: "Item 1",
         slug: "item-1",
-        price: 10.5,
+        price: 20,
+        salePrice: 15,
+        effectivePrice: 15,
+        discountPercent: 25,
+        originalTotal: 40,
         quantity: 2,
         unit: "1 pack",
         image: "",
         maxQuantity: 99,
-        total: 21,
+        total: 30,
         enabled: true,
       },
       {
@@ -193,21 +197,28 @@ test("Cart Service Unit & Integration Tests", async (t) => {
         productId: "p2",
         name: "Item 2",
         slug: "item-2",
-        price: 3.33,
+        price: 10,
+        salePrice: null,
+        effectivePrice: 10,
+        discountPercent: 0,
+        originalTotal: 30,
         quantity: 3,
         unit: "1 pack",
         image: "",
         maxQuantity: 99,
-        total: 9.99,
+        total: 30,
         enabled: true,
       },
     ];
 
     const totals = calculateCartTotals(mockLines);
     assert.equal(totals.itemCount, 5);
-    assert.equal(totals.subtotal, 30.99);
+    assert.equal(totals.originalSubtotal, 70);
+    assert.equal(totals.subtotal, 60);
+    assert.equal(totals.discountAmount, 10);
+    assert.equal(totals.discountPercent, 14); // 10 / 70 * 100 = 14%
     assert.equal(totals.deliveryFee, 100);
     assert.equal(totals.platformFee, 20);
-    assert.equal(totals.total, 150.99);
+    assert.equal(totals.total, 180);
   });
 });

@@ -88,6 +88,9 @@ export default function OrderDetailPage({
                 <div className="mt-4 border-t border-border pt-4">
                   <OrderTotals
                     subtotal={order.subtotal}
+                    originalSubtotal={order.originalSubtotal}
+                    discountAmount={order.discountAmount}
+                    discountPercent={order.discountPercent}
                     deliveryFee={order.deliveryFee}
                     platformFee={order.platformFee}
                     total={order.total}

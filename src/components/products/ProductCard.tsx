@@ -69,6 +69,12 @@ export function ProductCard({
           </div>
         )}
 
+        {product.discountPercent > 0 && (
+          <span className="absolute left-2.5 top-2.5 z-10 rounded-lg bg-destructive px-2 py-0.5 text-[11px] font-bold text-destructive-foreground shadow-xs">
+            −{product.discountPercent}%
+          </span>
+        )}
+
         {soldOut && !compact && (
           <span className="absolute inset-x-0 bottom-0 bg-foreground/80 py-1.5 text-center text-[11px] font-bold uppercase tracking-[0.1em] text-background">
             Unavailable
@@ -100,8 +106,18 @@ export function ProductCard({
         {/* Price */}
         <div className="flex flex-wrap items-baseline gap-x-2">
           <span className="font-display text-lg text-foreground">
-            Rs {Math.round(product.price)}
+            Rs {Math.round(product.effectivePrice)}
           </span>
+          {product.discountPercent > 0 && (
+            <>
+              <span className="text-xs text-muted-foreground line-through">
+                Rs {Math.round(product.price)}
+              </span>
+              <span className="text-[11px] font-bold text-destructive">
+                {product.discountPercent}% OFF
+              </span>
+            </>
+          )}
         </div>
 
         {/* Availability badge */}

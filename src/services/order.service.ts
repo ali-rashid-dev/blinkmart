@@ -75,14 +75,29 @@ export function mapPrismaOrderToDomainOrder(dbOrder: OrderWithItems): Order {
   const platformFee = Number(dbOrder.platformFee ?? 20);
   const total = Number(dbOrder.total);
 
-  const items: OrderItem[] = dbOrder.items.map((item) => ({
-    productId: item.productId,
-    name: item.name,
-    price: Number(item.price),
-    quantity: item.quantity,
-    unit: item.unit,
-    image: item.imageUrl || item.product?.imageUrl || "🛒",
-  }));
+  const items: OrderItem[] = dbOrder.items.map((item) => {
+    const price = Number(item.price);
+    const originalPrice = item.originalPrice ? Number(item.originalPrice) : item.product?.price ? Number(item.product.price) : price;
+    return {
+      productId: item.productId,
+      name: item.name,
+      price,
+      originalPrice,
+      quantity: item.quantity,
+      unit: item.unit,
+      image: item.imageUrl || item.product?.imageUrl || "🛒",
+    };
+  });
+
+  const rawOriginalSubtotal = items.reduce(
+    (sum, item) => sum + (item.originalPrice && item.originalPrice > item.price ? item.originalPrice : item.price) * item.quantity,
+    0
+  );
+  const originalSubtotal = Math.round(rawOriginalSubtotal * 100) / 100;
+  const discountAmount = Math.max(0, Math.round((originalSubtotal - subtotal) * 100) / 100);
+  const discountPercent = originalSubtotal > 0 && discountAmount > 0
+    ? Math.round((discountAmount / originalSubtotal) * 100)
+    : 0;
 
   // Build realistic timeline step events
   const timeline: OrderTimelineEvent[] = [{ status: "placed", at: dbOrder.createdAt.toISOString() }];
@@ -106,6 +121,9 @@ export function mapPrismaOrderToDomainOrder(dbOrder: OrderWithItems): Order {
     cancelReason: dbOrder.cancelReason ?? null,
     cancelledAt: dbOrder.cancelledAt ? dbOrder.cancelledAt.toISOString() : null,
     subtotal,
+    originalSubtotal,
+    discountAmount,
+    discountPercent,
     deliveryFee,
     platformFee,
     total,

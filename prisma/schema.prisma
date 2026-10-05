@@ -134,6 +134,7 @@ model Product {
   slug        String     @unique @db.Citext
   description String?
   price       Decimal    @db.Decimal(10, 2)
+  salePrice   Decimal?   @db.Decimal(10, 2)
   imageUrl    String?
   enabled     Boolean    @default(true)
   brandId     String?
@@ -226,18 +227,19 @@ model Order {
 }
 
 model OrderItem {
-  id        String   @id @default(cuid())
-  orderId   String
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
-  name      String
-  price     Decimal  @db.Decimal(10, 2)
-  quantity  Int
-  unit      String   @default("1 pack")
-  imageUrl  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(cuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  name          String
+  price         Decimal  @db.Decimal(10, 2)
+  originalPrice Decimal? @db.Decimal(10, 2)
+  quantity      Int
+  unit          String   @default("1 pack")
+  imageUrl      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("order_item")
   @@index([orderId])

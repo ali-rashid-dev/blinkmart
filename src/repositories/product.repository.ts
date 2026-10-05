@@ -204,6 +204,7 @@ export async function createProduct(data: {
   slug: string;
   description?: string | null;
   price: number | Prisma.Decimal;
+  salePrice?: number | Prisma.Decimal | null;
   imageUrl?: string | null;
   enabled?: boolean;
   brandId?: string | null;
@@ -215,6 +216,7 @@ export async function createProduct(data: {
       slug: data.slug,
       description: data.description ?? null,
       price: data.price,
+      salePrice: data.salePrice ?? null,
       imageUrl: data.imageUrl ?? null,
       enabled: data.enabled ?? true,
       brandId: data.brandId ?? null,
@@ -234,6 +236,7 @@ export async function updateProduct(
     slug?: string;
     description?: string | null;
     price?: number | Prisma.Decimal;
+    salePrice?: number | Prisma.Decimal | null;
     imageUrl?: string | null;
     enabled?: boolean;
     brandId?: string | null;
@@ -247,6 +250,7 @@ export async function updateProduct(
       ...(data.slug !== undefined && { slug: data.slug }),
       ...(data.description !== undefined && { description: data.description }),
       ...(data.price !== undefined && { price: data.price }),
+      ...(data.salePrice !== undefined && { salePrice: data.salePrice }),
       ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
       ...(data.enabled !== undefined && { enabled: data.enabled }),
       ...(data.brandId !== undefined && { brandId: data.brandId }),

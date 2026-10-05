@@ -4,6 +4,10 @@ export interface CartLine {
   name: string;
   slug: string;
   price: number;
+  salePrice?: number | null;
+  effectivePrice?: number;
+  discountPercent?: number;
+  originalTotal?: number;
   quantity: number;
   unit: string;
   image: string;
@@ -14,6 +18,9 @@ export interface CartLine {
 
 export interface CartTotals {
   subtotal: number;
+  originalSubtotal: number;
+  discountAmount: number;
+  discountPercent: number;
   deliveryFee: number;
   platformFee: number;
   tax: number;

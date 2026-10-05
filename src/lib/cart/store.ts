@@ -18,6 +18,9 @@ const initialState: CartState = {
   lines: [],
   totals: {
     subtotal: 0,
+    originalSubtotal: 0,
+    discountAmount: 0,
+    discountPercent: 0,
     deliveryFee: 0,
     platformFee: 0,
     tax: 0,
@@ -202,22 +205,42 @@ export function useCartCount(): number {
 
 export function cartTotals(lines: CartLine[]): CartTotals {
   let subtotal = 0;
+  let originalSubtotal = 0;
   let itemCount = 0;
 
   for (const line of lines) {
     if (line.enabled) {
-      subtotal += line.price * line.quantity;
+      const effective = line.effectivePrice ?? (line.salePrice && line.salePrice < line.price ? line.salePrice : line.price);
+      const original = line.price;
+      subtotal += effective * line.quantity;
+      originalSubtotal += original * line.quantity;
       itemCount += line.quantity;
     }
   }
 
   subtotal = Math.round(subtotal * 100) / 100;
+  originalSubtotal = Math.round(originalSubtotal * 100) / 100;
+  const discountAmount = Math.max(0, Math.round((originalSubtotal - subtotal) * 100) / 100);
+  const discountPercent = originalSubtotal > 0 && discountAmount > 0
+    ? Math.round((discountAmount / originalSubtotal) * 100)
+    : 0;
+
   const deliveryFee = calculateDeliveryFee(subtotal);
   const platformFee = calculatePlatformFee(subtotal);
   const tax = 0;
   const total = Math.round((subtotal + deliveryFee + platformFee + tax) * 100) / 100;
 
-  return { subtotal, deliveryFee, platformFee, tax, total, itemCount };
+  return {
+    subtotal,
+    originalSubtotal,
+    discountAmount,
+    discountPercent,
+    deliveryFee,
+    platformFee,
+    tax,
+    total,
+    itemCount,
+  };
 }
 
 import { formatCurrency } from "@/lib/currency";

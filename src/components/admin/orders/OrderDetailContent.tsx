@@ -314,6 +314,23 @@ export function OrderDetailContent({ orderId }: { orderId: string }) {
         </div>
 
         <div className="bg-muted/20 p-4 border-t border-border space-y-2 text-xs">
+          {order.discountAmount && order.discountAmount > 0 ? (
+            <>
+              <div className="flex justify-between text-muted-foreground">
+                <span>Original Subtotal (MRP)</span>
+                <span className="line-through">Rs {Math.round(order.originalSubtotal ?? order.subtotal + order.discountAmount)}</span>
+              </div>
+              <div className="flex justify-between text-destructive font-medium">
+                <span className="flex items-center gap-1.5">
+                  Discount Savings
+                  <Badge variant="destructive" className="text-[10px] px-1 py-0 font-bold">
+                    {order.discountPercent}% OFF
+                  </Badge>
+                </span>
+                <span>− Rs {Math.round(order.discountAmount)}</span>
+              </div>
+            </>
+          ) : null}
           <div className="flex justify-between text-muted-foreground">
             <span>Items Subtotal</span>
             <span>Rs {Math.round(order.subtotal)}</span>

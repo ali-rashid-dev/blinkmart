@@ -63,8 +63,18 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
             <div className="mt-4 flex flex-wrap items-end gap-3">
               <span className="font-display text-4xl text-foreground">
-                {formattedPrice}
+                Rs {Math.round(customerProductData.effectivePrice)}
               </span>
+              {customerProductData.discountPercent > 0 && (
+                <>
+                  <span className="pb-1 text-lg text-muted-foreground line-through">
+                    Rs {Math.round(customerProductData.price)}
+                  </span>
+                  <span className="mb-1 rounded-lg bg-destructive/10 px-2 py-1 text-xs font-bold text-destructive">
+                    SAVE {customerProductData.discountPercent}%
+                  </span>
+                </>
+              )}
               <span className="pb-1.5 text-sm text-muted-foreground">/ item</span>
             </div>
 

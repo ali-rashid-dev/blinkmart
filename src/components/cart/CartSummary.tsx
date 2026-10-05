@@ -10,12 +10,18 @@ import { calculateDeliveryFee, calculatePlatformFee, getNextDeliveryTier } from 
 
 export function CartSummary({
   subtotal,
+  originalSubtotal,
+  discountAmount: propDiscountAmount,
+  discountPercent: propDiscountPercent,
   deliveryFee: propDeliveryFee,
   platformFee: propPlatformFee,
   total: propTotal,
   itemCount,
 }: {
   subtotal: number;
+  originalSubtotal?: number;
+  discountAmount?: number;
+  discountPercent?: number;
   deliveryFee?: number;
   platformFee?: number;
   total?: number;
@@ -24,6 +30,10 @@ export function CartSummary({
   const router = useRouter();
   const { data: session } = authClient.useSession();
   const { openDialog } = useLoginDialog();
+
+  const origSubtotal = originalSubtotal ?? subtotal;
+  const discountAmount = propDiscountAmount ?? (origSubtotal > subtotal ? Math.round((origSubtotal - subtotal) * 100) / 100 : 0);
+  const discountPercent = propDiscountPercent ?? (origSubtotal > 0 && discountAmount > 0 ? Math.round((discountAmount / origSubtotal) * 100) : 0);
 
   const deliveryFee = propDeliveryFee ?? calculateDeliveryFee(subtotal);
   const platformFee = propPlatformFee ?? calculatePlatformFee(subtotal);
@@ -46,12 +56,40 @@ export function CartSummary({
     >
       <h2
         id="order-summary-heading"
-        className="font-display text-lg text-foreground"
+        className="font-display text-lg text-foreground flex items-center justify-between"
       >
-        Order Summary
+        <span>Order Summary</span>
+        {discountPercent > 0 && (
+          <span className="rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-bold text-destructive">
+            SAVE {discountPercent}%
+          </span>
+        )}
       </h2>
 
       <dl className="mt-4 space-y-3 text-sm">
+        {discountAmount > 0 && (
+          <div className="flex items-baseline justify-between gap-3">
+            <dt className="text-muted-foreground">Original Price (MRP)</dt>
+            <dd className="font-semibold tabular-nums text-muted-foreground line-through">
+              {formatPrice(origSubtotal)}
+            </dd>
+          </div>
+        )}
+
+        {discountAmount > 0 && (
+          <div className="flex items-baseline justify-between gap-3 text-destructive font-medium">
+            <dt className="flex items-center gap-1.5">
+              <span>Discount Savings</span>
+              <span className="rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-bold text-destructive">
+                {discountPercent}% OFF
+              </span>
+            </dt>
+            <dd className="font-semibold tabular-nums">
+              − {formatPrice(discountAmount)}
+            </dd>
+          </div>
+        )}
+
         <div className="flex items-baseline justify-between gap-3">
           <dt className="text-muted-foreground">
             Subtotal

@@ -65,11 +65,13 @@ export async function createOrderInDb(params: {
           throw new EmptyCartError();
         }
 
-        // Compute subtotal then round to cents before using threshold and total calculations
-        const rawSubtotal = validItems.reduce(
-          (sum, item) => sum + Number(item.product.price) * item.quantity,
-          0
-        );
+        // Compute subtotal using effective prices then round to cents before using threshold and total calculations
+        const rawSubtotal = validItems.reduce((sum, item) => {
+          const priceNum = Number(item.product.price);
+          const salePriceNum = item.product.salePrice !== null && item.product.salePrice !== undefined ? Number(item.product.salePrice) : null;
+          const effectivePrice = salePriceNum !== null && salePriceNum > 0 && salePriceNum < priceNum ? salePriceNum : priceNum;
+          return sum + effectivePrice * item.quantity;
+        }, 0);
         const subtotal = Math.round(rawSubtotal * 100) / 100;
         const deliveryFee = calculateDeliveryFee(subtotal);
         const platformFee = calculatePlatformFee(subtotal);
@@ -96,13 +98,16 @@ export async function createOrderInDb(params: {
             notes: address.notes ?? null,
             items: {
               create: validItems.map((item) => {
-                const priceNum = Number(item.product.price);
+                const originalPriceNum = Number(item.product.price);
+                const salePriceNum = item.product.salePrice !== null && item.product.salePrice !== undefined ? Number(item.product.salePrice) : null;
+                const effectivePrice = salePriceNum !== null && salePriceNum > 0 && salePriceNum < originalPriceNum ? salePriceNum : originalPriceNum;
                 const categoryName = item.product.category?.name;
                 const unit = categoryName ? `1 ${categoryName.toLowerCase()}` : "1 pack";
                 return {
                   productId: item.productId,
                   name: item.product.name,
-                  price: priceNum,
+                  price: effectivePrice,
+                  originalPrice: originalPriceNum,
                   quantity: item.quantity,
                   unit,
                   imageUrl: item.product.imageUrl ?? null,

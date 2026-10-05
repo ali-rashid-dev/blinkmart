@@ -87,6 +87,7 @@ type ProductFormValues = {
   slug: string;
   description: string;
   price: number;
+  salePrice: number | null;
   imageUrl: string;
   enabled: boolean;
   brandId: string;
@@ -130,6 +131,7 @@ function ProductFormDialog({
       slug: defaultValues?.slug ?? "",
       description: defaultValues?.description ?? "",
       price: defaultValues?.price ?? 0,
+      salePrice: defaultValues?.salePrice ?? null,
       imageUrl: defaultValues?.imageUrl ?? "",
       enabled: defaultValues?.enabled ?? true,
       brandId: defaultValues?.brandId ?? "",
@@ -138,10 +140,17 @@ function ProductFormDialog({
   });
 
   const nameValue = watch("name");
+  const priceValue = watch("price");
+  const salePriceValue = watch("salePrice");
   const enabledValue = watch("enabled");
   const imageUrlValue = watch("imageUrl");
   const imageSrc = getSupportedImageSrc(imageUrlValue);
   const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
+
+  const calculatedDiscount =
+    priceValue > 0 && salePriceValue !== null && salePriceValue !== undefined && salePriceValue > 0 && salePriceValue < priceValue
+      ? Math.round(((priceValue - salePriceValue) / priceValue) * 100)
+      : 0;
 
   useEffect(() => {
     if (!slugManuallyEdited && !defaultValues?.slug && nameValue) {
@@ -158,6 +167,7 @@ function ProductFormDialog({
         slug: defaultValues?.slug ?? "",
         description: defaultValues?.description ?? "",
         price: defaultValues?.price ?? 0,
+        salePrice: defaultValues?.salePrice ?? null,
         imageUrl: defaultValues?.imageUrl ?? "",
         enabled: defaultValues?.enabled ?? true,
         brandId: defaultValues?.brandId ?? "",
@@ -172,6 +182,7 @@ function ProductFormDialog({
     const result = await onSave({
       ...values,
       price: Number(values.price),
+      salePrice: values.salePrice && values.salePrice > 0 ? Number(values.salePrice) : null,
       brandId: values.brandId || "",
       categoryId: values.categoryId || "",
     });
@@ -295,7 +306,7 @@ function ProductFormDialog({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="prod-price">
-                  Price (Rs) <span className="text-destructive">*</span>
+                  Price / MRP (Rs) <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground">
@@ -317,6 +328,38 @@ function ProductFormDialog({
                 </div>
                 {errors.price && (
                   <p className="text-xs text-destructive">{errors.price.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="prod-sale-price">
+                    Sale Price (Rs) <span className="text-xs text-muted-foreground">(Optional)</span>
+                  </Label>
+                  {calculatedDiscount > 0 && (
+                    <Badge variant="destructive" className="text-[10px] font-bold">
+                      {calculatedDiscount}% OFF
+                    </Badge>
+                  )}
+                </div>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground">
+                    Rs
+                  </span>
+                  <Input
+                    id="prod-sale-price"
+                    type="number"
+                    step="1"
+                    min="0"
+                    className="pl-9"
+                    {...register("salePrice", {
+                      setValueAs: (v) => (v === "" || v === null || v === undefined ? null : parseFloat(v)),
+                    })}
+                    placeholder="2400"
+                  />
+                </div>
+                {errors.salePrice && (
+                  <p className="text-xs text-destructive">{errors.salePrice.message}</p>
                 )}
               </div>
             </div>
@@ -763,6 +806,7 @@ export default function AdminProductsPage() {
       slug: values.slug || undefined,
       description: values.description || null,
       price: values.price,
+      salePrice: values.salePrice ?? null,
       imageUrl: values.imageUrl || null,
       enabled: values.enabled,
       brandId: values.brandId || null,
@@ -789,6 +833,7 @@ export default function AdminProductsPage() {
       slug: values.slug || undefined,
       description: values.description || null,
       price: values.price,
+      salePrice: values.salePrice ?? null,
       imageUrl: values.imageUrl || null,
       enabled: values.enabled,
       brandId: values.brandId || null,
@@ -1095,8 +1140,22 @@ export default function AdminProductsPage() {
                       </td>
 
                       {/* Price */}
-                      <td className="px-4 py-3 font-semibold text-foreground">
-                        Rs {Math.round(Number(prod.price))}
+                      <td className="px-4 py-3 text-foreground">
+                        {prod.salePrice && Number(prod.salePrice) < Number(prod.price) ? (
+                          <div className="flex flex-col">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-semibold">Rs {Math.round(Number(prod.salePrice))}</span>
+                              <Badge variant="destructive" className="text-[10px] font-bold px-1.5 py-0">
+                                {Math.round(((Number(prod.price) - Number(prod.salePrice)) / Number(prod.price)) * 100)}% OFF
+                              </Badge>
+                            </div>
+                            <span className="text-xs text-muted-foreground line-through">
+                              Rs {Math.round(Number(prod.price))}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="font-semibold">Rs {Math.round(Number(prod.price))}</span>
+                        )}
                       </td>
 
                       {/* Status Switch */}
@@ -1238,6 +1297,7 @@ export default function AdminProductsPage() {
             slug: selectedEditProduct.slug,
             description: selectedEditProduct.description ?? "",
             price: Number(selectedEditProduct.price),
+            salePrice: selectedEditProduct.salePrice ? Number(selectedEditProduct.salePrice) : null,
             imageUrl: selectedEditProduct.imageUrl ?? "",
             enabled: selectedEditProduct.enabled,
             brandId: selectedEditProduct.brandId ?? "",

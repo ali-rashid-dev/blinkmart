@@ -9,8 +9,14 @@ export type CustomerProduct = {
   slug: string;
   name: string;
   description: string | null;
-  /** Numeric price — converted from Prisma Decimal */
+  /** Numeric price (regular MRP) — converted from Prisma Decimal */
   price: number;
+  /** Numeric sale price (discounted price) if active */
+  salePrice: number | null;
+  /** Active effective price to charge (salePrice if < price, else price) */
+  effectivePrice: number;
+  /** Calculated discount percentage (e.g. 20 for 20%) */
+  discountPercent: number;
   /** Single image URL stored in the DB */
   imageUrl: string | null;
   /** true = Active / visible, false = disabled / hidden */
@@ -34,12 +40,21 @@ export type Product = CustomerProduct;
 
 /** Convert a DB row to a CustomerProduct DTO */
 export function toCustomerProduct(p: ProductWithBrandAndCategory): CustomerProduct {
+  const price = Number(p.price);
+  const salePrice = p.salePrice !== null && p.salePrice !== undefined ? Number(p.salePrice) : null;
+  const hasSale = salePrice !== null && salePrice > 0 && salePrice < price;
+  const effectivePrice = hasSale ? salePrice : price;
+  const discountPercent = hasSale ? Math.round(((price - salePrice) / price) * 100) : 0;
+
   return {
     id: p.id,
     slug: p.slug,
     name: p.name,
     description: p.description ?? null,
-    price: Number(p.price),
+    price,
+    salePrice,
+    effectivePrice,
+    discountPercent,
     imageUrl: p.imageUrl ?? null,
     enabled: p.enabled,
     brandId: p.brandId ?? null,

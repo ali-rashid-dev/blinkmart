@@ -56,6 +56,7 @@ export interface OrderItem {
   productId: string;
   name: string;
   price: number;
+  originalPrice?: number;
   quantity: number;
   unit: string;
   image: string;
@@ -76,6 +77,9 @@ export interface Order {
   cancelReason?: string | null;
   cancelledAt?: string | null;
   subtotal: number;
+  originalSubtotal?: number;
+  discountAmount?: number;
+  discountPercent?: number;
   deliveryFee: number;
   platformFee: number;
   total: number;

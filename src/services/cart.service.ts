@@ -45,6 +45,10 @@ export interface CartLineItem {
   name: string;
   slug: string;
   price: number;
+  salePrice: number | null;
+  effectivePrice: number;
+  discountPercent: number;
+  originalTotal: number;
   quantity: number;
   unit: string;
   image: string;
@@ -55,6 +59,9 @@ export interface CartLineItem {
 
 export interface CartTotals {
   subtotal: number;
+  originalSubtotal: number;
+  discountAmount: number;
+  discountPercent: number;
   deliveryFee: number;
   platformFee: number;
   tax: number;
@@ -70,15 +77,25 @@ export interface CartDetails {
 
 export function calculateCartTotals(lines: CartLineItem[]): CartTotals {
   let subtotal = 0;
+  let originalSubtotal = 0;
   let itemCount = 0;
 
   for (const line of lines) {
-    subtotal += line.price * line.quantity;
+    const effective = line.effectivePrice ?? (line.salePrice && line.salePrice < line.price ? line.salePrice : line.price);
+    const original = line.price;
+    subtotal += effective * line.quantity;
+    originalSubtotal += original * line.quantity;
     itemCount += line.quantity;
   }
 
   // Round currency to 2 decimal places cleanly
   subtotal = Math.round(subtotal * 100) / 100;
+  originalSubtotal = Math.round(originalSubtotal * 100) / 100;
+  const discountAmount = Math.max(0, Math.round((originalSubtotal - subtotal) * 100) / 100);
+  const discountPercent = originalSubtotal > 0 && discountAmount > 0
+    ? Math.round((discountAmount / originalSubtotal) * 100)
+    : 0;
+
   const deliveryFee = calculateDeliveryFee(subtotal);
   const platformFee = calculatePlatformFee(subtotal);
   const tax = 0; // Tax can be expanded if needed
@@ -86,6 +103,9 @@ export function calculateCartTotals(lines: CartLineItem[]): CartTotals {
 
   return {
     subtotal,
+    originalSubtotal,
+    discountAmount,
+    discountPercent,
     deliveryFee,
     platformFee,
     tax,
@@ -97,7 +117,12 @@ export function calculateCartTotals(lines: CartLineItem[]): CartTotals {
 function mapCartToDetails(cart: CartWithItems): CartDetails {
   const lines: CartLineItem[] = cart.items.map((item) => {
     const priceNum = Number(item.product.price);
-    const lineTotal = Math.round(priceNum * item.quantity * 100) / 100;
+    const salePriceNum = item.product.salePrice !== null && item.product.salePrice !== undefined ? Number(item.product.salePrice) : null;
+    const hasSale = salePriceNum !== null && salePriceNum > 0 && salePriceNum < priceNum;
+    const effectivePrice = hasSale ? salePriceNum : priceNum;
+    const discountPercent = hasSale ? Math.round(((priceNum - salePriceNum) / priceNum) * 100) : 0;
+    const lineTotal = Math.round(effectivePrice * item.quantity * 100) / 100;
+    const originalTotal = Math.round(priceNum * item.quantity * 100) / 100;
     const isProductEnabled =
       item.product.enabled && (!item.product.brand || item.product.brand.enabled);
 
@@ -107,6 +132,10 @@ function mapCartToDetails(cart: CartWithItems): CartDetails {
       name: item.product.name,
       slug: item.product.slug,
       price: priceNum,
+      salePrice: salePriceNum,
+      effectivePrice,
+      discountPercent,
+      originalTotal,
       quantity: item.quantity,
       unit: item.product.category?.name ? `1 ${item.product.category.name.toLowerCase()}` : "1 pack",
       image: item.product.imageUrl || "🛒",

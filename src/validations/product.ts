@@ -38,6 +38,18 @@ export const createProductSchema = z.object({
         .min(1, "Price must be at least Rs 1")
         .max(10000000, "Price cannot exceed Rs 10,000,000")
     ),
+  salePrice: z
+    .union([z.number(), z.string(), z.null()])
+    .optional()
+    .transform((val) => {
+      if (val === "" || val === null || val === undefined) return null;
+      const num = typeof val === "string" ? parseFloat(val) : val;
+      return Number.isNaN(num) ? null : num;
+    })
+    .refine(
+      (val) => val === null || (typeof val === "number" && val >= 0 && val <= 10000000),
+      { message: "Sale price must be between Rs 0 and Rs 10,000,000" }
+    ),
   imageUrl: z.string().nullable().optional(),
   enabled: z.boolean().optional().default(true),
   brandId: z.string().nullable().optional(),
@@ -71,6 +83,19 @@ export const updateProductSchema = z.object({
         .positive("Price must be greater than 0")
         .min(1, "Price must be at least Rs 1")
         .max(10000000, "Price cannot exceed Rs 10,000,000")
+    )
+    .optional(),
+  salePrice: z
+    .union([z.number(), z.string(), z.null()])
+    .optional()
+    .transform((val) => {
+      if (val === "" || val === null || val === undefined) return null;
+      const num = typeof val === "string" ? parseFloat(val) : val;
+      return Number.isNaN(num) ? null : num;
+    })
+    .refine(
+      (val) => val === null || (typeof val === "number" && val >= 0 && val <= 10000000),
+      { message: "Sale price must be between Rs 0 and Rs 10,000,000" }
     )
     .optional(),
   imageUrl: z.string().nullable().optional(),

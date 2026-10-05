@@ -46,9 +46,12 @@ export function DealOfTheDay({ product, compareAtPrice }: DealOfTheDayProps) {
 
   const p = product;
   const soldOut = !p.enabled;
-  const originalPrice = compareAtPrice ?? Math.round(p.price / 0.8);
-  const discountPercent = originalPrice > 0
-    ? Math.max(0, Math.round((1 - p.price / originalPrice) * 100))
+  const originalPrice = compareAtPrice ?? (p.discountPercent > 0 ? p.price : Math.round(p.price / 0.8));
+  const sellingPrice = p.effectivePrice;
+  const discountPercent = p.discountPercent > 0
+    ? p.discountPercent
+    : originalPrice > sellingPrice
+    ? Math.round(((originalPrice - sellingPrice) / originalPrice) * 100)
     : 0;
   const imageSrc = getSupportedImageSrc(p.imageUrl);
 
@@ -74,9 +77,11 @@ export function DealOfTheDay({ product, compareAtPrice }: DealOfTheDayProps) {
               <ImageIcon className="h-20 w-20" />
             </div>
           )}
-          <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-destructive/90 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-destructive-foreground">
-            <Flame className="size-3" />−{discountPercent}% OFF
-          </span>
+          {discountPercent > 0 && (
+            <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-destructive/90 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-destructive-foreground">
+              <Flame className="size-3" />−{discountPercent}% OFF
+            </span>
+          )}
         </div>
 
         <div className="flex min-w-0 flex-col gap-4">
@@ -93,10 +98,12 @@ export function DealOfTheDay({ product, compareAtPrice }: DealOfTheDayProps) {
           </div>
 
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="font-display text-3xl text-foreground">Rs {Math.round(p.price)}</span>
-            <span className="text-sm text-muted-foreground line-through">
-              Rs {originalPrice}
-            </span>
+            <span className="font-display text-3xl text-foreground">Rs {Math.round(sellingPrice)}</span>
+            {originalPrice > sellingPrice && (
+              <span className="text-sm text-muted-foreground line-through">
+                Rs {Math.round(originalPrice)}
+              </span>
+            )}
           </div>
 
           <p className="text-[13px] font-semibold text-success">
