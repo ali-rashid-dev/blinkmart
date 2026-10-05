@@ -55,7 +55,7 @@ export default function AdminReportsPage() {
     const csvLines: string[] = [];
 
     // Header & KPIs section
-    csvLines.push(`Blinkmart Admin Sales & Analytics Report (${rangeLabel[data.range]})`);
+    csvLines.push(`kitcomart Admin Sales & Analytics Report (${rangeLabel[data.range]})`);
     csvLines.push(`Generated At,${new Date().toLocaleString()}`);
     csvLines.push("");
     csvLines.push("KPI Overview");
@@ -92,7 +92,7 @@ export default function AdminReportsPage() {
     const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(csvLines.join("\n"));
     const link = document.createElement("a");
     link.setAttribute("href", csvContent);
-    link.setAttribute("download", `blinkmart-sales-report-${data.range}-${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute("download", `kitcomart-sales-report-${data.range}-${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -144,11 +144,10 @@ export default function AdminReportsPage() {
             aria-checked={range === r}
             onClick={() => setRange(r)}
             disabled={isPending}
-            className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
-              range === r
+            className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${range === r
                 ? "bg-primary text-primary-foreground shadow-xs"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             {rangeLabel[r]}
           </button>

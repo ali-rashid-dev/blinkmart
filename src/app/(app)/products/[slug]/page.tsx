@@ -20,7 +20,10 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   }
 
   const categoryName = product.category?.name || "Groceries";
-  const brandName = product.brand?.name || "Kit&Co";
+  const brandName = product.brand?.name || "kitcomart";
+  const price = Number(product.price);
+  const formattedPrice = `Rs ${Math.round(price)}`;
+
   const customerProductData = toCustomerProduct(product);
 
   return (

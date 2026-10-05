@@ -11,6 +11,7 @@ import {
   Truck,
   Lock,
 } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
 
 export function Footer() {
   return (
@@ -59,14 +60,7 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4">
           {/* Column 1: Brand & Brief Slogan */}
           <div className="flex flex-col gap-3">
-            <Link href="/" className="flex items-center gap-2 w-fit">
-              <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold">
-                <ShoppingBag className="size-4.5" />
-              </div>
-              <span className="font-display text-lg font-bold tracking-tight text-foreground">
-                Kit&amp;Co
-              </span>
-            </Link>
+            <Logo href="/" size="md" />
             <p className="text-xs text-muted-foreground leading-relaxed">
               Faisalabad’s premier evening grocery delivery service. Quality packaged groceries &amp; essentials delivered to your doorstep.
             </p>

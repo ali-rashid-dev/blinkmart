@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
+import { Logo } from "@/components/ui/logo";
 
 export function AuthLayout({
   children,
@@ -51,19 +52,8 @@ export function AuthLayout({
 
 export function Brandmark() {
   return (
-    <div className="mb-8 flex items-center gap-2.5">
-      <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-        <svg viewBox="0 0 24 24" fill="none" className="size-5" aria-hidden="true">
-          <path
-            d="M12 21c0-6 3-10 8-11-1 6-3.5 9-8 11Z"
-            fill="currentColor"
-            opacity="0.9"
-          />
-          <path d="M12 21C10 14 7 11 3 9c1 6 3.5 10 9 12Z" fill="currentColor" opacity="0.55" />
-          <path d="M12 21V12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-        </svg>
-      </span>
-      <span className="font-display text-lg tracking-tight text-foreground">Verdant Market</span>
+    <div className="mb-8 flex items-center">
+      <Logo href="/" size="lg" />
     </div>
   );
 }

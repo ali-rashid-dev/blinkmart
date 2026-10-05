@@ -15,9 +15,9 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "About Us — Kit&Co Grocery Delivery Faisalabad",
+  title: "About Us — kitcomart Grocery Delivery Faisalabad",
   description:
-    "Learn about Kit&Co, Faisalabad's leading evening grocery delivery service specializing in quality packaged groceries, daily essentials, and bulk pantry stock-ups.",
+    "Learn about kitcomart, Faisalabad's leading evening grocery delivery service specializing in quality packaged groceries, daily essentials, and bulk pantry stock-ups.",
 };
 
 export default function AboutPage() {

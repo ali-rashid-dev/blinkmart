@@ -20,6 +20,7 @@ import {
 import { QUICK_LINKS } from "./constants";
 import type { NavSession } from "./constants";
 import type { NavbarCategoryItem } from "./use-navbar-categories";
+import { Logo } from "@/components/ui/logo";
 
 interface MobileDrawerProps {
   session: NavSession;
@@ -63,20 +64,8 @@ export function MobileDrawer({ session, onLogout, categories }: MobileDrawerProp
         <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
 
         {/* ── Drawer header ──────────────────────────────────────────── */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
-          <Link href="/" onClick={close} className="flex items-center gap-2.5">
-            <div className="size-9 rounded-xl bg-primary text-primary-foreground grid place-items-center shrink-0">
-              <ShoppingBag className="size-5" />
-            </div>
-            <div>
-              <span className="font-display text-lg font-bold text-foreground">
-                Kit&amp;Co
-              </span>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground -mt-0.5">
-                Fresh &amp; Fast
-              </p>
-            </div>
-          </Link>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0" onClick={close}>
+          <Logo href="/" size="md" />
         </div>
 
         {/* ── Logged-in user card ─────────────────────────────────────── */}

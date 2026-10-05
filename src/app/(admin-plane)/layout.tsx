@@ -8,8 +8,8 @@ import { prisma } from "@/lib/prisma";
 import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
-  title: "Kit&Co Admin",
-  description: "Kit&Co administration panel",
+  title: "kitcomart Admin",
+  description: "kitcomart administration panel",
 };
 
 interface RootLayoutProps {

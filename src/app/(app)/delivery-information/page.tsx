@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Grocery Delivery Faisalabad — Evening Slots & Fee Tiers | Kit&Co",
+  title: "Grocery Delivery Faisalabad — Evening Slots & Fee Tiers | kitcomart",
   description:
     "Complete delivery information for grocery delivery in Faisalabad. Learn about our guaranteed 7–10 PM evening slot, 5 PM order cutoff, sector coverage, and delivery fee tiers.",
 };

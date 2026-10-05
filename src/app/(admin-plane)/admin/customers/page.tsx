@@ -150,12 +150,12 @@ function StatsGrid({ stats, loading }: { stats: CustomerStats | null; loading: b
             <CardContent className="flex items-center justify-between">
               <div className="space-y-1 w-full h-full">
                 <div className="flex items-center justify-between">
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  {card.title}
-                </p>
-                <div className={`p-2 rounded-lg ${card.color}`}>
-                <Icon className="h-4 w-4" />
-              </div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    {card.title}
+                  </p>
+                  <div className={`p-2 rounded-lg ${card.color}`}>
+                    <Icon className="h-4 w-4" />
+                  </div>
                 </div>
                 {loading ? (
                   <Skeleton className="h-8 w-16" />
@@ -163,7 +163,7 @@ function StatsGrid({ stats, loading }: { stats: CustomerStats | null; loading: b
                   <p className="text-2xl font-bold font-serif">{card.value.toLocaleString()}</p>
                 )}
               </div>
-            
+
             </CardContent>
           </Card>
         );
@@ -437,7 +437,7 @@ function BanCustomerModal({
             <ShieldAlert className="h-5 w-5" /> Ban Customer Account
           </DialogTitle>
           <DialogDescription>
-            This action will restrict customer access to BlinkMart and log out all active sessions.
+            This action will restrict customer access to kitcomart and log out all active sessions.
           </DialogDescription>
         </DialogHeader>
 
@@ -520,7 +520,7 @@ function UnbanCustomerModal({
             <ShieldCheck className="h-5 w-5" /> Unban Customer Account
           </DialogTitle>
           <DialogDescription>
-            Restore customer login and order privileges on BlinkMart.
+            Restore customer login and order privileges on kitcomart.
           </DialogDescription>
         </DialogHeader>
 

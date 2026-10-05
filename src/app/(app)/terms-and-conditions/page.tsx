@@ -3,9 +3,9 @@ import Link from "next/link";
 import { FileText, Shield, Scale, Clock, Truck, Lock } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions — Kit&Co Grocery Delivery Faisalabad",
+  title: "Terms & Conditions — kitcomart Grocery Delivery Faisalabad",
   description:
-    "Read the terms and conditions for ordering groceries, cutoff times, delivery fee tiers, and refunds with Kit&Co in Faisalabad.",
+    "Read the terms and conditions for ordering groceries, cutoff times, delivery fee tiers, and refunds with kitcomart in Faisalabad.",
 };
 
 export default function TermsAndConditionsPage() {
