@@ -349,7 +349,7 @@ function ProductFormDialog({
                   <Input
                     id="prod-sale-price"
                     type="number"
-                    step="1"
+                    step="0.01"
                     min="0"
                     className="pl-9"
                     {...register("salePrice", {

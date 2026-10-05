@@ -77,7 +77,7 @@ export function mapPrismaOrderToDomainOrder(dbOrder: OrderWithItems): Order {
 
   const items: OrderItem[] = dbOrder.items.map((item) => {
     const price = Number(item.price);
-    const originalPrice = item.originalPrice ? Number(item.originalPrice) : item.product?.price ? Number(item.product.price) : price;
+    const originalPrice = item.originalPrice != null ? Number(item.originalPrice) : price;
     return {
       productId: item.productId,
       name: item.name,

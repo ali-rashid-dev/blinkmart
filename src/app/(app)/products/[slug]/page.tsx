@@ -5,6 +5,7 @@ import { ChevronRight, Truck } from "lucide-react";
 import { ProductGallery } from "@/components/products/ProductGallery";
 import { PurchasePanel } from "@/components/products/PurchasePanel";
 import { toCustomerProduct } from "@/components/products/data";
+import { formatCurrency } from "@/lib/currency";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -20,9 +21,6 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
   const categoryName = product.category?.name || "Groceries";
   const brandName = product.brand?.name || "Kit&Co";
-  const price = Number(product.price);
-  const formattedPrice = `Rs ${Math.round(price)}`;
-
   const customerProductData = toCustomerProduct(product);
 
   return (
@@ -63,17 +61,17 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
             <div className="mt-4 flex flex-wrap items-end gap-3">
               <span className="font-display text-4xl text-foreground">
-                Rs {Math.round(customerProductData.effectivePrice)}
+                {formatCurrency(customerProductData.effectivePrice)}
               </span>
+              {customerProductData.effectivePrice < customerProductData.price && (
+                <span className="pb-1 text-lg text-muted-foreground line-through">
+                  {formatCurrency(customerProductData.price)}
+                </span>
+              )}
               {customerProductData.discountPercent > 0 && (
-                <>
-                  <span className="pb-1 text-lg text-muted-foreground line-through">
-                    Rs {Math.round(customerProductData.price)}
-                  </span>
-                  <span className="mb-1 rounded-lg bg-destructive/10 px-2 py-1 text-xs font-bold text-destructive">
-                    SAVE {customerProductData.discountPercent}%
-                  </span>
-                </>
+                <span className="mb-1 rounded-lg bg-destructive/10 px-2 py-1 text-xs font-bold text-destructive">
+                  SAVE {customerProductData.discountPercent}%
+                </span>
               )}
               <span className="pb-1.5 text-sm text-muted-foreground">/ item</span>
             </div>

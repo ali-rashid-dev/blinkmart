@@ -10,6 +10,7 @@ import { QuantitySelector } from "./QuantitySelector";
 import { cartStore, useCartState } from "@/lib/cart/store";
 import type { CustomerProduct } from "./data";
 import { getSupportedImageSrc } from "@/lib/image";
+import { formatCurrency } from "@/lib/currency";
 
 export function ProductCard({
   product,
@@ -106,17 +107,17 @@ export function ProductCard({
         {/* Price */}
         <div className="flex flex-wrap items-baseline gap-x-2">
           <span className="font-display text-lg text-foreground">
-            Rs {Math.round(product.effectivePrice)}
+            {formatCurrency(product.effectivePrice)}
           </span>
+          {product.effectivePrice < product.price && (
+            <span className="text-xs text-muted-foreground line-through">
+              {formatCurrency(product.price)}
+            </span>
+          )}
           {product.discountPercent > 0 && (
-            <>
-              <span className="text-xs text-muted-foreground line-through">
-                Rs {Math.round(product.price)}
-              </span>
-              <span className="text-[11px] font-bold text-destructive">
-                {product.discountPercent}% OFF
-              </span>
-            </>
+            <span className="text-[11px] font-bold text-destructive">
+              {product.discountPercent}% OFF
+            </span>
           )}
         </div>
 

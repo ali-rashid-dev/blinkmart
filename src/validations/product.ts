@@ -43,8 +43,7 @@ export const createProductSchema = z.object({
     .optional()
     .transform((val) => {
       if (val === "" || val === null || val === undefined) return null;
-      const num = typeof val === "string" ? parseFloat(val) : val;
-      return Number.isNaN(num) ? null : num;
+      return typeof val === "string" ? Number(val) : val;
     })
     .refine(
       (val) => val === null || (typeof val === "number" && val >= 0 && val <= 10000000),
@@ -90,8 +89,7 @@ export const updateProductSchema = z.object({
     .optional()
     .transform((val) => {
       if (val === "" || val === null || val === undefined) return null;
-      const num = typeof val === "string" ? parseFloat(val) : val;
-      return Number.isNaN(num) ? null : num;
+      return typeof val === "string" ? Number(val) : val;
     })
     .refine(
       (val) => val === null || (typeof val === "number" && val >= 0 && val <= 10000000),

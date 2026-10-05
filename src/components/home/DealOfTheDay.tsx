@@ -9,6 +9,7 @@ import type { CustomerProduct } from "@/components/products/data";
 import { SectionHeader } from "./SectionHeader";
 
 import { getSupportedImageSrc } from "@/lib/image";
+import { formatCurrency } from "@/lib/currency";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -48,11 +49,9 @@ export function DealOfTheDay({ product, compareAtPrice }: DealOfTheDayProps) {
   const soldOut = !p.enabled;
   const originalPrice = compareAtPrice ?? (p.discountPercent > 0 ? p.price : Math.round(p.price / 0.8));
   const sellingPrice = p.effectivePrice;
-  const discountPercent = p.discountPercent > 0
-    ? p.discountPercent
-    : originalPrice > sellingPrice
+  const discountPercent = originalPrice > sellingPrice
     ? Math.round(((originalPrice - sellingPrice) / originalPrice) * 100)
-    : 0;
+    : p.discountPercent;
   const imageSrc = getSupportedImageSrc(p.imageUrl);
 
   return (
@@ -98,10 +97,10 @@ export function DealOfTheDay({ product, compareAtPrice }: DealOfTheDayProps) {
           </div>
 
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="font-display text-3xl text-foreground">Rs {Math.round(sellingPrice)}</span>
+            <span className="font-display text-3xl text-foreground">{formatCurrency(sellingPrice)}</span>
             {originalPrice > sellingPrice && (
               <span className="text-sm text-muted-foreground line-through">
-                Rs {Math.round(originalPrice)}
+                {formatCurrency(originalPrice)}
               </span>
             )}
           </div>
