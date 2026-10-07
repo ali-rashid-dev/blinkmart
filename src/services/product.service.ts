@@ -1,3 +1,4 @@
+import { deleteUploadThingFile } from "@/lib/uploadthing-server";
 import {
   listCustomerProducts,
   findCustomerProductById,
@@ -195,29 +196,28 @@ export async function updateProductService(
     }
   }
 
-  try {
-    return await dbUpdateProduct(input.id, {
-      ...(input.name !== undefined && { name: input.name }),
-      ...(finalSlug !== undefined && { slug: finalSlug }),
-      ...(input.description !== undefined && { description: input.description }),
-      ...(input.price !== undefined && { price: input.price }),
-      ...(input.salePrice !== undefined && { salePrice: input.salePrice }),
-      ...(input.imageUrl !== undefined && { imageUrl: input.imageUrl }),
-      ...(input.enabled !== undefined && { enabled: input.enabled }),
-      ...(input.brandId !== undefined && { brandId: input.brandId }),
-      ...(input.categoryId !== undefined && { categoryId: input.categoryId }),
-    });
-  } catch (err: unknown) {
-    if (
-      typeof err === "object" &&
-      err !== null &&
-      "code" in err &&
-      err.code === "P2002"
-    ) {
-      throw new ProductSlugConflictError(finalSlug ?? existing.slug);
-    }
-    throw err;
+  const updatedProduct = await dbUpdateProduct(input.id, {
+    ...(input.name !== undefined && { name: input.name }),
+    ...(finalSlug !== undefined && { slug: finalSlug }),
+    ...(input.description !== undefined && { description: input.description }),
+    ...(input.price !== undefined && { price: input.price }),
+    ...(input.salePrice !== undefined && { salePrice: input.salePrice }),
+    ...(input.imageUrl !== undefined && { imageUrl: input.imageUrl }),
+    ...(input.enabled !== undefined && { enabled: input.enabled }),
+    ...(input.brandId !== undefined && { brandId: input.brandId }),
+    ...(input.categoryId !== undefined && { categoryId: input.categoryId }),
+  });
+
+  // If imageUrl was explicitly modified and old image was an UploadThing file, delete old file from UploadThing
+  if (
+    input.imageUrl !== undefined &&
+    existing.imageUrl &&
+    input.imageUrl !== existing.imageUrl
+  ) {
+    await deleteUploadThingFile(existing.imageUrl);
   }
+
+  return updatedProduct;
 }
 
 export async function deleteProductService(id: string): Promise<ProductWithBrandAndCategory> {
@@ -225,7 +225,14 @@ export async function deleteProductService(id: string): Promise<ProductWithBrand
   if (!existing) {
     throw new ProductNotFoundError(id);
   }
-  return dbDeleteProduct(id);
+
+  const deletedProduct = await dbDeleteProduct(id);
+
+  if (existing.imageUrl) {
+    await deleteUploadThingFile(existing.imageUrl);
+  }
+
+  return deletedProduct;
 }
 
 export async function toggleProductStatusService(

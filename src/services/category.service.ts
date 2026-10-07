@@ -1,3 +1,4 @@
+import { deleteUploadThingFile } from "@/lib/uploadthing-server";
 import {
   createCategory as dbCreate,
   updateCategory as dbUpdate,
@@ -155,8 +156,9 @@ export async function updateCategory(input: UpdateCategoryInput): Promise<Catego
     slug = await generateUniqueSlug(input.name, input.id);
   }
 
+  let updated: CategoryRecord;
   try {
-    return await dbUpdate(input.id, {
+    updated = await dbUpdate(input.id, {
       ...(input.name !== undefined && { name: input.name }),
       ...(slug !== undefined && { slug }),
       ...(input.emoji !== undefined && { emoji: input.emoji }),
@@ -179,6 +181,17 @@ export async function updateCategory(input: UpdateCategoryInput): Promise<Catego
     }
     throw err;
   }
+
+  // If imageUrl was explicitly modified and old image was an UploadThing file, delete old file from UploadThing
+  if (
+    input.imageUrl !== undefined &&
+    existing.imageUrl &&
+    input.imageUrl !== existing.imageUrl
+  ) {
+    await deleteUploadThingFile(existing.imageUrl);
+  }
+
+  return updated;
 }
 
 // ──────────────────────────────────────────────────────────
@@ -191,7 +204,13 @@ export async function deleteCategory(id: string): Promise<CategoryRecord> {
   const productCount = await countProductsByCategory(id);
   if (productCount > 0) throw new CategoryHasProductsError(productCount);
 
-  return dbDelete(id);
+  const deletedCategory = await dbDelete(id);
+
+  if (existing.imageUrl) {
+    await deleteUploadThingFile(existing.imageUrl);
+  }
+
+  return deletedCategory;
 }
 
 // ──────────────────────────────────────────────────────────
