@@ -20,6 +20,10 @@ test("UploadThing Server Helpers", async (t) => {
       extractUploadThingFileKey("https://fmcupnguk1.ufs.sh/f/987xyz-image.jpg"),
       "987xyz-image.jpg"
     );
+    assert.equal(
+      extractUploadThingFileKey("https://ufs.sh/f/root-image.jpg"),
+      "root-image.jpg"
+    );
 
     // URL with query parameters or hash
     assert.equal(
@@ -41,6 +45,19 @@ test("UploadThing Server Helpers", async (t) => {
       extractUploadThingFileKey("https://images.unsplash.com/photo-12345"),
       null
     );
+    assert.equal(
+      extractUploadThingFileKey("https://example.com/utfs.io/f/not-uploadthing.png"),
+      null
+    );
+    assert.equal(
+      extractUploadThingFileKey("https://example.com/?next=/f/not-uploadthing.png"),
+      null
+    );
+    assert.equal(
+      extractUploadThingFileKey("https://ufs.sh.example.com/f/not-uploadthing.png"),
+      null
+    );
+    assert.equal(extractUploadThingFileKey("https://[invalid/f/broken.png"), null);
 
     // Local assets return null
     assert.equal(extractUploadThingFileKey("/images/apple.png"), null);

@@ -196,17 +196,30 @@ export async function updateProductService(
     }
   }
 
-  const updatedProduct = await dbUpdateProduct(input.id, {
-    ...(input.name !== undefined && { name: input.name }),
-    ...(finalSlug !== undefined && { slug: finalSlug }),
-    ...(input.description !== undefined && { description: input.description }),
-    ...(input.price !== undefined && { price: input.price }),
-    ...(input.salePrice !== undefined && { salePrice: input.salePrice }),
-    ...(input.imageUrl !== undefined && { imageUrl: input.imageUrl }),
-    ...(input.enabled !== undefined && { enabled: input.enabled }),
-    ...(input.brandId !== undefined && { brandId: input.brandId }),
-    ...(input.categoryId !== undefined && { categoryId: input.categoryId }),
-  });
+  let updatedProduct: ProductWithBrandAndCategory;
+  try {
+    updatedProduct = await dbUpdateProduct(input.id, {
+      ...(input.name !== undefined && { name: input.name }),
+      ...(finalSlug !== undefined && { slug: finalSlug }),
+      ...(input.description !== undefined && { description: input.description }),
+      ...(input.price !== undefined && { price: input.price }),
+      ...(input.salePrice !== undefined && { salePrice: input.salePrice }),
+      ...(input.imageUrl !== undefined && { imageUrl: input.imageUrl }),
+      ...(input.enabled !== undefined && { enabled: input.enabled }),
+      ...(input.brandId !== undefined && { brandId: input.brandId }),
+      ...(input.categoryId !== undefined && { categoryId: input.categoryId }),
+    });
+  } catch (err: unknown) {
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "code" in err &&
+      err.code === "P2002"
+    ) {
+      throw new ProductSlugConflictError(finalSlug ?? existing.slug);
+    }
+    throw err;
+  }
 
   // If imageUrl was explicitly modified and old image was an UploadThing file, delete old file from UploadThing
   if (

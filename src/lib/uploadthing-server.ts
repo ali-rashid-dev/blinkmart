@@ -12,37 +12,35 @@ export function extractUploadThingFileKey(url: string | null | undefined): strin
   const trimmed = url.trim();
   if (!trimmed) return null;
 
-  // If it's a raw file key without slashes or HTTP protocol
-  if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
-    if (!trimmed.includes("/")) return trimmed;
-    return null;
+  if (!/^https?:\/\//i.test(trimmed)) {
+    if (/^[a-z][a-z\d+.-]*:/i.test(trimmed) || trimmed.includes("/")) return null;
+    return trimmed;
   }
 
-  // Check if domain belongs to UploadThing
-  const isUploadThingDomain =
-    trimmed.includes("utfs.io") ||
-    trimmed.includes("ufs.sh") ||
-    trimmed.includes("uploadthing") ||
-    trimmed.includes("uploadthing-prod");
-
-  if (!isUploadThingDomain) return null;
-
-  // Extract key after /f/ if present
-  if (trimmed.includes("/f/")) {
-    const parts = trimmed.split("/f/");
-    const keyWithParams = parts[parts.length - 1];
-    return keyWithParams.split("?")[0].split("#")[0];
-  }
-
-  // Fallback: extract last path segment
+  let parsed: URL;
   try {
-    const parsed = new URL(trimmed);
-    const segments = parsed.pathname.split("/").filter(Boolean);
-    const lastSegment = segments[segments.length - 1];
-    return lastSegment ? lastSegment.split("?")[0].split("#")[0] : null;
+    parsed = new URL(trimmed);
   } catch {
     return null;
   }
+
+  const hostname = parsed.hostname.toLowerCase().replace(/\.$/, "");
+  const isUploadThingDomain =
+    hostname === "utfs.io" ||
+    hostname === "ufs.sh" ||
+    hostname.endsWith(".ufs.sh") ||
+    hostname === "uploadthing-prod.s3.us-west-2.amazonaws.com";
+
+  if (!isUploadThingDomain) return null;
+
+  const fileMarkerIndex = parsed.pathname.lastIndexOf("/f/");
+  if (fileMarkerIndex >= 0) {
+    const key = parsed.pathname.slice(fileMarkerIndex + 3);
+    return key || null;
+  }
+
+  const segments = parsed.pathname.split("/").filter(Boolean);
+  return segments[segments.length - 1] ?? null;
 }
 
 /**
