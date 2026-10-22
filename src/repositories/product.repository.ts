@@ -5,8 +5,15 @@ export type ProductWithBrandAndCategory = Prisma.ProductGetPayload<{
   include: {
     brand: true;
     category: true;
+    variants: true;
   };
 }>;
+
+const productRelations = {
+  brand: true,
+  category: true,
+  variants: { orderBy: { createdAt: "asc" as const } },
+};
 
 // ──────────────────────────────────────────────────────────
 //  Customer Queries — MUST respect Brand enabled status
@@ -52,10 +59,7 @@ export async function listCustomerProducts(params?: {
 
   return prisma.product.findMany({
     where,
-    include: {
-      brand: true,
-      category: true,
-    },
+    include: { ...productRelations, variants: { where: { isActive: true }, orderBy: { createdAt: "asc" } } },
     orderBy: { createdAt: "desc" },
     ...(params?.take ? { take: params.take } : {}),
     ...(params?.skip ? { skip: params.skip } : {}),
@@ -68,10 +72,7 @@ export async function findCustomerProductById(id: string): Promise<ProductWithBr
       id,
       ...customerProductVisibilityWhere,
     },
-    include: {
-      brand: true,
-      category: true,
-    },
+    include: { ...productRelations, variants: { where: { isActive: true }, orderBy: { createdAt: "asc" } } },
   });
 }
 
@@ -81,10 +82,7 @@ export async function findCustomerProductBySlug(slug: string): Promise<ProductWi
       slug: { equals: slug, mode: "insensitive" },
       ...customerProductVisibilityWhere,
     },
-    include: {
-      brand: true,
-      category: true,
-    },
+    include: { ...productRelations, variants: { where: { isActive: true }, orderBy: { createdAt: "asc" } } },
   });
 }
 
@@ -132,10 +130,7 @@ export async function listAdminProducts(params?: {
 
   return prisma.product.findMany({
     where,
-    include: {
-      brand: true,
-      category: true,
-    },
+    include: productRelations,
     orderBy: { createdAt: "desc" },
     ...(params?.take ? { take: params.take } : {}),
     ...(params?.skip ? { skip: params.skip } : {}),
@@ -175,10 +170,7 @@ export async function countAdminProducts(params?: {
 export async function findAdminProductById(id: string): Promise<ProductWithBrandAndCategory | null> {
   return prisma.product.findUnique({
     where: { id },
-    include: {
-      brand: true,
-      category: true,
-    },
+    include: productRelations,
   });
 }
 
@@ -207,8 +199,18 @@ export async function createProduct(data: {
   salePrice?: number | Prisma.Decimal | null;
   imageUrl?: string | null;
   enabled?: boolean;
+  variantsEnabled?: boolean;
   brandId?: string | null;
   categoryId?: string | null;
+  variants?: Array<{
+    sku: string;
+    attributes: Record<string, string>;
+    price: number;
+    salePrice?: number | null;
+    stockQuantity: number;
+    imageUrl?: string | null;
+    isActive: boolean;
+  }>;
 }): Promise<ProductWithBrandAndCategory> {
   return prisma.product.create({
     data: {
@@ -219,14 +221,26 @@ export async function createProduct(data: {
       salePrice: data.salePrice ?? null,
       imageUrl: data.imageUrl ?? null,
       enabled: data.enabled ?? true,
+      variantsEnabled: data.variantsEnabled ?? false,
       brandId: data.brandId ?? null,
       categoryId: data.categoryId ?? null,
+      variants: {
+        create: (data.variants ?? []).map((variant) => ({
+          ...variant,
+          attributesKey: getVariantAttributesKey(variant.attributes),
+        })),
+      },
     },
-    include: {
-      brand: true,
-      category: true,
-    },
+    include: productRelations,
   });
+}
+
+export function getVariantAttributesKey(attributes: Record<string, string>): string {
+  return JSON.stringify(
+    Object.entries(attributes)
+      .map(([key, value]) => [key.trim().toLowerCase(), value.trim().toLowerCase()] as const)
+      .sort(([a], [b]) => a.localeCompare(b))
+  );
 }
 
 export async function updateProduct(
@@ -239,37 +253,81 @@ export async function updateProduct(
     salePrice?: number | Prisma.Decimal | null;
     imageUrl?: string | null;
     enabled?: boolean;
+    variantsEnabled?: boolean;
     brandId?: string | null;
     categoryId?: string | null;
+    variants?: Array<{
+      id?: string;
+      sku: string;
+      attributes: Record<string, string>;
+      price: number;
+      salePrice?: number | null;
+      stockQuantity: number;
+      imageUrl?: string | null;
+      isActive: boolean;
+    }>;
   }
 ): Promise<ProductWithBrandAndCategory> {
-  return prisma.product.update({
-    where: { id },
-    data: {
-      ...(data.name !== undefined && { name: data.name }),
-      ...(data.slug !== undefined && { slug: data.slug }),
-      ...(data.description !== undefined && { description: data.description }),
-      ...(data.price !== undefined && { price: data.price }),
-      ...(data.salePrice !== undefined && { salePrice: data.salePrice }),
-      ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
-      ...(data.enabled !== undefined && { enabled: data.enabled }),
-      ...(data.brandId !== undefined && { brandId: data.brandId }),
-      ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
-    },
-    include: {
-      brand: true,
-      category: true,
-    },
+  return prisma.$transaction(async (tx) => {
+    await tx.product.update({
+      where: { id },
+      data: {
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.slug !== undefined && { slug: data.slug }),
+        ...(data.description !== undefined && { description: data.description }),
+        ...(data.price !== undefined && { price: data.price }),
+        ...(data.salePrice !== undefined && { salePrice: data.salePrice }),
+        ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
+        ...(data.enabled !== undefined && { enabled: data.enabled }),
+        ...(data.variantsEnabled !== undefined && { variantsEnabled: data.variantsEnabled }),
+        ...(data.brandId !== undefined && { brandId: data.brandId }),
+        ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
+      },
+    });
+    if (data.variants !== undefined) {
+      const retainedIds = data.variants.flatMap((variant) => variant.id ? [variant.id] : []);
+      await tx.productVariant.deleteMany({
+        where: { productId: id, ...(retainedIds.length ? { id: { notIn: retainedIds } } : {}) },
+      });
+      for (const variantId of retainedIds) {
+        const temporaryValue = `__editing_${variantId}_${Date.now()}`;
+        const updated = await tx.productVariant.updateMany({
+          where: { id: variantId, productId: id },
+          data: { sku: temporaryValue, attributesKey: temporaryValue },
+        });
+        if (updated.count !== 1) {
+          throw new Error("A variant being edited does not belong to this product.");
+        }
+      }
+      for (const variant of data.variants) {
+        const variantData = {
+          sku: variant.sku,
+          attributes: variant.attributes,
+          attributesKey: getVariantAttributesKey(variant.attributes),
+          price: variant.price,
+          salePrice: variant.salePrice ?? null,
+          stockQuantity: variant.stockQuantity,
+          imageUrl: variant.imageUrl ?? null,
+          isActive: variant.isActive,
+        };
+        if (variant.id) {
+          await tx.productVariant.updateMany({
+            where: { id: variant.id, productId: id },
+            data: variantData,
+          });
+        } else {
+          await tx.productVariant.create({ data: { ...variantData, productId: id } });
+        }
+      }
+    }
+    return tx.product.findUniqueOrThrow({ where: { id }, include: productRelations });
   });
 }
 
 export async function deleteProduct(id: string): Promise<ProductWithBrandAndCategory> {
   return prisma.product.delete({
     where: { id },
-    include: {
-      brand: true,
-      category: true,
-    },
+    include: productRelations,
   });
 }
 
@@ -280,10 +338,7 @@ export async function toggleProductStatus(
   return prisma.product.update({
     where: { id },
     data: { enabled },
-    include: {
-      brand: true,
-      category: true,
-    },
+    include: productRelations,
   });
 }
 
@@ -300,4 +355,3 @@ export async function getAdminProductStats(): Promise<{
 
   return { total, active, inactive };
 }
-

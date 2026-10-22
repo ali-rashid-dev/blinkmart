@@ -23,6 +23,62 @@ function parseSalePrice(val: string | number | null | undefined): number | null 
   return Number(trimmed);
 }
 
+const productVariantSchema = z.object({
+  id: z.string().min(1).optional(),
+  sku: z.string().trim().min(1, "SKU is required").max(100).transform((value) => value.toUpperCase()),
+  attributes: z.record(z.string().trim().min(1), z.string().trim().min(1))
+    .refine(
+      (attributes) => Object.keys(attributes).length > 0,
+      "Add at least one variant attribute"
+    )
+    .superRefine((attributes, ctx) => {
+      const keys = new Set<string>();
+      for (const key of Object.keys(attributes)) {
+        const normalized = key.trim().toLowerCase();
+        if (keys.has(normalized)) {
+          ctx.addIssue({ code: "custom", message: "Attribute names must be unique", path: [key] });
+        }
+        keys.add(normalized);
+      }
+    }),
+  price: z.coerce.number().min(1, "Price must be at least Rs 1").max(10000000).multipleOf(0.01, "Price can have at most 2 decimal places"),
+  salePrice: z.preprocess(
+    (value) => value === "" || value === undefined ? null : value,
+    z.union([z.coerce.number(), z.null()])
+  ).default(null),
+  stockQuantity: z.coerce.number().int().min(0, "Stock cannot be negative").max(2147483647),
+  imageUrl: z.string().trim().nullable().optional(),
+  isActive: z.boolean().default(true),
+}).refine(
+  (variant) => variant.salePrice === null || (
+    variant.salePrice >= 0 &&
+    variant.salePrice <= 10000000 &&
+    variant.salePrice < variant.price &&
+    Math.round(variant.salePrice * 100) === variant.salePrice * 100
+  ),
+  { message: "Sale price must be between Rs 0 and the regular price (up to 2 decimal places)", path: ["salePrice"] }
+);
+
+const variantsSchema = z.array(productVariantSchema).max(100, "A product cannot have more than 100 variants")
+  .superRefine((variants, ctx) => {
+    const skus = new Set<string>();
+    const combinations = new Set<string>();
+    variants.forEach((variant, index) => {
+      if (skus.has(variant.sku)) {
+        ctx.addIssue({ code: "custom", message: "Each variant must have a unique SKU", path: [index, "sku"] });
+      }
+      skus.add(variant.sku);
+      const key = Object.entries(variant.attributes)
+        .map(([name, value]) => [name.trim().toLowerCase(), value.trim().toLowerCase()] as const)
+        .sort(([a], [b]) => a.localeCompare(b));
+      const combination = JSON.stringify(key);
+      if (combinations.has(combination)) {
+        ctx.addIssue({ code: "custom", message: "This attribute combination already exists", path: [index, "attributes"] });
+      }
+      combinations.add(combination);
+    });
+  });
+
 export const createProductSchema = z.object({
   name: z
     .string()
@@ -59,9 +115,14 @@ export const createProductSchema = z.object({
     ),
   imageUrl: z.string().nullable().optional(),
   enabled: z.boolean().optional().default(true),
+  variantsEnabled: z.boolean().optional().default(false),
+  variants: variantsSchema.optional().default([]),
   brandId: z.string().nullable().optional(),
   categoryId: z.string().nullable().optional(),
-});
+}).refine(
+  (product) => !product.variantsEnabled || (product.variants.length > 0 && product.variants.some((variant) => variant.isActive)),
+  { message: "Add at least one active variant", path: ["variants"] }
+);
 
 export const updateProductSchema = z.object({
   id: z.string().min(1, "Product ID is required"),
@@ -103,9 +164,14 @@ export const updateProductSchema = z.object({
     .optional(),
   imageUrl: z.string().nullable().optional(),
   enabled: z.boolean().optional(),
+  variantsEnabled: z.boolean().optional(),
+  variants: variantsSchema.optional(),
   brandId: z.string().nullable().optional(),
   categoryId: z.string().nullable().optional(),
-});
+}).refine(
+  (product) => product.variantsEnabled !== true || Boolean(product.variants?.length && product.variants.some((variant) => variant.isActive)),
+  { message: "Add at least one active variant", path: ["variants"] }
+);
 
 export const toggleProductStatusSchema = z.object({
   id: z.string().min(1, "Product ID is required"),
@@ -134,8 +200,8 @@ export function getFieldErrors<TSchema extends z.ZodTypeAny>(schema: TSchema, va
   }
 
   return result.error.issues.reduce<Record<string, string>>((acc, issue) => {
-    const field = issue.path[0];
-    if (typeof field === "string") {
+    const field = issue.path.join(".");
+    if (field) {
       acc[field] = issue.message;
     }
     return acc;

@@ -1,5 +1,6 @@
 import { CartItem } from "./CartItem";
 import type { PendingKind } from "@/lib/cart/store";
+import { getCartLineKey } from "@/lib/cart/store";
 import type { CartLine } from "@/lib/cart/types";
 
 export function CartItemList({
@@ -15,7 +16,7 @@ export function CartItemList({
         <CartItem
           key={line.id}
           line={line}
-          {...(pending[line.productId] ? { pending: pending[line.productId] } : {})}
+          {...(pending[getCartLineKey(line.productId, line.variantId)] ? { pending: pending[getCartLineKey(line.productId, line.variantId)] } : {})}
         />
       ))}
     </ul>

@@ -1,6 +1,9 @@
 export interface CartLine {
   id: string;
   productId: string;
+  variantId: string | null;
+  sku: string | null;
+  attributes: Record<string, string>;
   name: string;
   slug: string;
   price: number;

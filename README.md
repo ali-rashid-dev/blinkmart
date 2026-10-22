@@ -28,7 +28,7 @@ A full-stack grocery e-commerce platform with a customer storefront and a full a
 ### Customer Storefront
 - Home page with hero, category strip, promo banner, best sellers, deal of the day, and fresh arrivals
 - Product listing with filtering by category and brand
-- Product detail page
+- Canonical product detail pages with selectable size, weight, color, flavor, and packaging variants
 - Shopping cart
 - Checkout flow
 - Order history and order detail
@@ -38,7 +38,7 @@ A full-stack grocery e-commerce platform with a customer storefront and a full a
 
 ### Admin Panel (`/admin/*`)
 - Dashboard with key metrics
-- Product management (list, create, edit)
+- Product management (list, create, edit, and per-variant pricing/SKU/stock)
 - Category & brand management
 - Order management with status updates
 - Customer management
@@ -163,6 +163,12 @@ Open [http://localhost:3000](http://localhost:3000).
 The Prisma schema is at [`prisma/schema.prisma`](./prisma/schema.prisma). The generated client outputs to `src/generated/prisma/` (gitignored).
 
 The `PrismaClient` singleton in [`src/lib/prisma.ts`](./src/lib/prisma.ts) uses the `@prisma/adapter-pg` driver adapter, which is required for Neon's serverless PostgreSQL.
+
+### Product variants and inventory
+
+Products remain the canonical catalog records and URLs. A product with `variantsEnabled` has purchasable `ProductVariant` rows; each row stores a globally unique SKU, its attribute map, pricing, image, active status, and independently tracked stock. Duplicate attribute combinations are rejected. Simple products retain their existing product-level pricing and purchasing behavior.
+
+Variant stock is validated and decremented atomically when an order is placed. Cancelling an eligible order restores its variant quantities. Order items retain SKU, selected attributes, image, and purchase-time prices as snapshots, so later catalog edits do not change order history. Shared underlying stock pools are not configured.
 
 ### Connection string format
 

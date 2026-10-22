@@ -10,6 +10,7 @@ import {
   deleteProductService,
   toggleProductStatusService,
   ProductSlugConflictError,
+  ProductVariantConflictError,
   ProductNotFoundError,
   type PaginatedProducts,
 } from "@/services/product.service";
@@ -34,9 +35,16 @@ import type { ProductWithBrandAndCategory } from "@/repositories/product.reposit
  * This helper converts it to a plain `number`.
  */
 /** Prisma's Decimal serialized to a plain number for the client boundary. */
-export type SerializedProduct = Omit<ProductWithBrandAndCategory, "price" | "salePrice"> & {
+export type SerializedProductVariant = Omit<ProductWithBrandAndCategory["variants"][number], "price" | "salePrice" | "attributes"> & {
   price: number;
   salePrice: number | null;
+  attributes: Record<string, string>;
+};
+
+export type SerializedProduct = Omit<ProductWithBrandAndCategory, "price" | "salePrice" | "variants"> & {
+  price: number;
+  salePrice: number | null;
+  variants: SerializedProductVariant[];
 };
 
 /** Paginated list with price already serialized. */
@@ -47,6 +55,14 @@ function serializeProduct(p: ProductWithBrandAndCategory): SerializedProduct {
     ...p,
     price: Number(p.price),
     salePrice: p.salePrice !== null && p.salePrice !== undefined ? Number(p.salePrice) : null,
+    variants: p.variants.map((variant) => ({
+      ...variant,
+      price: Number(variant.price),
+      salePrice: variant.salePrice !== null ? Number(variant.salePrice) : null,
+      attributes: variant.attributes && typeof variant.attributes === "object" && !Array.isArray(variant.attributes)
+        ? Object.fromEntries(Object.entries(variant.attributes).filter((entry): entry is [string, string] => typeof entry[1] === "string"))
+        : {},
+    })),
   };
 }
 
@@ -88,6 +104,9 @@ const requireProductAdmin = () =>
 
 function handleServiceError(error: unknown): ProductActionResult<never> {
   if (error instanceof ProductSlugConflictError) {
+    return buildError("PRODUCT_ALREADY_EXISTS", error.message);
+  }
+  if (error instanceof ProductVariantConflictError) {
     return buildError("PRODUCT_ALREADY_EXISTS", error.message);
   }
   if (error instanceof ProductNotFoundError) {

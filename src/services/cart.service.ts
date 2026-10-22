@@ -32,6 +32,13 @@ export class ProductDisabledError extends Error {
   }
 }
 
+export class VariantUnavailableError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "VariantUnavailableError";
+  }
+}
+
 export class InvalidQuantityError extends Error {
   constructor(message: string) {
     super(message);
@@ -42,6 +49,9 @@ export class InvalidQuantityError extends Error {
 export interface CartLineItem {
   id: string;
   productId: string;
+  variantId: string | null;
+  sku: string | null;
+  attributes: Record<string, string>;
   name: string;
   slug: string;
   price: number;
@@ -116,19 +126,30 @@ export function calculateCartTotals(lines: CartLineItem[]): CartTotals {
 
 function mapCartToDetails(cart: CartWithItems): CartDetails {
   const lines: CartLineItem[] = cart.items.map((item) => {
-    const priceNum = Number(item.product.price);
-    const salePriceNum = item.product.salePrice !== null && item.product.salePrice !== undefined ? Number(item.product.salePrice) : null;
+    const priceNum = Number(item.variant?.price ?? item.product.price);
+    const variantSale = item.variant?.salePrice;
+    const salePriceNum = variantSale !== null && variantSale !== undefined
+      ? Number(variantSale)
+      : item.variant ? null : item.product.salePrice !== null ? Number(item.product.salePrice) : null;
     const hasSale = salePriceNum !== null && salePriceNum > 0 && salePriceNum < priceNum;
     const effectivePrice = hasSale ? salePriceNum : priceNum;
     const discountPercent = hasSale ? Math.round(((priceNum - salePriceNum) / priceNum) * 100) : 0;
     const lineTotal = Math.round(effectivePrice * item.quantity * 100) / 100;
     const originalTotal = Math.round(priceNum * item.quantity * 100) / 100;
     const isProductEnabled =
-      item.product.enabled && (!item.product.brand || item.product.brand.enabled);
+      item.product.enabled && (!item.product.brand || item.product.brand.enabled) &&
+      (!item.product.variantsEnabled || Boolean(item.variant?.isActive && item.variant.stockQuantity > 0));
+    const attributes = item.variant?.attributes && typeof item.variant.attributes === "object" && !Array.isArray(item.variant.attributes)
+      ? Object.fromEntries(Object.entries(item.variant.attributes).filter((entry): entry is [string, string] => typeof entry[1] === "string"))
+      : {};
+    const attributeLabel = Object.entries(attributes).map(([key, value]) => `${key}: ${value}`).join(" · ");
 
     return {
       id: item.id,
       productId: item.productId,
+      variantId: item.variantId,
+      sku: item.variant?.sku ?? null,
+      attributes,
       name: item.product.name,
       slug: item.product.slug,
       price: priceNum,
@@ -137,9 +158,9 @@ function mapCartToDetails(cart: CartWithItems): CartDetails {
       discountPercent,
       originalTotal,
       quantity: item.quantity,
-      unit: item.product.category?.name ? `1 ${item.product.category.name.toLowerCase()}` : "1 pack",
-      image: item.product.imageUrl || "🛒",
-      maxQuantity: 99,
+      unit: attributeLabel || (item.product.category?.name ? `1 ${item.product.category.name.toLowerCase()}` : "1 pack"),
+      image: item.variant?.imageUrl || item.product.imageUrl || "🛒",
+      maxQuantity: item.variant ? Math.min(99, item.variant.stockQuantity) : 99,
       total: lineTotal,
       enabled: isProductEnabled,
     };
@@ -194,9 +215,31 @@ export async function addItemToCart(
   if (!product.enabled || (product.brand && !product.brand.enabled)) {
     throw new ProductDisabledError(product.name);
   }
+  let variantId: string | undefined;
+  if (product.variantsEnabled) {
+    const variant = product.variants.find((candidate) => candidate.id === parsed.variantId);
+    if (!variant || !variant.isActive) {
+      throw new VariantUnavailableError("Select an active product option.");
+    }
+    if (variant.stockQuantity < 1) {
+      throw new VariantUnavailableError("This option is out of stock.");
+    }
+    variantId = variant.id;
+  } else if (parsed.variantId) {
+    throw new VariantUnavailableError("This product does not have selectable options.");
+  }
 
   const cart = await getOrCreateCart(identifier);
-  await upsertCartItem(cart.id, parsed.productId, parsed.quantity);
+  const existing = cart.items.find((item) => item.productId === parsed.productId && item.variantId === (variantId ?? null));
+  if (existing && existing.quantity + parsed.quantity > 99) {
+    throw new InvalidQuantityError("Maximum quantity per option is 99.");
+  }
+  if (variantId) {
+    if ((existing?.quantity ?? 0) + parsed.quantity > (product.variants.find((variant) => variant.id === variantId)?.stockQuantity ?? 0)) {
+      throw new InvalidQuantityError("Requested quantity exceeds available stock.");
+    }
+  }
+  await upsertCartItem(cart.id, parsed.productId, parsed.quantity, variantId);
 
   return getCartDetails(identifier);
 }
@@ -208,19 +251,29 @@ export async function updateItemQuantity(
   const parsed = updateCartQuantitySchema.parse(input);
 
   const cart = await getOrCreateCart(identifier);
-  await updateCartItemQuantity(cart.id, parsed.productId, parsed.quantity);
+  const item = cart.items.find((line) => line.productId === parsed.productId && line.variantId === (parsed.variantId ?? null));
+  if (parsed.variantId && !item?.variant) {
+    throw new VariantUnavailableError("This product option is no longer available.");
+  }
+  if (item?.variant) {
+    if (!item.variant.isActive || parsed.quantity > item.variant.stockQuantity) {
+      throw new InvalidQuantityError("Requested quantity exceeds available stock.");
+    }
+  }
+  await updateCartItemQuantity(cart.id, parsed.productId, parsed.quantity, parsed.variantId);
 
   return getCartDetails(identifier);
 }
 
 export async function removeItemFromCart(
   identifier: { userId?: string; sessionToken?: string },
-  productId: string
+  productId: string,
+  variantId?: string
 ): Promise<CartDetails> {
-  const parsed = removeFromCartSchema.parse({ productId });
+  const parsed = removeFromCartSchema.parse({ productId, variantId });
 
   const cart = await getOrCreateCart(identifier);
-  await removeCartItem(cart.id, parsed.productId);
+  await removeCartItem(cart.id, parsed.productId, parsed.variantId);
 
   return getCartDetails(identifier);
 }

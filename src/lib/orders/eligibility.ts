@@ -53,7 +53,20 @@ export function getNextDeliveryTier(subtotal: number): {
   return { nextThreshold: 1000, amountNeeded, isFree: false, nextFee: 70 };
 }
 
-export function filterOrderableCartItems<T extends { product: { enabled: boolean; brand?: { enabled?: boolean } | null } }>(items: T[]): T[] {
-  return items.filter((item) => item.product.enabled && (!item.product.brand || item.product.brand.enabled));
+export function filterOrderableCartItems<T extends {
+  quantity: number;
+  product: {
+    enabled: boolean;
+    variantsEnabled?: boolean;
+    brand?: { enabled?: boolean } | null;
+  };
+  variant?: { isActive: boolean; stockQuantity: number } | null;
+}>(items: T[]): T[] {
+  return items.filter((item) =>
+    item.product.enabled &&
+    (!item.product.brand || item.product.brand.enabled) &&
+    (!item.product.variantsEnabled || Boolean(
+      item.variant?.isActive && item.variant.stockQuantity >= item.quantity
+    ))
+  );
 }
-

@@ -6,6 +6,7 @@ import {
   calculatePlatformFee,
   calculateOrderTotals,
   getNextDeliveryTier,
+  filterOrderableCartItems,
 } from "../lib/orders/eligibility";
 import {
   placeOrderSchema,
@@ -15,6 +16,20 @@ import {
 } from "../validations/order";
 
 describe("Order Module Service & Utilities", () => {
+  it("only treats active variants with sufficient independent stock as orderable", () => {
+    const items = [
+      { quantity: 2, product: { enabled: true, variantsEnabled: true }, variant: { isActive: true, stockQuantity: 2 } },
+      { quantity: 3, product: { enabled: true, variantsEnabled: true }, variant: { isActive: true, stockQuantity: 2 } },
+      { quantity: 1, product: { enabled: true, variantsEnabled: true }, variant: { isActive: false, stockQuantity: 10 } },
+      { quantity: 1, product: { enabled: true, variantsEnabled: false }, variant: null },
+    ];
+    const orderable = filterOrderableCartItems(items);
+
+    assert.equal(orderable.length, 2);
+    assert.equal(orderable[0]?.quantity, 2);
+    assert.equal(orderable[1]?.quantity, 1);
+  });
+
   it("computes delivery date options before 5:00 PM cutoff", () => {
     // Local date 2026-08-19 14:00 (2:00 PM)
     const mockTimeBeforeCutoff = new Date(2026, 7, 19, 14, 0, 0);
@@ -302,5 +317,4 @@ describe("Order Module Service & Utilities", () => {
     });
   });
 });
-
 

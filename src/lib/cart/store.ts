@@ -13,6 +13,10 @@ import { calculateDeliveryFee, calculatePlatformFee } from "@/lib/orders/eligibi
 
 export type PendingKind = "update" | "remove";
 
+export function getCartLineKey(productId: string, variantId?: string | null): string {
+  return `${productId}:${variantId ?? "simple"}`;
+}
+
 const initialState: CartState = {
   status: "idle",
   lines: [],
@@ -85,20 +89,21 @@ export const cartStore = {
     }
   },
 
-  async add(productId: string, quantity = 1) {
+  async add(productId: string, quantity = 1, variantId?: string) {
+    const key = getCartLineKey(productId, variantId);
     // Optimistic item count update if item exists
     updateState((prev) => {
-      const existing = prev.lines.find((l) => l.productId === productId);
+      const existing = prev.lines.find((l) => getCartLineKey(l.productId, l.variantId) === key);
       if (existing) {
         return {
           ...prev,
-          pending: { ...prev.pending, [productId]: "update" },
+          pending: { ...prev.pending, [key]: "update" },
         };
       }
       return { ...prev };
     });
 
-    const res = await addToCartAction({ productId, quantity });
+    const res = await addToCartAction({ productId, variantId, quantity });
 
     if (res.success) {
       updateState(() => ({
@@ -110,24 +115,25 @@ export const cartStore = {
     } else {
       updateState((prev) => {
         const nextPending = { ...prev.pending };
-        delete nextPending[productId];
+        delete nextPending[key];
         return { ...prev, pending: nextPending, errorMessage: res.error.message };
       });
       throw new Error(res.error.message);
     }
   },
 
-  async updateQuantity(productId: string, quantity: number) {
+  async updateQuantity(productId: string, quantity: number, variantId?: string | null) {
     if (quantity <= 0) {
-      return this.remove(productId);
+      return this.remove(productId, variantId);
     }
 
+    const key = getCartLineKey(productId, variantId);
     updateState((prev) => ({
       ...prev,
-      pending: { ...prev.pending, [productId]: "update" },
+      pending: { ...prev.pending, [key]: "update" },
     }));
 
-    const res = await updateCartQuantityAction({ productId, quantity });
+    const res = await updateCartQuantityAction({ productId, variantId: variantId ?? undefined, quantity });
 
     if (res.success) {
       updateState(() => ({
@@ -139,19 +145,20 @@ export const cartStore = {
     } else {
       updateState((prev) => {
         const nextPending = { ...prev.pending };
-        delete nextPending[productId];
+        delete nextPending[key];
         return { ...prev, pending: nextPending, errorMessage: res.error.message };
       });
     }
   },
 
-  async remove(productId: string) {
+  async remove(productId: string, variantId?: string | null) {
+    const key = getCartLineKey(productId, variantId);
     updateState((prev) => ({
       ...prev,
-      pending: { ...prev.pending, [productId]: "remove" },
+      pending: { ...prev.pending, [key]: "remove" },
     }));
 
-    const res = await removeFromCartAction(productId);
+    const res = await removeFromCartAction(productId, variantId ?? undefined);
 
     if (res.success) {
       updateState(() => ({
@@ -163,7 +170,7 @@ export const cartStore = {
     } else {
       updateState((prev) => {
         const nextPending = { ...prev.pending };
-        delete nextPending[productId];
+        delete nextPending[key];
         return { ...prev, pending: nextPending, errorMessage: res.error.message };
       });
     }

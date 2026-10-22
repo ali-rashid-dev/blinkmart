@@ -11,7 +11,7 @@ import {
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -93,7 +93,29 @@ type ProductFormValues = {
   enabled: boolean;
   brandId: string;
   categoryId: string;
+  variantsEnabled: boolean;
+  variants: ProductFormVariant[];
 };
+
+type ProductFormVariant = {
+  id?: string;
+  sku: string;
+  attributes: Record<string, string>;
+  price: number;
+  salePrice: number | null;
+  stockQuantity: number;
+  imageUrl: string;
+  isActive: boolean;
+};
+
+const variantAttributeFields = [
+  ["weight", "Weight"],
+  ["volume", "Volume"],
+  ["color", "Color"],
+  ["size", "Size"],
+  ["flavor", "Flavor"],
+  ["packaging", "Packaging"],
+] as const;
 
 // ──────────────────────────────────────────────────────────
 //  Product Form Dialog (Add / Edit)
@@ -125,6 +147,7 @@ function ProductFormDialog({
     watch,
     setValue,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<ProductFormValues>({
     defaultValues: {
@@ -137,13 +160,20 @@ function ProductFormDialog({
       enabled: defaultValues?.enabled ?? true,
       brandId: defaultValues?.brandId ?? "",
       categoryId: defaultValues?.categoryId ?? "",
+      variantsEnabled: defaultValues?.variantsEnabled ?? false,
+      variants: defaultValues?.variants ?? [],
     },
+  });
+  const { fields: variantFields, append: appendVariant, remove: removeVariant } = useFieldArray({
+    control,
+    name: "variants",
   });
 
   const nameValue = watch("name");
   const priceValue = watch("price");
   const salePriceValue = watch("salePrice");
   const enabledValue = watch("enabled");
+  const variantsEnabledValue = watch("variantsEnabled");
   const imageUrlValue = watch("imageUrl");
   const imageSrc = getSupportedImageSrc(imageUrlValue);
   const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
@@ -173,6 +203,8 @@ function ProductFormDialog({
         enabled: defaultValues?.enabled ?? true,
         brandId: defaultValues?.brandId ?? "",
         categoryId: defaultValues?.categoryId ?? "",
+        variantsEnabled: defaultValues?.variantsEnabled ?? false,
+        variants: defaultValues?.variants ?? [],
       });
     }
   }
@@ -184,6 +216,15 @@ function ProductFormDialog({
       ...values,
       price: Number(values.price),
       salePrice: values.salePrice && values.salePrice > 0 ? Number(values.salePrice) : null,
+      variants: values.variantsEnabled ? values.variants.map((variant) => ({
+        ...variant,
+        price: Number(variant.price),
+        salePrice: variant.salePrice ? Number(variant.salePrice) : null,
+        stockQuantity: Number(variant.stockQuantity),
+        attributes: Object.fromEntries(
+          Object.entries(variant.attributes).filter(([, value]) => typeof value === "string" && value.trim() !== "")
+        ),
+      })) : [],
       brandId: values.brandId || "",
       categoryId: values.categoryId || "",
     });
@@ -205,6 +246,7 @@ function ProductFormDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-2">
+          <input type="hidden" {...register("variantsEnabled")} />
           {/* Section 1: Basic Information */}
           <div className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
@@ -364,6 +406,67 @@ function ProductFormDialog({
                 )}
               </div>
             </div>
+          </div>
+
+          <div className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Purchase options</h3>
+                <p className="mt-1 text-xs text-muted-foreground">Choose one simple option or manage multiple variants.</p>
+              </div>
+              <div className="flex rounded-lg border border-border p-1">
+                <button type="button" onClick={() => setValue("variantsEnabled", false)} className={`rounded-md px-3 py-1.5 text-xs font-semibold ${!variantsEnabledValue ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Simple product</button>
+                <button type="button" onClick={() => setValue("variantsEnabled", true)} className={`rounded-md px-3 py-1.5 text-xs font-semibold ${variantsEnabledValue ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Product with variants</button>
+              </div>
+            </div>
+            {variantsEnabledValue && (
+              <>
+                <div className="overflow-x-auto rounded-lg border border-border">
+                  <table className="min-w-[1160px] w-full text-left text-xs">
+                    <thead className="bg-muted/60 text-muted-foreground">
+                      <tr>
+                        <th className="p-2">SKU</th>
+                        {variantAttributeFields.map(([key, label]) => <th key={key} className="p-2">{label}</th>)}
+                        <th className="p-2">Price</th>
+                        <th className="p-2">Sale</th>
+                        <th className="p-2">Stock</th>
+                        <th className="p-2">Image URL</th>
+                        <th className="p-2">Active</th>
+                        <th className="p-2"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {variantFields.map((field, index) => (
+                        <tr key={field.id}>
+                          <td className="p-2"><Input aria-label={`Variant ${index + 1} SKU`} {...register(`variants.${index}.sku`)} placeholder="SKU" className="min-w-24" /></td>
+                          {variantAttributeFields.map(([key, label]) => (
+                            <td className="p-2" key={key}><Input aria-label={`${label} for variant ${index + 1}`} {...register(`variants.${index}.attributes.${key}`)} placeholder={label} className="min-w-20" /></td>
+                          ))}
+                          <td className="p-2"><Input aria-label={`Variant ${index + 1} price`} type="number" min="1" step="0.01" {...register(`variants.${index}.price`, { valueAsNumber: true })} className="w-24" /></td>
+                          <td className="p-2"><Input aria-label={`Variant ${index + 1} sale price`} type="number" min="0" step="0.01" {...register(`variants.${index}.salePrice`, { setValueAs: (value) => value === "" ? null : Number(value) })} className="w-24" /></td>
+                          <td className="p-2"><Input aria-label={`Variant ${index + 1} stock`} type="number" min="0" step="1" {...register(`variants.${index}.stockQuantity`, { valueAsNumber: true })} className="w-20" /></td>
+                          <td className="p-2"><Input aria-label={`Variant ${index + 1} image URL`} {...register(`variants.${index}.imageUrl`)} placeholder="Optional URL" className="min-w-36" /></td>
+                          <td className="p-2 text-center"><input type="checkbox" aria-label={`Variant ${index + 1} active`} {...register(`variants.${index}.isActive`)} className="size-4 accent-primary" /></td>
+                          <td className="p-2"><Button type="button" variant="ghost" size="icon" aria-label={`Remove variant ${index + 1}`} onClick={() => removeVariant(index)}><X className="size-4" /></Button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={() => appendVariant({
+                    sku: "",
+                    attributes: {},
+                    price: 1,
+                    salePrice: null,
+                    stockQuantity: 0,
+                    imageUrl: "",
+                    isActive: true,
+                  })}><Plus className="mr-1 size-4" /> Add variant</Button>
+                  {errors.variants && <p className="text-xs text-destructive">{errors.variants.message ?? "Check SKU, attributes, price and stock for each row."}</p>}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Section 3: Product Image */}
@@ -810,6 +913,8 @@ export default function AdminProductsPage() {
       salePrice: values.salePrice ?? null,
       imageUrl: values.imageUrl || null,
       enabled: values.enabled,
+      variantsEnabled: values.variantsEnabled,
+      variants: values.variants,
       brandId: values.brandId || null,
       categoryId: values.categoryId || null,
     });
@@ -819,6 +924,7 @@ export default function AdminProductsPage() {
       loadData();
     } else {
       toast.error(res.error.message);
+      if (res.error.details) toast.error(Object.values(res.error.details).join(" · "));
     }
 
     return res;
@@ -837,6 +943,8 @@ export default function AdminProductsPage() {
       salePrice: values.salePrice ?? null,
       imageUrl: values.imageUrl || null,
       enabled: values.enabled,
+      variantsEnabled: values.variantsEnabled,
+      variants: values.variants,
       brandId: values.brandId || null,
       categoryId: values.categoryId || null,
     });
@@ -847,6 +955,7 @@ export default function AdminProductsPage() {
       loadData();
     } else {
       toast.error(res.error.message);
+      if (res.error.details) toast.error(Object.values(res.error.details).join(" · "));
     }
 
     return res;
@@ -1082,7 +1191,12 @@ export default function AdminProductsPage() {
                 </tr>
               ) : (
                 products.map((prod) => {
-                  const sku = `SKU-${prod.id.slice(-6).toUpperCase()}`;
+                  const sku = prod.variants[0]?.sku ?? `SKU-${prod.id.slice(-6).toUpperCase()}`;
+                  const lowestVariant = prod.variantsEnabled
+                    ? prod.variants.filter((variant) => variant.isActive).sort((a, b) => (a.salePrice ?? a.price) - (b.salePrice ?? b.price))[0]
+                    : undefined;
+                  const listedPrice = lowestVariant?.salePrice ?? lowestVariant?.price ?? prod.salePrice ?? prod.price;
+                  const listedOriginalPrice = lowestVariant?.price ?? prod.price;
 
                   return (
                     <tr
@@ -1142,20 +1256,21 @@ export default function AdminProductsPage() {
 
                       {/* Price */}
                       <td className="px-4 py-3 text-foreground">
-                        {prod.salePrice && Number(prod.salePrice) < Number(prod.price) ? (
+                        {prod.variantsEnabled && <span className="mr-1 text-[10px] text-muted-foreground">From</span>}
+                        {Number(listedPrice) < Number(listedOriginalPrice) ? (
                           <div className="flex flex-col">
                             <div className="flex items-center gap-1.5">
-                              <span className="font-semibold">{formatCurrency(prod.salePrice)}</span>
+                              <span className="font-semibold">{formatCurrency(Number(listedPrice))}</span>
                               <Badge variant="destructive" className="text-[10px] font-bold px-1.5 py-0">
-                                {Math.round(((Number(prod.price) - Number(prod.salePrice)) / Number(prod.price)) * 100)}% OFF
+                                {Math.round(((Number(listedOriginalPrice) - Number(listedPrice)) / Number(listedOriginalPrice)) * 100)}% OFF
                               </Badge>
                             </div>
                             <span className="text-xs text-muted-foreground line-through">
-                              {formatCurrency(prod.price)}
+                              {formatCurrency(Number(listedOriginalPrice))}
                             </span>
                           </div>
                         ) : (
-                          <span className="font-semibold">{formatCurrency(prod.price)}</span>
+                          <span className="font-semibold">{formatCurrency(Number(listedPrice))}</span>
                         )}
                       </td>
 
@@ -1303,6 +1418,17 @@ export default function AdminProductsPage() {
             enabled: selectedEditProduct.enabled,
             brandId: selectedEditProduct.brandId ?? "",
             categoryId: selectedEditProduct.categoryId ?? "",
+            variantsEnabled: selectedEditProduct.variantsEnabled,
+            variants: selectedEditProduct.variants.map((variant) => ({
+              id: variant.id,
+              sku: variant.sku,
+              attributes: variant.attributes,
+              price: variant.price,
+              salePrice: variant.salePrice,
+              stockQuantity: variant.stockQuantity,
+              imageUrl: variant.imageUrl ?? "",
+              isActive: variant.isActive,
+            })),
           }}
           onSave={(values) => handleUpdateProduct(selectedEditProduct.id, values)}
         />

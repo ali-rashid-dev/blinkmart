@@ -11,6 +11,7 @@ export function AddToCartButton({
   compact,
   size = "md",
   productId,
+  variantId,
   quantity = 1,
   onAdd,
   className,
@@ -20,6 +21,7 @@ export function AddToCartButton({
   compact?: boolean;
   size?: "md" | "lg";
   productId?: string;
+  variantId?: string;
   quantity?: number;
   onAdd?: () => void;
   className?: string;
@@ -33,7 +35,7 @@ export function AddToCartButton({
     if (disabled || state !== "idle" || !productId) return;
     setState("loading");
     try {
-      await cartStore.add(productId, quantity);
+      await cartStore.add(productId, quantity, variantId);
       setState("done");
       onAdd?.();
       timers.current.push(setTimeout(() => setState("idle"), 1600));

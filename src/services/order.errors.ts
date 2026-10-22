@@ -12,10 +12,16 @@ export class EmptyCartError extends Error {
   }
 }
 
+export class InsufficientStockError extends Error {
+  constructor(message = "One or more selected options no longer have enough stock. Review your cart.") {
+    super(message);
+    this.name = "InsufficientStockError";
+  }
+}
+
 export class InvalidStatusTransitionError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "InvalidStatusTransitionError";
   }
 }
-

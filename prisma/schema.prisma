@@ -137,12 +137,14 @@ model Product {
   salePrice   Decimal?   @db.Decimal(10, 2)
   imageUrl    String?
   enabled     Boolean    @default(true)
+  variantsEnabled Boolean @default(false)
   brandId     String?
   brand       Brand?     @relation(fields: [brandId], references: [id], onDelete: SetNull)
   categoryId  String?
   category    Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   cartItems   CartItem[]
   orderItems  OrderItem[]
+  variants    ProductVariant[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
@@ -150,6 +152,29 @@ model Product {
   @@index([brandId])
   @@index([categoryId])
   @@index([enabled])
+}
+
+model ProductVariant {
+  id            String     @id @default(cuid())
+  productId     String
+  product       Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku           String     @unique
+  attributes    Json
+  attributesKey String
+  price         Decimal    @db.Decimal(10, 2)
+  salePrice     Decimal?   @db.Decimal(10, 2)
+  stockQuantity Int        @default(0)
+  imageUrl      String?
+  isActive      Boolean    @default(true)
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@unique([id, productId])
+  @@unique([productId, attributesKey])
+  @@map("product_variant")
+  @@index([productId, isActive])
 }
 
 model Cart {
@@ -172,11 +197,13 @@ model CartItem {
   cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId, productId], references: [id, productId], onDelete: Cascade)
   quantity  Int      @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([cartId, productId])
+  @@unique([cartId, productId, variantId])
   @@map("cart_item")
   @@index([cartId])
   @@index([productId])
@@ -232,7 +259,11 @@ model OrderItem {
   order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId     String
   product       Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  variantId     String?
+  variant       ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
   name          String
+  sku           String?
+  variantAttributes Json?
   price         Decimal  @db.Decimal(10, 2)
   originalPrice Decimal? @db.Decimal(10, 2)
   quantity      Int

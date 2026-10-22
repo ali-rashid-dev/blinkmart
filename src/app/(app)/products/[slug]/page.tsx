@@ -1,11 +1,9 @@
 import { findCustomerProductBySlug } from "@/repositories/product.repository";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, Truck } from "lucide-react";
-import { ProductGallery } from "@/components/products/ProductGallery";
-import { PurchasePanel } from "@/components/products/PurchasePanel";
+import { ChevronRight } from "lucide-react";
+import { ProductPurchaseExperience } from "@/components/products/ProductPurchaseExperience";
 import { toCustomerProduct } from "@/components/products/data";
-import { formatCurrency } from "@/lib/currency";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -20,10 +18,6 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   }
 
   const categoryName = product.category?.name || "Groceries";
-  const brandName = product.brand?.name || "kitcomart";
-  const price = Number(product.price);
-  const formattedPrice = `Rs ${Math.round(price)}`;
-
   const customerProductData = toCustomerProduct(product);
 
   return (
@@ -51,56 +45,8 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           <span className="font-semibold text-foreground">{product.name}</span>
         </nav>
 
-        <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:gap-12">
-          <ProductGallery product={customerProductData} />
-
-          <div className="animate-rise min-w-0">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-              {brandName} · {categoryName}
-            </p>
-            <h1 className="mt-2 font-display text-3xl leading-tight text-foreground sm:text-4xl">
-              {product.name}
-            </h1>
-
-            <div className="mt-4 flex flex-wrap items-end gap-3">
-              <span className="font-display text-4xl text-foreground">
-                {formatCurrency(customerProductData.effectivePrice)}
-              </span>
-              {customerProductData.effectivePrice < customerProductData.price && (
-                <span className="pb-1 text-lg text-muted-foreground line-through">
-                  {formatCurrency(customerProductData.price)}
-                </span>
-              )}
-              {customerProductData.discountPercent > 0 && (
-                <span className="mb-1 rounded-lg bg-destructive/10 px-2 py-1 text-xs font-bold text-destructive">
-                  SAVE {customerProductData.discountPercent}%
-                </span>
-              )}
-              <span className="pb-1.5 text-sm text-muted-foreground">/ item</span>
-            </div>
-
-            <div className="mt-3">
-              <p className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600">
-                <span aria-hidden="true" className="size-2 rounded-full bg-current" />
-                {product.enabled ? "In Stock" : "Unavailable"}
-              </p>
-            </div>
-
-            <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
-              {product.description || "High quality grocery product."}
-            </p>
-
-            
-            <PurchasePanel product={customerProductData} />
-
-            <div className="mt-5 flex items-start gap-3 rounded-2xl border border-border bg-card/70 p-3">
-              <Truck className="mt-0.5 size-4 shrink-0 text-secondary" />
-              <p className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">Same-day delivery</span> on
-                orders before 4pm in selected areas.
-              </p>
-            </div>
-          </div>
+        <div className="mt-6">
+          <ProductPurchaseExperience product={customerProductData} />
         </div>
       </div>
     </main>

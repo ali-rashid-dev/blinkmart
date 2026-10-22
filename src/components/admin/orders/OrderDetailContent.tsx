@@ -300,6 +300,7 @@ export function OrderDetailContent({ orderId }: { orderId: string }) {
                   <p className="text-xs text-muted-foreground">
                     {item.quantity} × {item.unit}
                   </p>
+                  {item.sku && <p className="text-[10px] font-mono text-muted-foreground">SKU: {item.sku}</p>}
                 </div>
               </div>
 
@@ -426,7 +427,9 @@ export function OrderDetailContent({ orderId }: { orderId: string }) {
                 <tbody className="divide-y divide-gray-200">
                   {order.items.map((item, idx) => (
                     <tr key={idx}>
-                      <td className="py-2 font-medium">{item.name}</td>
+                      <td className="py-2 font-medium">
+                        {item.name} — {item.unit}{item.sku ? ` (SKU: ${item.sku})` : ""}
+                      </td>
                       <td className="py-2 text-center">{item.quantity}</td>
                       <td className="py-2 text-right">Rs {Math.round(item.price)}</td>
                       <td className="py-2 text-right">Rs {Math.round(item.price * item.quantity)}</td>

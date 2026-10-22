@@ -20,7 +20,7 @@ export function ProductCard({
   view?: "grid" | "compact";
 }) {
   const { lines } = useCartState();
-  const cartLine = lines.find((l) => l.productId === product.id);
+  const cartLine = lines.find((l) => l.productId === product.id && !l.variantId);
   const qty = cartLine ? cartLine.quantity : 0;
   const soldOut = !product.enabled;
   const compact = view === "compact";
@@ -106,6 +106,7 @@ export function ProductCard({
 
         {/* Price */}
         <div className="flex flex-wrap items-baseline gap-x-2">
+          {product.variantsEnabled && <span className="text-[10px] font-semibold uppercase text-muted-foreground">From</span>}
           <span className="font-display text-lg text-foreground">
             {formatCurrency(product.effectivePrice)}
           </span>
@@ -130,7 +131,14 @@ export function ProductCard({
 
         {/* Cart actions */}
         <div className="mt-auto flex items-center gap-2 pt-2">
-          {qty > 0 && !soldOut ? (
+          {product.variantsEnabled ? (
+            <Link
+              href={`/products/${product.slug}`}
+              className="inline-flex h-9 flex-1 items-center justify-center rounded-xl bg-primary px-3 text-sm font-semibold text-primary-foreground transition hover:brightness-105"
+            >
+              Choose options
+            </Link>
+          ) : qty > 0 && !soldOut ? (
             <QuantitySelector
               value={qty}
               onChange={(n) => void cartStore.updateQuantity(product.id, n)}

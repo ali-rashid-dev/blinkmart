@@ -32,6 +32,13 @@ export class ProductSlugConflictError extends Error {
   }
 }
 
+export class ProductVariantConflictError extends Error {
+  constructor() {
+    super("A variant SKU or attribute combination already exists.");
+    this.name = "ProductVariantConflictError";
+  }
+}
+
 export class ProductNotFoundError extends Error {
   constructor(id: string) {
     super(`Product "${id}" was not found.`);
@@ -161,6 +168,8 @@ export async function createProductService(
       salePrice: input.salePrice ?? null,
       imageUrl: input.imageUrl ?? null,
       enabled: input.enabled ?? true,
+      variantsEnabled: input.variantsEnabled ?? false,
+      variants: input.variants,
       brandId: input.brandId ?? null,
       categoryId: input.categoryId ?? null,
     });
@@ -171,6 +180,12 @@ export async function createProductService(
       "code" in err &&
       err.code === "P2002"
     ) {
+      const target = "meta" in err && typeof err.meta === "object" && err.meta !== null && "target" in err.meta
+        ? err.meta.target
+        : undefined;
+      if (Array.isArray(target) && target.some((field) => String(field).includes("sku") || String(field).includes("attributesKey"))) {
+        throw new ProductVariantConflictError();
+      }
       throw new ProductSlugConflictError(slug);
     }
     throw err;
@@ -206,6 +221,8 @@ export async function updateProductService(
       ...(input.salePrice !== undefined && { salePrice: input.salePrice }),
       ...(input.imageUrl !== undefined && { imageUrl: input.imageUrl }),
       ...(input.enabled !== undefined && { enabled: input.enabled }),
+      ...(input.variantsEnabled !== undefined && { variantsEnabled: input.variantsEnabled }),
+      ...(input.variants !== undefined && { variants: input.variants }),
       ...(input.brandId !== undefined && { brandId: input.brandId }),
       ...(input.categoryId !== undefined && { categoryId: input.categoryId }),
     });
@@ -216,6 +233,12 @@ export async function updateProductService(
       "code" in err &&
       err.code === "P2002"
     ) {
+      const target = "meta" in err && typeof err.meta === "object" && err.meta !== null && "target" in err.meta
+        ? err.meta.target
+        : undefined;
+      if (Array.isArray(target) && target.some((field) => String(field).includes("sku") || String(field).includes("attributesKey"))) {
+        throw new ProductVariantConflictError();
+      }
       throw new ProductSlugConflictError(finalSlug ?? existing.slug);
     }
     throw err;

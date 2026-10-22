@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { OrderCannotCancelError, EmptyCartError } from "@/services/order.errors";
+import { OrderCannotCancelError, EmptyCartError, InsufficientStockError } from "@/services/order.errors";
 import {
   filterOrderableCartItems,
   calculateDeliveryFee,
@@ -48,6 +48,7 @@ export async function createOrderInDb(params: {
           include: {
             items: {
               include: {
+                variant: true,
                 product: {
                   include: {
                     brand: true,
@@ -59,7 +60,15 @@ export async function createOrderInDb(params: {
           },
         });
 
-        const validItems = filterOrderableCartItems(txCart?.items ?? []);
+        const txItems = txCart?.items ?? [];
+        const invalidVariant = txItems.find((item) =>
+          item.product.variantsEnabled &&
+          (!item.variant?.isActive || item.variant.stockQuantity < item.quantity)
+        );
+        if (invalidVariant) {
+          throw new InsufficientStockError();
+        }
+        const validItems = filterOrderableCartItems(txItems);
 
         if (validItems.length === 0) {
           throw new EmptyCartError();
@@ -67,8 +76,10 @@ export async function createOrderInDb(params: {
 
         // Compute subtotal using effective prices then round to cents before using threshold and total calculations
         const rawSubtotal = validItems.reduce((sum, item) => {
-          const priceNum = Number(item.product.price);
-          const salePriceNum = item.product.salePrice !== null && item.product.salePrice !== undefined ? Number(item.product.salePrice) : null;
+          const priceNum = Number(item.variant?.price ?? item.product.price);
+          const salePriceNum = item.variant?.salePrice !== null && item.variant?.salePrice !== undefined
+            ? Number(item.variant.salePrice)
+            : item.variant ? null : item.product.salePrice !== null ? Number(item.product.salePrice) : null;
           const effectivePrice = salePriceNum !== null && salePriceNum > 0 && salePriceNum < priceNum ? salePriceNum : priceNum;
           return sum + effectivePrice * item.quantity;
         }, 0);
@@ -77,6 +88,20 @@ export async function createOrderInDb(params: {
         const platformFee = calculatePlatformFee(subtotal);
         const total = Math.round((subtotal + deliveryFee + platformFee) * 100) / 100;
         const itemIds = validItems.map((item) => item.id);
+        for (const item of validItems) {
+          if (!item.variantId) continue;
+          const stockUpdate = await tx.productVariant.updateMany({
+            where: {
+              id: item.variantId,
+              productId: item.productId,
+              isActive: true,
+              stockQuantity: { gte: item.quantity },
+              product: { enabled: true, OR: [{ brandId: null }, { brand: { enabled: true } }] },
+            },
+            data: { stockQuantity: { decrement: item.quantity } },
+          });
+          if (stockUpdate.count !== 1) throw new InsufficientStockError();
+        }
         const order = await tx.order.create({
           data: {
             code,
@@ -98,19 +123,28 @@ export async function createOrderInDb(params: {
             notes: address.notes ?? null,
             items: {
               create: validItems.map((item) => {
-                const originalPriceNum = Number(item.product.price);
-                const salePriceNum = item.product.salePrice !== null && item.product.salePrice !== undefined ? Number(item.product.salePrice) : null;
+                const originalPriceNum = Number(item.variant?.price ?? item.product.price);
+                const salePriceNum = item.variant?.salePrice !== null && item.variant?.salePrice !== undefined
+                  ? Number(item.variant.salePrice)
+                  : item.variant ? null : item.product.salePrice !== null ? Number(item.product.salePrice) : null;
                 const effectivePrice = salePriceNum !== null && salePriceNum > 0 && salePriceNum < originalPriceNum ? salePriceNum : originalPriceNum;
                 const categoryName = item.product.category?.name;
-                const unit = categoryName ? `1 ${categoryName.toLowerCase()}` : "1 pack";
+                const attributes = item.variant?.attributes && typeof item.variant.attributes === "object" && !Array.isArray(item.variant.attributes)
+                  ? Object.fromEntries(Object.entries(item.variant.attributes).filter((entry): entry is [string, string] => typeof entry[1] === "string"))
+                  : {};
+                const attributesLabel = Object.entries(attributes).map(([key, value]) => `${key}: ${value}`).join(" · ");
+                const unit = attributesLabel || (categoryName ? `1 ${categoryName.toLowerCase()}` : "1 pack");
                 return {
                   productId: item.productId,
+                  ...(item.variantId ? { variantId: item.variantId } : {}),
                   name: item.product.name,
+                  sku: item.variant?.sku ?? null,
+                  variantAttributes: item.variant ? attributes : undefined,
                   price: effectivePrice,
                   originalPrice: originalPriceNum,
                   quantity: item.quantity,
                   unit,
-                  imageUrl: item.product.imageUrl ?? null,
+                  imageUrl: item.variant?.imageUrl ?? item.product.imageUrl ?? null,
                 };
               }),
             },
@@ -199,6 +233,7 @@ export async function cancelOrderInDb(
 ): Promise<OrderWithItems> {
   const existing = await prisma.order.findFirst({
     where: { id: orderId, userId },
+    include: { items: { select: { variantId: true, quantity: true } } },
   });
 
   if (!existing) {
@@ -215,40 +250,51 @@ export async function cancelOrderInDb(
 
   // Perform conditional update so concurrent state changes cannot overwrite cancellation data
   const allowedStatuses: OrderStatus[] = ["PLACED", "CONFIRMED", "PACKED"];
-  const updateResult = await prisma.order.updateMany({
-    where: { id: existing.id, status: { in: allowedStatuses } },
-    data: {
-      status: "CANCELLED",
-      cancelReason: reason,
-      cancelledAt: new Date(),
-    },
-  });
-
-  if (updateResult.count === 0) {
-    const current = await prisma.order.findUnique({
-      where: { id: existing.id },
-      select: { status: true },
+  return prisma.$transaction(async (tx) => {
+    const updateResult = await tx.order.updateMany({
+      where: { id: existing.id, status: { in: allowedStatuses } },
+      data: {
+        status: "CANCELLED",
+        cancelReason: reason,
+        cancelledAt: new Date(),
+      },
     });
-    throw new OrderCannotCancelError(
-      `Order cannot be cancelled in status ${current?.status ?? existing.status}`
-    );
-  }
 
-  return prisma.order.findUnique({
-    where: { id: existing.id },
-    include: {
-      items: {
-        include: {
-          product: {
-            include: {
-              brand: true,
-              category: true,
+    if (updateResult.count === 0) {
+      const current = await tx.order.findUnique({
+        where: { id: existing.id },
+        select: { status: true },
+      });
+      throw new OrderCannotCancelError(
+        `Order cannot be cancelled in status ${current?.status ?? existing.status}`
+      );
+    }
+
+    for (const item of existing.items) {
+      if (item.variantId) {
+        await tx.productVariant.update({
+          where: { id: item.variantId },
+          data: { stockQuantity: { increment: item.quantity } },
+        });
+      }
+    }
+
+    return tx.order.findUnique({
+      where: { id: existing.id },
+      include: {
+        items: {
+          include: {
+            product: {
+              include: {
+                brand: true,
+                category: true,
+              },
             },
           },
         },
       },
-    },
-  }) as Promise<OrderWithItems>;
+    }) as Promise<OrderWithItems>;
+  });
 }
 
 export type FindAdminOrdersParams = {
@@ -459,4 +505,3 @@ export async function findAdminOrderByIdInDb(orderId: string): Promise<OrderWith
     },
   });
 }
-

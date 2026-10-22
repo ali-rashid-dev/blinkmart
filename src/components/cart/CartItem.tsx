@@ -17,7 +17,7 @@ export function CartItem({
 }) {
   const removing = pending === "remove";
   const updating = pending === "update";
-  const itemTotal = line.price * line.quantity;
+  const itemTotal = line.total;
 
   const isImageUrl =
     line.image && (line.image.startsWith("http") || line.image.startsWith("/"));
@@ -57,9 +57,13 @@ export function CartItem({
               {line.name}
             </Link>
             <p className="mt-0.5 truncate text-xs text-muted-foreground">{line.unit}</p>
+            {line.sku && <p className="text-[10px] font-mono text-muted-foreground">SKU: {line.sku}</p>}
             <p className="mt-1 text-sm font-semibold text-foreground">
-              {formatPrice(line.price)}
+              {formatPrice(line.effectivePrice ?? line.price)}
             </p>
+            {line.effectivePrice !== undefined && line.effectivePrice < line.price && (
+              <p className="text-xs text-muted-foreground line-through">{formatPrice(line.price)}</p>
+            )}
           </div>
           <p className="shrink-0 text-right">
             <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
@@ -75,7 +79,7 @@ export function CartItem({
           <div className="flex items-center gap-2">
             <QuantitySelector
               value={line.quantity}
-              onChange={(next) => void cartStore.updateQuantity(line.productId, next)}
+              onChange={(next) => void cartStore.updateQuantity(line.productId, next, line.variantId)}
               disabled={updating || removing}
               max={line.maxQuantity}
               label={line.name}
@@ -93,7 +97,7 @@ export function CartItem({
 
           <button
             type="button"
-            onClick={() => void cartStore.remove(line.productId)}
+            onClick={() => void cartStore.remove(line.productId, line.variantId)}
             disabled={removing || updating}
             aria-label={`Remove ${line.name} from cart`}
             className="inline-flex h-9 items-center gap-1.5 rounded-xl px-2.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:cursor-not-allowed disabled:opacity-60"

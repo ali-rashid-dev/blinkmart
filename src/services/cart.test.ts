@@ -10,6 +10,7 @@ import {
   calculateCartTotals,
   ProductDisabledError,
   ProductNotFoundError,
+  InvalidQuantityError,
   type CartLineItem,
 } from "./cart.service";
 import { createProduct, deleteProduct } from "@/repositories/product.repository";
@@ -18,6 +19,7 @@ import prisma from "@/lib/prisma";
 test("Cart Service Unit & Integration Tests", async (t) => {
   let testProductId: string | null = null;
   let testDisabledProductId: string | null = null;
+  let testVariantProductId: string | null = null;
   const testSessionToken = `test-cart-session-${Date.now()}`;
 
   t.after(async () => {
@@ -27,6 +29,9 @@ test("Cart Service Unit & Integration Tests", async (t) => {
     }
     if (testDisabledProductId) {
       await deleteProduct(testDisabledProductId).catch(() => {});
+    }
+    if (testVariantProductId) {
+      await deleteProduct(testVariantProductId).catch(() => {});
     }
     const cart = await prisma.cart.findFirst({
       where: { sessionToken: testSessionToken },
@@ -173,11 +178,72 @@ test("Cart Service Unit & Integration Tests", async (t) => {
     );
   });
 
-  await t.test("10. Pure calculateCartTotals calculation test", async () => {
+  await t.test("10. Distinguishes variant cart lines and enforces stock", async () => {
+    const variantProduct = await createProduct({
+      name: "Test Variant Rice",
+      slug: `test-rice-${Date.now()}`,
+      price: 100,
+      variantsEnabled: true,
+      variants: [
+        {
+          sku: `RICE-1-${Date.now()}`,
+          attributes: { weight: "1 kg" },
+          price: 100,
+          stockQuantity: 3,
+          isActive: true,
+        },
+        {
+          sku: `RICE-5-${Date.now()}`,
+          attributes: { weight: "5 kg" },
+          price: 450,
+          stockQuantity: 5,
+          isActive: true,
+        },
+      ],
+    });
+    testVariantProductId = variantProduct.id;
+    const [small, large] = variantProduct.variants;
+    assert.ok(small && large);
+
+    await addItemToCart({ sessionToken: testSessionToken }, {
+      productId: variantProduct.id,
+      variantId: small.id,
+      quantity: 1,
+    });
+    let details = await addItemToCart({ sessionToken: testSessionToken }, {
+      productId: variantProduct.id,
+      variantId: large.id,
+      quantity: 2,
+    });
+    assert.equal(details.lines.length, 2);
+    assert.equal(details.lines.find((line) => line.variantId === small.id)?.sku, small.sku);
+    assert.equal(details.lines.find((line) => line.variantId === large.id)?.effectivePrice, 450);
+
+    details = await addItemToCart({ sessionToken: testSessionToken }, {
+      productId: variantProduct.id,
+      variantId: small.id,
+      quantity: 1,
+    });
+    assert.equal(details.lines.find((line) => line.variantId === small.id)?.quantity, 2);
+
+    await assert.rejects(
+      () => addItemToCart({ sessionToken: testSessionToken }, {
+        productId: variantProduct.id,
+        variantId: large.id,
+        quantity: 4,
+      }),
+      (error: unknown) => error instanceof InvalidQuantityError
+    );
+  });
+
+  await t.test("11. Pure calculateCartTotals calculation test", async () => {
     const mockLines: CartLineItem[] = [
       {
         id: "1",
         productId: "p1",
+        variantId: null,
+        sku: null,
+        attributes: {},
         name: "Item 1",
         slug: "item-1",
         price: 20,
@@ -195,6 +261,9 @@ test("Cart Service Unit & Integration Tests", async (t) => {
       {
         id: "2",
         productId: "p2",
+        variantId: null,
+        sku: null,
+        attributes: {},
         name: "Item 2",
         slug: "item-2",
         price: 10,

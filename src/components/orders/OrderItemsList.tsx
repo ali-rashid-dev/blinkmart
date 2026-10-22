@@ -24,6 +24,7 @@ export function OrderItemsList({ items }: { items: OrderItem[] }) {
             )}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-foreground">{item.name}</p>
+            {item.sku && <p className="truncate text-[10px] font-mono text-muted-foreground">SKU: {item.sku}</p>}
             <p className="truncate text-xs text-muted-foreground">
               {item.unit} · {formatMoney(item.price)}
               {item.originalPrice && item.originalPrice > item.price && (

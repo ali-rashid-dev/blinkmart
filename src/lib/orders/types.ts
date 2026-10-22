@@ -54,6 +54,9 @@ export interface OrderAddress {
 
 export interface OrderItem {
   productId: string;
+  variantId?: string | null;
+  sku?: string | null;
+  variantAttributes?: Record<string, string>;
   name: string;
   price: number;
   originalPrice?: number;

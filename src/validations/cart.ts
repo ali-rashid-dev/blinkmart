@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const addToCartSchema = z.object({
   productId: z.string().min(1, "Product ID is required"),
+  variantId: z.string().min(1).optional(),
   quantity: z
     .number()
     .int("Quantity must be an integer")
@@ -14,6 +15,7 @@ export type AddToCartInput = z.infer<typeof addToCartSchema>;
 
 export const updateCartQuantitySchema = z.object({
   productId: z.string().min(1, "Product ID is required"),
+  variantId: z.string().min(1).optional(),
   quantity: z
     .number()
     .int("Quantity must be an integer")
@@ -25,6 +27,7 @@ export type UpdateCartQuantityInput = z.infer<typeof updateCartQuantitySchema>;
 
 export const removeFromCartSchema = z.object({
   productId: z.string().min(1, "Product ID is required"),
+  variantId: z.string().min(1).optional(),
 });
 
 export type RemoveFromCartInput = z.infer<typeof removeFromCartSchema>;

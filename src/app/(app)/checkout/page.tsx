@@ -401,7 +401,9 @@ export default function CheckoutPage() {
                   <div className="min-w-0 pr-2">
                     <p className="truncate font-medium text-foreground">{line.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      Qty: {line.quantity} × {formatPrice(line.price)}
+                      {line.unit}{line.sku ? ` · ${line.sku}` : ""}
+                      <br />
+                      Qty: {line.quantity} × {formatPrice(line.effectivePrice ?? line.price)}
                     </p>
                   </div>
                   <span className="font-semibold tabular-nums text-foreground">

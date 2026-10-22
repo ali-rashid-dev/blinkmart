@@ -10,6 +10,7 @@ import {
   clearUserCart,
   ProductNotFoundError,
   ProductDisabledError,
+  VariantUnavailableError,
   InvalidQuantityError,
   type CartDetails,
 } from "@/services/cart.service";
@@ -27,6 +28,7 @@ export type CartActionErrorCode =
   | "VALIDATION_ERROR"
   | "PRODUCT_NOT_FOUND"
   | "PRODUCT_DISABLED"
+  | "VARIANT_UNAVAILABLE"
   | "DATABASE_ERROR"
   | "UNKNOWN_ERROR";
 
@@ -93,6 +95,7 @@ export async function getCartAction(): Promise<CartActionResult<CartDetails>> {
 
 export async function addToCartAction(input: {
   productId: string;
+  variantId?: string;
   quantity?: number;
 }): Promise<CartActionResult<CartDetails>> {
   try {
@@ -115,6 +118,9 @@ export async function addToCartAction(input: {
     if (error instanceof ProductDisabledError) {
       return buildError("PRODUCT_DISABLED", error.message);
     }
+    if (error instanceof VariantUnavailableError) {
+      return buildError("VARIANT_UNAVAILABLE", error.message);
+    }
     if (error instanceof InvalidQuantityError) {
       return buildError("VALIDATION_ERROR", error.message);
     }
@@ -125,6 +131,7 @@ export async function addToCartAction(input: {
 
 export async function updateCartQuantityAction(input: {
   productId: string;
+  variantId?: string;
   quantity: number;
 }): Promise<CartActionResult<CartDetails>> {
   try {
@@ -141,22 +148,29 @@ export async function updateCartQuantityAction(input: {
     const cart = await updateItemQuantity(identifier, parsed.data);
     return { success: true, data: cart };
   } catch (error) {
+    if (error instanceof VariantUnavailableError) {
+      return buildError("VARIANT_UNAVAILABLE", error.message);
+    }
+    if (error instanceof InvalidQuantityError) {
+      return buildError("VALIDATION_ERROR", error.message);
+    }
     console.error("Failed to update cart quantity:", error);
     return buildError("DATABASE_ERROR", "Unable to update quantity.");
   }
 }
 
 export async function removeFromCartAction(
-  productId: string
+  productId: string,
+  variantId?: string
 ): Promise<CartActionResult<CartDetails>> {
   try {
-    const parsed = removeFromCartSchema.safeParse({ productId });
+    const parsed = removeFromCartSchema.safeParse({ productId, variantId });
     if (!parsed.success) {
       return buildError("VALIDATION_ERROR", "Invalid product ID.");
     }
 
     const identifier = await getCartIdentifier();
-    const cart = await removeItemFromCart(identifier, parsed.data.productId);
+    const cart = await removeItemFromCart(identifier, parsed.data.productId, parsed.data.variantId);
     return { success: true, data: cart };
   } catch (error) {
     console.error("Failed to remove item from cart:", error);

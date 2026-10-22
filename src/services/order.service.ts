@@ -13,13 +13,14 @@ import {
 import {
   OrderCannotCancelError,
   EmptyCartError,
+  InsufficientStockError,
   InvalidStatusTransitionError,
 } from "@/services/order.errors";
-export { OrderCannotCancelError, EmptyCartError, InvalidStatusTransitionError };
+export { OrderCannotCancelError, EmptyCartError, InsufficientStockError, InvalidStatusTransitionError };
 import type { OrderStatus as PrismaOrderStatus } from "@/generated/prisma/client";
 import { OrderStatus as PrismaOrderStatusEnum } from "@/generated/prisma/enums";
 import { findCartByIdentifier } from "@/repositories/cart.repository";
-import { addItemToCart } from "@/services/cart.service";
+import { addItemToCart, VariantUnavailableError } from "@/services/cart.service";
 import {
   placeOrderSchema,
   cancelOrderSchema,
@@ -80,7 +81,12 @@ export function mapPrismaOrderToDomainOrder(dbOrder: OrderWithItems): Order {
     const originalPrice = item.originalPrice != null ? Number(item.originalPrice) : price;
     return {
       productId: item.productId,
+      variantId: item.variantId,
       name: item.name,
+      sku: item.sku,
+      variantAttributes: item.variantAttributes && typeof item.variantAttributes === "object" && !Array.isArray(item.variantAttributes)
+        ? Object.fromEntries(Object.entries(item.variantAttributes).filter((entry): entry is [string, string] => typeof entry[1] === "string"))
+        : {},
       price,
       originalPrice,
       quantity: item.quantity,
@@ -152,6 +158,13 @@ export async function placeOrder(
   const cart = await findCartByIdentifier({ userId });
   if (!cart || cart.items.length === 0) {
     throw new EmptyCartError();
+  }
+
+  if (cart.items.some((item) =>
+    item.product.variantsEnabled &&
+    (!item.variant?.isActive || item.variant.stockQuantity < item.quantity)
+  )) {
+    throw new InsufficientStockError();
   }
 
   const validItems = filterOrderableCartItems(cart.items);
@@ -239,9 +252,17 @@ export async function reorderUserOrder(
 
   let itemCount = 0;
   for (const item of order.items) {
-    if (item.product && item.product.enabled) {
-      await addItemToCart({ userId }, { productId: item.productId, quantity: item.quantity });
-      itemCount += item.quantity;
+    if (item.product && item.product.enabled && (!item.product.variantsEnabled || item.variantId)) {
+      try {
+        await addItemToCart({ userId }, {
+          productId: item.productId,
+          variantId: item.variantId ?? undefined,
+          quantity: item.quantity,
+        });
+        itemCount += item.quantity;
+      } catch (error) {
+        if (!(error instanceof VariantUnavailableError)) throw error;
+      }
     }
   }
 
@@ -330,6 +351,3 @@ export async function getAdminOrderDetail(orderId: string): Promise<Order | null
   if (!dbOrder) return null;
   return mapPrismaOrderToDomainOrder(dbOrder);
 }
-
-
-

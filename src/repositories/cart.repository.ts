@@ -5,6 +5,7 @@ export type CartWithItems = Prisma.CartGetPayload<{
   include: {
     items: {
       include: {
+        variant: true;
         product: {
           include: {
             brand: true;
@@ -18,6 +19,7 @@ export type CartWithItems = Prisma.CartGetPayload<{
 
 export type CartItemWithProduct = Prisma.CartItemGetPayload<{
   include: {
+    variant: true;
     product: {
       include: {
         brand: true;
@@ -26,6 +28,11 @@ export type CartItemWithProduct = Prisma.CartItemGetPayload<{
     };
   };
 }>;
+
+const cartItemInclude = {
+  variant: true,
+  product: { include: { brand: true, category: true } },
+};
 
 export async function findCartByIdentifier(identifier: {
   userId?: string;
@@ -42,14 +49,7 @@ export async function findCartByIdentifier(identifier: {
     include: {
       items: {
         orderBy: { createdAt: "asc" },
-        include: {
-          product: {
-            include: {
-              brand: true,
-              category: true,
-            },
-          },
-        },
+        include: cartItemInclude,
       },
     },
   });
@@ -67,14 +67,7 @@ export async function createCart(identifier: {
     include: {
       items: {
         orderBy: { createdAt: "asc" },
-        include: {
-          product: {
-            include: {
-              brand: true,
-              category: true,
-            },
-          },
-        },
+        include: cartItemInclude,
       },
     },
   });
@@ -83,15 +76,11 @@ export async function createCart(identifier: {
 export async function upsertCartItem(
   cartId: string,
   productId: string,
-  quantityDelta: number
+  quantityDelta: number,
+  variantId?: string
 ): Promise<CartItemWithProduct | null> {
-  const existing = await prisma.cartItem.findUnique({
-    where: {
-      cartId_productId: {
-        cartId,
-        productId,
-      },
-    },
+  const existing = await prisma.cartItem.findFirst({
+    where: { cartId, productId, variantId: variantId ?? null },
   });
 
   if (existing) {
@@ -105,14 +94,7 @@ export async function upsertCartItem(
     return prisma.cartItem.update({
       where: { id: existing.id },
       data: { quantity: newQty },
-      include: {
-        product: {
-          include: {
-            brand: true,
-            category: true,
-          },
-        },
-      },
+      include: cartItemInclude,
     });
   } else {
     if (quantityDelta <= 0) return null;
@@ -120,16 +102,10 @@ export async function upsertCartItem(
       data: {
         cartId,
         productId,
+        ...(variantId ? { variantId } : {}),
         quantity: quantityDelta,
       },
-      include: {
-        product: {
-          include: {
-            brand: true,
-            category: true,
-          },
-        },
-      },
+      include: cartItemInclude,
     });
   }
 }
@@ -137,15 +113,11 @@ export async function upsertCartItem(
 export async function updateCartItemQuantity(
   cartId: string,
   productId: string,
-  newQuantity: number
+  newQuantity: number,
+  variantId?: string
 ): Promise<CartItemWithProduct | null> {
-  const existing = await prisma.cartItem.findUnique({
-    where: {
-      cartId_productId: {
-        cartId,
-        productId,
-      },
-    },
+  const existing = await prisma.cartItem.findFirst({
+    where: { cartId, productId, variantId: variantId ?? null },
   });
 
   if (!existing) {
@@ -154,16 +126,10 @@ export async function updateCartItemQuantity(
       data: {
         cartId,
         productId,
+        ...(variantId ? { variantId } : {}),
         quantity: newQuantity,
       },
-      include: {
-        product: {
-          include: {
-            brand: true,
-            category: true,
-          },
-        },
-      },
+      include: cartItemInclude,
     });
   }
 
@@ -177,28 +143,17 @@ export async function updateCartItemQuantity(
   return prisma.cartItem.update({
     where: { id: existing.id },
     data: { quantity: newQuantity },
-    include: {
-      product: {
-        include: {
-          brand: true,
-          category: true,
-        },
-      },
-    },
+    include: cartItemInclude,
   });
 }
 
 export async function removeCartItem(
   cartId: string,
-  productId: string
+  productId: string,
+  variantId?: string
 ): Promise<boolean> {
-  const existing = await prisma.cartItem.findUnique({
-    where: {
-      cartId_productId: {
-        cartId,
-        productId,
-      },
-    },
+  const existing = await prisma.cartItem.findFirst({
+    where: { cartId, productId, variantId: variantId ?? null },
   });
 
   if (!existing) return false;
@@ -234,7 +189,7 @@ export async function mergeCarts(
   }
 
   for (const item of guestCart.items) {
-    await upsertCartItem(userCartId, item.productId, item.quantity);
+    await upsertCartItem(userCartId, item.productId, item.quantity, item.variantId ?? undefined);
   }
 
   await prisma.cart.delete({ where: { id: guestCartId } }).catch(() => {});
