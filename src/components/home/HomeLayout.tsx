@@ -75,13 +75,15 @@ export function HomeLayout({
         error={productsFailedToLoad}
       />
       {serverDealProduct && <DealOfTheDay product={serverDealProduct} compareAtPrice={dealCompareAtPrice} />}
-      <ProductRow
-        title="More to explore"
-        subtitle="Continue browsing more products from the market."
-        products={moreProducts}
-        ctaLabel="See All Items"
-        error={productsFailedToLoad}
-      />
+      {(moreProducts.length > 0 || productsFailedToLoad) && (
+        <ProductRow
+          title="More to explore"
+          subtitle="Continue browsing more products from the market."
+          products={moreProducts}
+          ctaLabel="See All Items"
+          error={productsFailedToLoad}
+        />
+      )}
       <WhyShopWithUs />
       <FinalCta />
       <Footer />
