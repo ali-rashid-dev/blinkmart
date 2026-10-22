@@ -7,11 +7,11 @@ import { toCustomerProduct } from "@/components/products/data";
 export const metadata: Metadata = {
   title: "kitcomart — Weekly & Monthly Grocery Delivery",
   description:
-    "Shop flour, grains, pulses, cooking oils, spices, tea, and monthly bulk pantry stock-ups with delivery within 24 hours.",
+    "Shop flour, grains, pulses, cooking oils, spices, tea, and monthly bulk pantry stock-ups. New orders are due within 24 hours.",
   openGraph: {
     title: "kitcomart — Weekly & Monthly Grocery Delivery",
     description:
-      "Weekly staple essentials and monthly pantry stock-ups delivered within 24 hours.",
+      "Weekly staple essentials and monthly pantry stock-ups. New orders are due within 24 hours.",
   },
 };
 

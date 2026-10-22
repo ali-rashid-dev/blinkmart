@@ -10,7 +10,7 @@ export function FinalCta() {
           {/* Badge */}
           <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-primary">
             <Sparkles className="size-3.5" />
-            Delivery within 24 hours
+            New orders within 24 hours
           </span>
 
           {/* Heading */}
@@ -24,7 +24,7 @@ export function FinalCta() {
           {/* Description */}
           <p className="mt-4 max-w-lg text-sm leading-relaxed text-secondary-foreground/70 sm:text-base">
             Shop top-quality packaged groceries, weekly staples &amp; monthly pantry
-            stock-ups delivered straight to your door within 24 hours of ordering.
+            stock-ups delivered straight to your door. Newly placed orders are due within 24 hours.
           </p>
 
           {/* CTA */}

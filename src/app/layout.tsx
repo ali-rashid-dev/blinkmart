@@ -26,7 +26,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "kitcomart — Your Everyday Grocery, Online",
-  description: "Faisalabad’s grocery delivery service. Quality packaged groceries & essentials delivered within 24 hours.",
+  description: "Weekly and monthly grocery essentials, carefully packed and delivered across Faisalabad.",
   icons: {
     icon: "/icon.png",
     shortcut: "/favicon.ico",

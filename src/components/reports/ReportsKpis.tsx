@@ -2,7 +2,7 @@ import { ArrowDownRight, ArrowUpRight, Receipt, ShoppingBasket, Users, Wallet } 
 import type { ReportsKpisData } from "@/lib/reports/types";
 
 const cards = [
-  { key: "revenue", label: "Revenue", Icon: Wallet, tone: "text-success" },
+  { key: "revenue", label: "Revenue", Icon: Wallet, tone: "text-success-text" },
   { key: "orders", label: "Orders", Icon: ShoppingBasket, tone: "text-primary" },
   { key: "average", label: "Avg. basket", Icon: Receipt, tone: "text-secondary" },
   { key: "customers", label: "Customers", Icon: Users, tone: "text-foreground" },
@@ -30,7 +30,7 @@ export function ReportsKpis({ kpis }: { kpis: ReportsKpisData }) {
               <span
                 aria-label={up ? "Increase" : "Decrease"}
                 className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 font-semibold tabular-nums ${
-                  up ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
+                  up ? "bg-success/10 text-success-text" : "bg-destructive/10 text-destructive"
                 }`}
               >
                 <Trend aria-hidden="true" className="size-3" />

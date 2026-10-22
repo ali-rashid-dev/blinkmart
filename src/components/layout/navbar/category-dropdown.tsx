@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Package, ShoppingBag, ChevronDown } from "lucide-react";
+import { Package, ShoppingBag, ChevronDown, Tag } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -64,14 +64,14 @@ export function CategoryDropdown({ categories }: CategoryDropdownProps) {
           )}
         >
           <div className="p-1.5 space-y-0.5">
-            {categories.map(({ id, label, emoji, href }) => (
+            {categories.map(({ id, label, href }) => (
               <Link
                 key={id}
                 href={href}
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
               >
-                <span className="text-base shrink-0 select-none">{emoji}</span>
+                <Tag aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
                 <span className="truncate">{label}</span>
               </Link>
             ))}

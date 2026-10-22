@@ -76,7 +76,7 @@ export default function SignupPage() {
       )}
 
       {done && (
-        <div className="mt-6 flex items-center gap-2 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
+        <div className="mt-6 flex items-center gap-2 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-success-text">
           <Check className="size-4" /> Account created — welcome to the market.
         </div>
       )}

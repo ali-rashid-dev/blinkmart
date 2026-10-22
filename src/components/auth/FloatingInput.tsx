@@ -103,7 +103,7 @@ export function FloatingInput({
           id={`${inputId}-msg`}
           className={cn(
             "mt-1.5 flex items-center gap-1.5 px-1 text-xs",
-            error ? "text-destructive" : success ? "text-success" : "text-muted-foreground",
+            error ? "text-destructive" : success ? "text-success-text" : "text-muted-foreground",
           )}
         >
           {error && <AlertCircle className="size-3.5 shrink-0" />}

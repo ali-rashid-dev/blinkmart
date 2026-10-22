@@ -88,7 +88,7 @@ export function ProfileField({
           id={`${inputId}-msg`}
           className={cn(
             "mt-1.5 flex items-start gap-1.5 px-0.5 text-xs leading-relaxed",
-            error ? "text-destructive" : success ? "text-success" : "text-muted-foreground",
+            error ? "text-destructive" : success ? "text-success-text" : "text-muted-foreground",
           )}
         >
           {error && <AlertCircle className="mt-px size-3.5 shrink-0" />}

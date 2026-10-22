@@ -12,7 +12,6 @@ import { ActiveOrderTracker } from "./ActiveOrderTracker";
 import { RepeatOrderCard } from "./RepeatOrderCard";
 import { DeliverySlotBanner } from "./DeliverySlotBanner";
 import { MobileHomeView } from "./MobileHomeView";
-import { Footer } from "@/components/layout/Footer";
 import type { HomeCategory } from "./CategoryStrip";
 import type { CustomerProduct } from "@/components/products/data";
 
@@ -56,7 +55,7 @@ export function HomeLayout({
   }
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-background">
+    <main className="overflow-x-hidden bg-background">
       <MarketHero />
 
       <div className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 flex flex-col gap-6">
@@ -86,7 +85,6 @@ export function HomeLayout({
       )}
       <WhyShopWithUs />
       <FinalCta />
-      <Footer />
     </main>
   );
 }

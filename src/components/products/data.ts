@@ -80,7 +80,9 @@ export function toCustomerProduct(p: ProductWithBrandAndCategory): CustomerProdu
   const parentPrice = Number(p.price);
   const parentSalePrice = p.salePrice !== null && p.salePrice !== undefined ? Number(p.salePrice) : null;
   const cheapestVariant = variantsEnabled
-    ? variants.reduce<CustomerProductVariant | null>((cheapest, variant) => !cheapest || variant.effectivePrice < cheapest.effectivePrice ? variant : cheapest, null)
+    ? variants
+        .filter((variant) => variant.isActive && variant.stockQuantity > 0)
+        .reduce<CustomerProductVariant | null>((cheapest, variant) => !cheapest || variant.effectivePrice < cheapest.effectivePrice ? variant : cheapest, null)
     : null;
   const price = cheapestVariant?.price ?? parentPrice;
   const salePrice = cheapestVariant ? cheapestVariant.salePrice : parentSalePrice;

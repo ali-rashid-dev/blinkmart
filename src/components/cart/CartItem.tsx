@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Loader2, Trash2 } from "lucide-react";
+import { ImageIcon, Loader2, Trash2 } from "lucide-react";
 import { QuantitySelector } from "@/components/products/QuantitySelector";
 import { cartStore, formatPrice } from "@/lib/cart/store";
 import type { CartLine } from "@/lib/cart/types";
@@ -31,7 +31,7 @@ export function CartItem({
       <Link
         href={`/products/${line.slug}`}
         aria-label={`View ${line.name}`}
-        className="relative grid size-20 shrink-0 place-items-center overflow-hidden rounded-2xl bg-accent/70 text-3xl sm:size-24 sm:text-4xl"
+        className="relative grid size-20 shrink-0 place-items-center overflow-hidden rounded-xl bg-accent/70 text-3xl sm:size-24 sm:text-4xl"
       >
         {isImageUrl ? (
           <Image
@@ -41,8 +41,8 @@ export function CartItem({
             className="object-cover"
           />
         ) : (
-          <span role="img" aria-label={line.name}>
-            {line.image || "🛒"}
+          <span aria-hidden="true">
+            <ImageIcon className="size-8 text-muted-foreground/60" />
           </span>
         )}
       </Link>

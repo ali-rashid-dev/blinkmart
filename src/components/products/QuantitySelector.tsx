@@ -15,7 +15,7 @@ export function QuantitySelector({
   label: string;
 }) {
   const btn =
-    "grid size-7 place-items-center rounded-lg text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40";
+    "grid size-11 place-items-center rounded-lg text-foreground transition-colors hover:bg-accent active:bg-accent/80 disabled:cursor-not-allowed disabled:opacity-40";
   return (
     <div
       className={cn(

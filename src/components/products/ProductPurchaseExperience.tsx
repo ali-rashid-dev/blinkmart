@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Truck } from "lucide-react";
+import { Clock3 } from "lucide-react";
 import { ProductGallery } from "@/components/products/ProductGallery";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
 import { QuantitySelector } from "@/components/products/QuantitySelector";
@@ -99,13 +99,12 @@ export function ProductPurchaseExperience({ product }: { product: CustomerProduc
           );
         })}
 
-        <div className="mt-5 flex flex-wrap items-end gap-3">
+        <div aria-live="polite" aria-atomic="true" className="mt-5 flex flex-wrap items-end gap-3">
           <span className="font-display text-4xl text-foreground">{formatCurrency(effectivePrice)}</span>
           {effectivePrice < price && <span className="pb-1 text-lg text-muted-foreground line-through">{formatCurrency(price)}</span>}
           {price > effectivePrice && <span className="mb-1 rounded-lg bg-destructive/10 px-2 py-1 text-xs font-bold text-destructive">SALE</span>}
-          <span className="pb-1.5 text-sm text-muted-foreground">/ item</span>
         </div>
-        <p className={`mt-3 text-sm font-semibold ${soldOut ? "text-destructive" : "text-emerald-600"}`}>
+        <p aria-live="polite" className={`mt-3 text-sm font-semibold ${soldOut ? "text-destructive" : "text-success-text"}`}>
           <span aria-hidden="true" className="mr-2 inline-block size-2 rounded-full bg-current" />
           {soldOut ? "Out of stock" : selectedVariant ? `${selectedVariant.stockQuantity} available` : "In stock"}
         </p>
@@ -128,7 +127,7 @@ export function ProductPurchaseExperience({ product }: { product: CustomerProduc
                 max={selectedVariant?.stockQuantity ?? 99}
                 label={product.name}
               />
-              <p className="text-sm font-semibold text-success">In your basket</p>
+              <p className="text-sm font-semibold text-success-text">In your basket</p>
               <Link href="/cart" className="ml-auto text-sm font-semibold text-primary underline-offset-4 hover:underline">View cart</Link>
             </div>
           ) : (
@@ -149,9 +148,9 @@ export function ProductPurchaseExperience({ product }: { product: CustomerProduc
         </div>
 
         <div className="mt-5 flex items-start gap-3 rounded-2xl border border-border bg-card/70 p-3">
-          <Truck className="mt-0.5 size-4 shrink-0 text-secondary" />
+          <Clock3 className="mt-0.5 size-4 shrink-0 text-secondary" />
           <p className="text-sm text-muted-foreground">
-            <span className="font-semibold text-foreground">Same-day delivery</span> on orders before 4pm in selected areas.
+            <span className="font-semibold text-foreground">New orders are delivered within 24 hours</span> of placement.
           </p>
         </div>
       </div>

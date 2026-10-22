@@ -24,7 +24,7 @@ export function PurchasePanel({ product }: { product: CustomerProduct }) {
             max={99}
             label={product.name}
           />
-          <p className="text-sm font-semibold text-success">In your basket</p>
+          <p className="text-sm font-semibold text-success-text">In your basket</p>
           <Link
             href="/cart"
             className="ml-auto text-sm font-semibold text-primary underline-offset-4 hover:underline"

@@ -17,7 +17,7 @@ import {
 export const metadata: Metadata = {
   title: "About Us — kitcomart Grocery Delivery Faisalabad",
   description:
-    "Learn about kitcomart, Faisalabad's grocery delivery service for quality packaged groceries, daily essentials, and bulk pantry stock-ups delivered within 24 hours.",
+    "Learn about kitcomart, Faisalabad's grocery service for weekly essentials and monthly pantry stock-ups.",
 };
 
 export default function AboutPage() {
@@ -36,7 +36,7 @@ export default function AboutPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            KitcoMart was built with a simple promise: quality packaged groceries, daily essentials and pantry staples delivered directly to your doorstep in Faisalabad within 24 hours of ordering.
+            KitcoMart was built for weekly and monthly grocery shopping, with quality packaged groceries and pantry staples delivered across Faisalabad. New orders are due within 24 hours.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -76,14 +76,14 @@ export default function AboutPage() {
             <div className="size-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
               <Clock className="size-6" />
             </div>
-            <h3 className="font-bold text-base text-foreground">Delivery within 24 hours</h3>
+            <h3 className="font-bold text-base text-foreground">New orders within 24 hours</h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Place an order any time and receive your groceries within 24 hours.
+              Place an order any time; newly placed orders are due within 24 hours.
             </p>
           </div>
 
           <div className="rounded-2xl border border-border/80 bg-card p-6 flex flex-col gap-3 shadow-xs hover:border-primary/40 transition-colors">
-            <div className="size-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <div className="size-12 rounded-xl bg-success/10 text-success-text flex items-center justify-center">
               <ShieldCheck className="size-6" />
             </div>
             <h3 className="font-bold text-base text-foreground">100% Quality Guarantee</h3>

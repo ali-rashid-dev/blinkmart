@@ -22,7 +22,10 @@ export function ProductCard({
   const { lines } = useCartState();
   const cartLine = lines.find((l) => l.productId === product.id && !l.variantId);
   const qty = cartLine ? cartLine.quantity : 0;
-  const soldOut = !product.enabled;
+  const availableVariantCount = product.variantsEnabled
+    ? product.variants.filter((variant) => variant.isActive && variant.stockQuantity > 0).length
+    : 0;
+  const soldOut = !product.enabled || (product.variantsEnabled && availableVariantCount === 0);
   const compact = view === "compact";
   const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
   const imageSrc = getSupportedImageSrc(product.imageUrl);
@@ -126,7 +129,12 @@ export function ProductCard({
         {soldOut ? (
           <span className="text-[11px] font-semibold text-destructive">Unavailable</span>
         ) : (
-          <span className="text-[11px] font-semibold text-success">Available</span>
+          <span className="text-[11px] font-semibold text-success-text">Available</span>
+        )}
+        {product.variantsEnabled && product.variants.length > 0 && (
+          <span className="text-[11px] text-muted-foreground">
+            {availableVariantCount} options available
+          </span>
         )}
 
         {/* Cart actions */}

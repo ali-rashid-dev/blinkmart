@@ -121,7 +121,7 @@ export function CompletionBlock({
       <ul className="mt-4 space-y-2 text-left">
         {completion.done.map((item) => (
           <li key={item} className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-success/15 text-success">
+            <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-success/15 text-success-text">
               <ShieldCheck className="size-3" />
             </span>
             <span className="truncate">{item}</span>

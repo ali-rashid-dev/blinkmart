@@ -250,7 +250,7 @@ export default function ProfilePage() {
             />
 
             {saved && !editing && (
-              <p className="flex items-center gap-2 rounded-2xl bg-success/10 px-4 py-3 text-sm font-medium text-success">
+              <p className="flex items-center gap-2 rounded-2xl bg-success/10 px-4 py-3 text-sm font-medium text-success-text">
                 <Check className="size-4 shrink-0" />
                 Your profile has been updated.
               </p>

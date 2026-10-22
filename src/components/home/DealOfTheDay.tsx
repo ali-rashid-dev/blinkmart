@@ -105,7 +105,7 @@ export function DealOfTheDay({ product, compareAtPrice }: DealOfTheDayProps) {
             )}
           </div>
 
-          <p className="text-[13px] font-semibold text-success">
+          <p className="text-[13px] font-semibold text-success-text">
             {soldOut ? "Out of Stock" : "In Stock — Fresh Daily"}
           </p>
 

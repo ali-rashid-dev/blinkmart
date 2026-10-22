@@ -62,7 +62,7 @@ export default function ForgotPassword() {
 
             {sent ? (
                 <div className="mt-7 space-y-6">
-                    <div className="flex items-start gap-2 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
+                    <div className="flex items-start gap-2 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-success-text">
                         <Check className="mt-0.5 size-4 shrink-0" />
                         <span>
                             If an account exists for <span className="font-semibold">{trimmedEmail}</span>, a reset link

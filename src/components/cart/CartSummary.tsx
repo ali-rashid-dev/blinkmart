@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ShoppingBag } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ShoppingBag } from "lucide-react";
 import { formatPrice } from "@/lib/cart/store";
 import { authClient } from "@/lib/auth-client";
 import { useLoginDialog } from "@/components/auth/LoginDialogContext";
@@ -106,7 +106,7 @@ export function CartSummary({
           <dt className="text-muted-foreground">Delivery Fee</dt>
           <dd className="font-semibold tabular-nums text-foreground">
             {deliveryFee === 0 ? (
-              <span className="font-bold text-success">FREE</span>
+              <span className="font-bold text-success-text">FREE</span>
             ) : (
               formatPrice(deliveryFee)
             )}
@@ -125,7 +125,10 @@ export function CartSummary({
         {tierInfo && (
           <p className="rounded-lg bg-accent/60 p-2 text-xs text-muted-foreground">
             {tierInfo.isFree ? (
-              <span className="font-medium text-success">🎉 You qualify for FREE delivery!</span>
+              <span className="inline-flex items-center gap-1.5 font-medium text-success-text">
+                <CheckCircle2 aria-hidden="true" className="size-4" />
+                You qualify for FREE delivery!
+              </span>
             ) : (
               <>
                 Add <span className="font-semibold text-foreground">{formatPrice(tierInfo.amountNeeded)}</span> more for {tierInfo.nextFee === 0 ? "FREE" : formatPrice(tierInfo.nextFee)} delivery!

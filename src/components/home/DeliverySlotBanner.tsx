@@ -12,14 +12,14 @@ export function DeliverySlotBanner() {
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-bold text-primary">
                 <Clock className="size-3" />
-                Delivery within 24 hours
+                New orders within 24 hours
               </span>
-              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+              <span className="text-xs font-medium text-success-text">
                 Order anytime
               </span>
             </div>
             <p className="mt-1 text-sm font-semibold text-foreground">
-              Your order is due within 24 hours of placing it.
+              Newly placed orders are due within 24 hours.
             </p>
           </div>
         </div>

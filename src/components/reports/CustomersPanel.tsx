@@ -4,7 +4,7 @@ import { formatCurrency } from "@/lib/reports/format";
 const statusStyle: Record<string, string> = {
   new: "bg-primary/10 text-primary",
   returning: "bg-secondary/10 text-secondary",
-  vip: "bg-success/10 text-success",
+  vip: "bg-success/10 text-success-text",
 };
 
 export function CustomersPanel({

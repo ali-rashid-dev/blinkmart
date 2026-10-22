@@ -48,7 +48,7 @@ export const STATUS_CONFIG: Record<
   },
   delivered: {
     label: "Delivered",
-    bg: "bg-emerald-500/10 dark:bg-emerald-500/20",
+    bg: "bg-success/10 dark:bg-success/20",
     text: "text-emerald-700 dark:text-emerald-300",
     border: "border-emerald-500/30",
     icon: CheckCircle2,

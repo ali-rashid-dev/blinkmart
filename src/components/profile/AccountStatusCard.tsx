@@ -25,7 +25,7 @@ function StatusRow({
       <span
         className={cn(
           "shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold",
-          tone === "success" && "bg-success/12 text-success",
+          tone === "success" && "bg-success/12 text-success-text",
           tone === "warning" && "bg-destructive/10 text-destructive",
           tone === "neutral" && "bg-muted text-muted-foreground",
         )}

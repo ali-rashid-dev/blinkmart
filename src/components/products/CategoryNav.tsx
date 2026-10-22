@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Tag } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-export type NavCategory = { id: string; label: string; emoji?: string };
+export type NavCategory = { id: string; label: string };
 
 const GAP = 8; // px, matches gap-2
 
@@ -105,7 +105,7 @@ export function CategoryNav({
       >
         {categories.map((c) => (
           <span key={c.id} className={pill(true)}>
-            {c.emoji ? <span aria-hidden="true">{c.emoji}</span> : null}
+            <Tag aria-hidden="true" className="size-3.5" />
             {c.label}
           </span>
         ))}
@@ -129,7 +129,7 @@ export function CategoryNav({
             onClick={() => onSelect?.(c.id)}
             className={pill(selectedId === c.id)}
           >
-            {c.emoji ? <span aria-hidden="true">{c.emoji}</span> : null}
+            <Tag aria-hidden="true" className="size-3.5" />
             {c.label}
           </button>
         ))}
@@ -155,7 +155,7 @@ export function CategoryNav({
                       selectedId === c.id && "bg-primary font-bold text-primary-foreground",
                     )}
                   >
-                    {c.emoji ? <span aria-hidden="true">{c.emoji}</span> : null}
+                    <Tag aria-hidden="true" className="size-3.5" />
                     {c.label}
                   </DropdownMenuItem>
                 ))}

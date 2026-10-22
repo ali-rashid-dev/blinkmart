@@ -5,13 +5,13 @@ import { ArrowRight, Clock, ShieldCheck, Truck } from "lucide-react";
 export function MarketHero() {
   const trustPoints = [
     { Icon: ShieldCheck, label: "100% Quality Inspected Essentials" },
-    { Icon: Clock, label: "Delivered within 24 hours" },
+    { Icon: Clock, label: "New orders within 24 hours" },
     { Icon: Truck, label: "Free delivery over Rs 3000" },
   ];
 
   return (
     <section
-      aria-label="Quality groceries delivered within 24 hours"
+      aria-label="Quality groceries, with new orders due within 24 hours"
       className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 sm:pt-8"
     >
       <div className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-secondary text-secondary-foreground">
@@ -31,16 +31,16 @@ export function MarketHero() {
           <div className="max-w-xl">
             <span className="inline-flex items-center gap-2 rounded-full border border-secondary-foreground/25 bg-secondary-foreground/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em]">
               <Clock aria-hidden="true" className="size-3.5 text-primary" />
-              Delivery within 24 hours
+              New orders delivered within 24 hours
             </span>
 
             <h1 className="mt-4 font-display text-4xl leading-[1.08] sm:text-5xl lg:text-6xl">
               Quality packaged groceries,{" "}
-              <span className="block text-primary">delivered within 24 hours.</span>
+              <span className="block text-primary">ready within 24 hours.</span>
             </h1>
 
             <p className="mt-4 max-w-md text-base leading-relaxed text-secondary-foreground/80">
-              Flour, pulses, cooking oils, spices, tea, snacks, and daily household essentials — delivered within 24 hours of ordering.
+              Flour, pulses, cooking oils, spices, tea, snacks, and daily household essentials. New orders are due within 24 hours.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">

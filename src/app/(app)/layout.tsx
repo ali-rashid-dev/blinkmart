@@ -4,7 +4,7 @@ import { AppClientShell } from './AppClientShell';
 
 export const metadata: Metadata = {
   title: 'kitcomart',
-  description: 'A modern shopping experience',
+  description: 'Weekly and monthly grocery essentials, carefully packed and delivered across Faisalabad.',
 };
 
 interface RootLayoutProps {

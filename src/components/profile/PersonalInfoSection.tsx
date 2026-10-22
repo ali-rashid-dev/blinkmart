@@ -55,7 +55,7 @@ export function PersonalInfoSection({ form, editing, phoneError, onEdit, set }: 
           tooltip="Your email is linked to your Google sign-in and can't be changed here."
           hint="Linked to your Google account"
           adornment={
-            <span className="rounded-full bg-success/12 px-2 py-0.5 text-[11px] font-semibold text-success">
+            <span className="rounded-full bg-success/12 px-2 py-0.5 text-[11px] font-semibold text-success-text">
               Verified
             </span>
           }

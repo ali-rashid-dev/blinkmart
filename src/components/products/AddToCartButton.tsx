@@ -66,7 +66,7 @@ export function AddToCartButton({
       {state === "loading" ? (
         <Loader2 className="size-4 animate-spin" />
       ) : state === "done" ? (
-        <Check className="size-4 animate-bounce" />
+        <Check className="size-4 animate-in zoom-in-90 duration-200" />
       ) : (
         <ShoppingBasket className="size-4" />
       )}

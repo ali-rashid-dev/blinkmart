@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ImageIcon } from "lucide-react";
 import { formatMoney } from "@/lib/orders/store";
 import type { OrderItem } from "@/lib/orders/types";
 
@@ -19,7 +20,7 @@ export function OrderItemsList({ items }: { items: OrderItem[] }) {
                 aria-hidden="true"
                 className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent/70 text-2xl"
               >
-                {item.image || "🛒"}
+                <ImageIcon className="size-5 text-muted-foreground/60" />
               </span>
             )}
           <div className="min-w-0 flex-1">
@@ -92,7 +93,7 @@ export function OrderTotals({
       <div className="flex items-baseline justify-between gap-3">
         <dt className="text-muted-foreground">Delivery fee</dt>
         <dd className="font-semibold tabular-nums text-foreground">
-          {deliveryFee === 0 ? <span className="font-bold text-success">FREE</span> : formatMoney(deliveryFee)}
+          {deliveryFee === 0 ? <span className="font-bold text-success-text">FREE</span> : formatMoney(deliveryFee)}
         </dd>
       </div>
       {pFee > 0 && (

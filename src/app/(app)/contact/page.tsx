@@ -115,7 +115,7 @@ export default function ContactPage() {
           </div>
           <h3 className="font-bold text-sm text-foreground">Operating Hours</h3>
           <p className="text-xs font-medium text-foreground">8:00 AM – 11:00 PM Daily</p>
-          <p className="text-[11px] text-muted-foreground">Delivery within 24 hours of ordering</p>
+          <p className="text-[11px] text-muted-foreground">New orders are due within 24 hours</p>
         </div>
       </div>
 
@@ -129,7 +129,7 @@ export default function ContactPage() {
 
           {submitted ? (
             <div className="flex flex-col items-center justify-center text-center gap-3 p-8 rounded-2xl bg-success/10 border border-success/30">
-              <div className="size-12 rounded-full bg-success/20 text-success flex items-center justify-center">
+              <div className="size-12 rounded-full bg-success/20 text-success-text flex items-center justify-center">
                 <CheckCircle2 className="size-6" />
               </div>
               <h3 className="font-bold text-base text-foreground">Message Received!</h3>

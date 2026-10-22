@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import {
-  ShoppingBag,
   MapPin,
   Phone,
   Mail,
@@ -23,7 +22,7 @@ export function Footer() {
             <div className="flex items-center gap-3">
               <Clock className="size-5 shrink-0 text-primary" />
               <div>
-                <h4 className="text-xs font-bold text-foreground">Delivery within 24 hours</h4>
+                <h4 className="text-xs font-bold text-foreground">New orders within 24 hours</h4>
                 <p className="text-[11px] text-muted-foreground">Order anytime, day or night</p>
               </div>
             </div>
@@ -62,7 +61,7 @@ export function Footer() {
           <div className="flex flex-col gap-3">
             <Logo href="/" size="md" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Faisalabad’s grocery delivery service. Quality packaged groceries &amp; essentials delivered within 24 hours.
+              Weekly and monthly grocery essentials, carefully packed and delivered across Faisalabad.
             </p>
           </div>
 

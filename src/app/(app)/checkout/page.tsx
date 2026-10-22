@@ -402,10 +402,10 @@ export default function CheckoutPage() {
                 <dd className="font-semibold tabular-nums text-foreground">{formatMoney(subtotal)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted-foreground">Evening Delivery Fee</dt>
+                <dt className="text-muted-foreground">Delivery Fee</dt>
                 <dd className="font-semibold tabular-nums text-foreground">
                   {deliveryFee === 0 ? (
-                    <span className="text-success font-bold">FREE</span>
+                    <span className="text-success-text font-bold">FREE</span>
                   ) : (
                     formatMoney(deliveryFee)
                   )}
@@ -424,7 +424,7 @@ export default function CheckoutPage() {
               {tierInfo && (
                 <p className="rounded-lg bg-accent/50 p-2 text-xs text-muted-foreground">
                   {tierInfo.isFree ? (
-                    <span className="font-medium text-success">🎉 You qualify for FREE delivery!</span>
+                    <span className="font-medium text-success-text">You qualify for FREE delivery!</span>
                   ) : (
                     <>
                       Add <span className="font-semibold text-foreground">{formatMoney(tierInfo.amountNeeded)}</span> more for {tierInfo.nextFee === 0 ? "FREE" : formatMoney(tierInfo.nextFee)} delivery!

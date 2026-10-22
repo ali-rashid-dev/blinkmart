@@ -58,7 +58,7 @@ export default function TermsAndConditionsPage() {
         <section className="flex flex-col gap-2">
           <h2 className="text-lg font-bold text-foreground font-display">3. Delivery Timing</h2>
           <p>
-            Orders may be placed at any time and are due to be delivered within <strong>24 hours of placement</strong>. There is no daily cutoff or fixed delivery window.
+            New orders may be placed at any time and are due to be delivered within <strong>24 hours of placement</strong>. There is no daily cutoff or fixed delivery window. Previously placed orders may retain their scheduled delivery slot.
           </p>
         </section>
 
@@ -94,7 +94,7 @@ export default function TermsAndConditionsPage() {
                 </tr>
                 <tr className="bg-primary/5">
                   <td className="p-3 font-bold text-foreground">Rs. 3,000+</td>
-                  <td className="p-3 font-bold text-emerald-600 dark:text-emerald-400">FREE</td>
+                  <td className="p-3 font-bold text-success-text">FREE</td>
                   <td className="p-3">Rs. 20</td>
                 </tr>
               </tbody>

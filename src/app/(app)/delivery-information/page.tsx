@@ -35,7 +35,7 @@ export default function DeliveryInformationPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            KitcoMart delivers quality packaged groceries, staples, and pantry stock-ups across Faisalabad within 24 hours of ordering. Place your order anytime; there is no daily cutoff or fixed delivery slot.
+            KitcoMart delivers quality packaged groceries, staples, and pantry stock-ups across Faisalabad. Newly placed orders are due within 24 hours. Place your order anytime; there is no daily cutoff or fixed delivery slot.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -98,7 +98,7 @@ export default function DeliveryInformationPage() {
                 </tr>
                 <tr className="bg-primary/5 hover:bg-primary/10 transition-colors">
                   <td className="px-6 py-4 font-bold text-foreground">Rs. 3,000+</td>
-                  <td className="px-6 py-4 font-bold text-emerald-600 dark:text-emerald-400">FREE</td>
+                  <td className="px-6 py-4 font-bold text-success-text">FREE</td>
                   <td className="px-6 py-4">Rs. 20</td>
                   <td className="px-6 py-4 text-right font-bold text-primary">Rs. 20 (Only Platform Fee)</td>
                 </tr>
@@ -128,7 +128,7 @@ export default function DeliveryInformationPage() {
             Order Anytime
           </h3>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Place your order whenever it suits you. Every order is due within <strong>24 hours of placement</strong>, with no fixed daily cutoff.
+            Place your order whenever it suits you. New orders are due within <strong>24 hours of placement</strong>, with no fixed daily cutoff. Older orders may retain their scheduled delivery slot.
           </p>
           <ul className="space-y-2 text-xs text-muted-foreground">
             <li className="flex items-center gap-2">
@@ -147,10 +147,10 @@ export default function DeliveryInformationPage() {
             <Package className="size-6" />
           </div>
           <h3 className="font-display text-xl font-bold text-foreground">
-            Delivery within 24 hours
+            New orders within 24 hours
           </h3>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Your order is due within <strong>24 hours of placing it</strong>. We will notify you when it is dispatched and share driver contact details.
+            Newly placed orders are due within <strong>24 hours of placement</strong>. Older orders may have a scheduled delivery slot. We will notify you when an order is dispatched and share driver contact details.
           </p>
           <ul className="space-y-2 text-xs text-muted-foreground">
             <li className="flex items-center gap-2">

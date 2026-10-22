@@ -12,7 +12,6 @@ import {
 import { DeliverySlotBanner } from "./DeliverySlotBanner";
 import { ActiveOrderTracker } from "./ActiveOrderTracker";
 import { RepeatOrderCard } from "./RepeatOrderCard";
-import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/products/ProductCard";
 import type { CustomerProduct } from "@/components/products/data";
 import type { HomeCategory } from "./CategoryStrip";
@@ -46,7 +45,7 @@ export function MobileHomeView({
               <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
             </div>
             <p className="text-xs font-semibold text-foreground truncate">
-              Delivered within 24 hours of ordering
+              New orders delivered within 24 hours
             </p>
           </div>
         </div>
@@ -145,10 +144,6 @@ export function MobileHomeView({
         </div>
       </div>
 
-      {/* ── 9. Homepage Footer ────────────────────────────────────────── */}
-      <div className="-mx-4 -mb-8 mt-6">
-        <Footer />
-      </div>
     </div>
   );
 }

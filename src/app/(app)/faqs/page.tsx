@@ -23,7 +23,7 @@ const FAQ_DATA: FAQItem[] = [
   {
     category: "delivery",
     question: "How soon will my grocery order arrive?",
-    answer: "We deliver orders within 24 hours of placement. You can place an order at any time; there is no daily cutoff or fixed delivery slot.",
+    answer: "New orders are due within 24 hours of placement. You can order at any time; there is no daily cutoff or fixed delivery slot. Older orders may retain their scheduled delivery slot.",
   },
   {
     category: "delivery",

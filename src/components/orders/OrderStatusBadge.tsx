@@ -6,7 +6,7 @@ const style: Record<OrderStatus, string> = {
   confirmed: "bg-secondary/10 text-secondary border-secondary/20",
   packed: "bg-secondary/10 text-secondary border-secondary/20",
   out_for_delivery: "bg-primary/10 text-primary border-primary/25",
-  delivered: "bg-success/10 text-success border-success/25",
+  delivered: "bg-success/10 text-success-text border-success/25",
   cancelled: "bg-destructive/10 text-destructive border-destructive/25",
 };
 

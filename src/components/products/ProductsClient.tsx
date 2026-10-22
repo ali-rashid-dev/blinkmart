@@ -158,7 +158,6 @@ export function ProductsClient({
       return {
         id: c.id,
         label: c.name,
-        emoji: c.emoji || "🛒",
       };
     });
   }, [rawCategories]);
@@ -184,7 +183,6 @@ export function ProductsClient({
       return {
         id: cat.id,
         label: cat.label,
-        emoji: cat.emoji,
         count,
       };
     });
@@ -255,7 +253,7 @@ export function ProductsClient({
   const categoryLabel = (id: string) => {
     const cat = navCategories.find((c) => c.id === id);
     if (!cat) return id;
-    return cat.emoji ? `${cat.emoji} ${cat.label}` : cat.label;
+    return cat.label;
   };
 
   const chips = buildChips(filters, categoryLabel);
@@ -333,7 +331,7 @@ export function ProductsClient({
         {navCategories.length > 0 && (
           <nav aria-label="Browse categories" className="mt-5 hidden lg:block">
             <CategoryNav
-              categories={[{ id: "all", label: "All", emoji: "✨" }, ...navCategories]}
+              categories={[{ id: "all", label: "All" }, ...navCategories]}
               selectedId={filters.categories[0] ?? "all"}
               onSelect={handleSelectCategory}
             />

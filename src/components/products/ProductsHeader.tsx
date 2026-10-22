@@ -29,7 +29,7 @@ export function ProductsHeader({ total }: { total: number }) {
     </h1>
 
     <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">
-      Quality grains, spices, oils, beverages and pantry staples — ready for quick delivery.
+      Quality grains, spices, oils, beverages and pantry staples for your weekly and monthly shop.
     </p>
   </div>
 

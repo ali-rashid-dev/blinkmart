@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Search, ShoppingBasket } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
@@ -41,7 +41,6 @@ function CheckRow({
 export type CategoryCountItem = {
   id: string;
   label: string;
-  emoji?: string;
   count: number;
 };
 
@@ -101,8 +100,8 @@ export function FilterSidebar({
                         : "border-transparent bg-muted/40 text-foreground hover:border-border hover:bg-muted/70",
                     )}
                   >
-                    <span aria-hidden="true" className="grid size-7 shrink-0 place-items-center rounded-lg bg-card text-base shadow-sm">
-                      {c.emoji || "🛒"}
+                    <span aria-hidden="true" className="grid size-7 shrink-0 place-items-center rounded-lg bg-card text-secondary shadow-sm">
+                      <ShoppingBasket className="size-4" />
                     </span>
                     <span className="min-w-0 flex-1 truncate text-sm font-medium">{c.label}</span>
                     <span className="text-[11px] font-semibold text-muted-foreground">{c.count}</span>
