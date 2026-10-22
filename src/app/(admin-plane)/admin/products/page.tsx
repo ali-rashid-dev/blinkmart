@@ -11,12 +11,10 @@ import {
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
-import { useFieldArray, useForm } from "react-hook-form";
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -26,7 +24,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -54,668 +51,23 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
-  DollarSign,
-  Calendar,
-  X,
 } from "lucide-react";
 
 import {
-  createProductAction,
-  updateProductAction,
   deleteProductAction,
   toggleProductStatusAction,
   getAdminProductsAction,
   getAdminProductStatsAction,
-  type ProductActionResult,
   type SerializedProduct,
 } from "./actions";
 import { getCategoriesAction } from "@/app/(admin-plane)/admin/categories/actions";
 import { getBrandsAction } from "@/app/(admin-plane)/admin/brands/actions";
-
-import type { ProductWithBrandAndCategory } from "@/repositories/product.repository";
 import type { CategoryRecord } from "@/repositories/category.repository";
 import type { BrandRecord } from "@/repositories/brand.repository";
-import { slugify } from "@/validations/product";
-import { getSupportedImageSrc } from "@/lib/image";
 import { formatCurrency } from "@/lib/currency";
-import { UploadButton } from "@/lib/uploadthing";
 
 // ──────────────────────────────────────────────────────────
 //  Types
-// ──────────────────────────────────────────────────────────
-type ProductFormValues = {
-  name: string;
-  slug: string;
-  description: string;
-  price: number;
-  salePrice: number | null;
-  imageUrl: string;
-  enabled: boolean;
-  brandId: string;
-  categoryId: string;
-  variantsEnabled: boolean;
-  variants: ProductFormVariant[];
-};
-
-type ProductFormVariant = {
-  id?: string;
-  sku: string;
-  attributes: Record<string, string>;
-  price: number;
-  salePrice: number | null;
-  stockQuantity: number;
-  imageUrl: string;
-  isActive: boolean;
-};
-
-const variantAttributeFields = [
-  ["weight", "Weight"],
-  ["volume", "Volume"],
-  ["color", "Color"],
-  ["size", "Size"],
-  ["flavor", "Flavor"],
-  ["packaging", "Packaging"],
-] as const;
-
-// ──────────────────────────────────────────────────────────
-//  Product Form Dialog (Add / Edit)
-// ──────────────────────────────────────────────────────────
-function ProductFormDialog({
-  trigger,
-  title,
-  defaultValues,
-  categories,
-  brands,
-  onSave,
-  isPending,
-}: {
-  trigger?: React.ReactNode;
-  title: string;
-  defaultValues?: Partial<ProductFormValues>;
-  categories: CategoryRecord[];
-  brands: BrandRecord[];
-  onSave: (values: ProductFormValues) => Promise<ProductActionResult<SerializedProduct>>;
-  isPending?: boolean;
-}) {
-  // When no trigger is provided, open immediately on mount (controlled by parent's conditional render)
-  const [open, setOpen] = useState(!trigger);
-  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    reset,
-    control,
-    formState: { errors, isSubmitting },
-  } = useForm<ProductFormValues>({
-    defaultValues: {
-      name: defaultValues?.name ?? "",
-      slug: defaultValues?.slug ?? "",
-      description: defaultValues?.description ?? "",
-      price: defaultValues?.price ?? 0,
-      salePrice: defaultValues?.salePrice ?? null,
-      imageUrl: defaultValues?.imageUrl ?? "",
-      enabled: defaultValues?.enabled ?? true,
-      brandId: defaultValues?.brandId ?? "",
-      categoryId: defaultValues?.categoryId ?? "",
-      variantsEnabled: defaultValues?.variantsEnabled ?? false,
-      variants: defaultValues?.variants ?? [],
-    },
-  });
-  const { fields: variantFields, append: appendVariant, remove: removeVariant } = useFieldArray({
-    control,
-    name: "variants",
-  });
-
-  const nameValue = watch("name");
-  const priceValue = watch("price");
-  const salePriceValue = watch("salePrice");
-  const enabledValue = watch("enabled");
-  const variantsEnabledValue = watch("variantsEnabled");
-  const imageUrlValue = watch("imageUrl");
-  const imageSrc = getSupportedImageSrc(imageUrlValue);
-  const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
-
-  const calculatedDiscount =
-    priceValue > 0 && salePriceValue !== null && salePriceValue !== undefined && salePriceValue > 0 && salePriceValue < priceValue
-      ? Math.round(((priceValue - salePriceValue) / priceValue) * 100)
-      : 0;
-
-  useEffect(() => {
-    if (!slugManuallyEdited && !defaultValues?.slug && nameValue) {
-      setValue("slug", slugify(nameValue));
-    }
-  }, [nameValue, slugManuallyEdited, defaultValues?.slug, setValue]);
-
-  function onOpenChange(val: boolean) {
-    setOpen(val);
-    if (val) {
-      setSlugManuallyEdited(false);
-      reset({
-        name: defaultValues?.name ?? "",
-        slug: defaultValues?.slug ?? "",
-        description: defaultValues?.description ?? "",
-        price: defaultValues?.price ?? 0,
-        salePrice: defaultValues?.salePrice ?? null,
-        imageUrl: defaultValues?.imageUrl ?? "",
-        enabled: defaultValues?.enabled ?? true,
-        brandId: defaultValues?.brandId ?? "",
-        categoryId: defaultValues?.categoryId ?? "",
-        variantsEnabled: defaultValues?.variantsEnabled ?? false,
-        variants: defaultValues?.variants ?? [],
-      });
-    }
-  }
-
-  async function onSubmit(values: ProductFormValues) {
-    if (!values.name.trim()) return;
-
-    const result = await onSave({
-      ...values,
-      price: Number(values.price),
-      salePrice: values.salePrice && values.salePrice > 0 ? Number(values.salePrice) : null,
-      variants: values.variantsEnabled ? values.variants.map((variant) => ({
-        ...variant,
-        price: Number(variant.price),
-        salePrice: variant.salePrice ? Number(variant.salePrice) : null,
-        stockQuantity: Number(variant.stockQuantity),
-        attributes: Object.fromEntries(
-          Object.entries(variant.attributes).filter(([, value]) => typeof value === "string" && value.trim() !== "")
-        ),
-      })) : [],
-      brandId: values.brandId || "",
-      categoryId: values.categoryId || "",
-    });
-
-    if (result.success) {
-      setOpen(false);
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-none bg-card">
-        <DialogHeader>
-          <DialogTitle className="font-serif text-xl">{title}</DialogTitle>
-          <DialogDescription>
-            Fill in the details below to save your product catalog item.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-2">
-          <input type="hidden" {...register("variantsEnabled")} />
-          {/* Section 1: Basic Information */}
-          <div className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-              <Boxes className="h-4 w-4 text-primary" /> Basic Information
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Product Name */}
-              <div className="space-y-1.5 md:col-span-2">
-                <Label htmlFor="prod-name">
-                  Product Name <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="prod-name"
-                  {...register("name", {
-                    required: "Product name is required",
-                    minLength: { value: 2, message: "At least 2 characters" },
-                  })}
-                  placeholder="Organic Honey Crispy Apples"
-                />
-                {errors.name && (
-                  <p className="text-xs text-destructive">{errors.name.message}</p>
-                )}
-              </div>
-
-              {/* Slug / SKU identifier */}
-              <div className="space-y-1.5">
-                <Label htmlFor="prod-slug">URL Slug / Identifier</Label>
-                <Input
-                  id="prod-slug"
-                  {...register("slug")}
-                  placeholder="organic-honey-crispy-apples"
-                  onChange={(e) => {
-                    setSlugManuallyEdited(true);
-                    setValue("slug", slugify(e.target.value));
-                  }}
-                />
-                {errors.slug && (
-                  <p className="text-xs text-destructive">{errors.slug.message}</p>
-                )}
-              </div>
-
-              {/* Category */}
-              <div className="space-y-1.5">
-                <Label htmlFor="prod-category">Category</Label>
-                <select
-                  id="prod-category"
-                  {...register("categoryId")}
-                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="">-- Select Category --</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Brand */}
-              <div className="space-y-1.5 md:col-span-2">
-                <Label htmlFor="prod-brand">Brand</Label>
-                <select
-                  id="prod-brand"
-                  {...register("brandId")}
-                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="">-- Select Brand --</option>
-                  {brands.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.name} {!b.enabled ? "(Banned)" : ""}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Description */}
-              <div className="space-y-1.5 md:col-span-2">
-                <Label htmlFor="prod-desc">Description</Label>
-                <textarea
-                  id="prod-desc"
-                  rows={3}
-                  {...register("description")}
-                  placeholder="Freshly harvested organic apples packed with sweet flavor and natural crispiness..."
-                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                />
-                {errors.description && (
-                  <p className="text-xs text-destructive">{errors.description.message}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Section 2: Pricing */}
-          <div className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-primary" /> Pricing
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="prod-price">
-                  Price / MRP (Rs) <span className="text-destructive">*</span>
-                </Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground">
-                    Rs
-                  </span>
-                  <Input
-                    id="prod-price"
-                    type="number"
-                    step="1"
-                    min="1"
-                    className="pl-9"
-                    {...register("price", {
-                      required: "Price is required",
-                      min: { value: 1, message: "Price must be greater than Rs 0" },
-                      setValueAs: (v) => (v === "" ? 0 : parseFloat(v)),
-                    })}
-                    placeholder="3000"
-                  />
-                </div>
-                {errors.price && (
-                  <p className="text-xs text-destructive">{errors.price.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="prod-sale-price">
-                    Sale Price (Rs) <span className="text-xs text-muted-foreground">(Optional)</span>
-                  </Label>
-                  {calculatedDiscount > 0 && (
-                    <Badge variant="destructive" className="text-[10px] font-bold">
-                      {calculatedDiscount}% OFF
-                    </Badge>
-                  )}
-                </div>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground">
-                    Rs
-                  </span>
-                  <Input
-                    id="prod-sale-price"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    className="pl-9"
-                    {...register("salePrice", {
-                      setValueAs: (v) => (v === "" || v === null || v === undefined ? null : parseFloat(v)),
-                    })}
-                    placeholder="2400"
-                  />
-                </div>
-                {errors.salePrice && (
-                  <p className="text-xs text-destructive">{errors.salePrice.message}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Purchase options</h3>
-                <p className="mt-1 text-xs text-muted-foreground">Choose one simple option or manage multiple variants.</p>
-              </div>
-              <div className="flex rounded-lg border border-border p-1">
-                <button type="button" onClick={() => setValue("variantsEnabled", false)} className={`rounded-md px-3 py-1.5 text-xs font-semibold ${!variantsEnabledValue ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Simple product</button>
-                <button type="button" onClick={() => setValue("variantsEnabled", true)} className={`rounded-md px-3 py-1.5 text-xs font-semibold ${variantsEnabledValue ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Product with variants</button>
-              </div>
-            </div>
-            {variantsEnabledValue && (
-              <>
-                <div className="overflow-x-auto rounded-lg border border-border">
-                  <table className="min-w-[1160px] w-full text-left text-xs">
-                    <thead className="bg-muted/60 text-muted-foreground">
-                      <tr>
-                        <th className="p-2">SKU</th>
-                        {variantAttributeFields.map(([key, label]) => <th key={key} className="p-2">{label}</th>)}
-                        <th className="p-2">Price</th>
-                        <th className="p-2">Sale</th>
-                        <th className="p-2">Stock</th>
-                        <th className="p-2">Image URL</th>
-                        <th className="p-2">Active</th>
-                        <th className="p-2"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {variantFields.map((field, index) => (
-                        <tr key={field.id}>
-                          <td className="p-2"><Input aria-label={`Variant ${index + 1} SKU`} {...register(`variants.${index}.sku`)} placeholder="SKU" className="min-w-24" /></td>
-                          {variantAttributeFields.map(([key, label]) => (
-                            <td className="p-2" key={key}><Input aria-label={`${label} for variant ${index + 1}`} {...register(`variants.${index}.attributes.${key}`)} placeholder={label} className="min-w-20" /></td>
-                          ))}
-                          <td className="p-2"><Input aria-label={`Variant ${index + 1} price`} type="number" min="1" step="0.01" {...register(`variants.${index}.price`, { valueAsNumber: true })} className="w-24" /></td>
-                          <td className="p-2"><Input aria-label={`Variant ${index + 1} sale price`} type="number" min="0" step="0.01" {...register(`variants.${index}.salePrice`, { setValueAs: (value) => value === "" ? null : Number(value) })} className="w-24" /></td>
-                          <td className="p-2"><Input aria-label={`Variant ${index + 1} stock`} type="number" min="0" step="1" {...register(`variants.${index}.stockQuantity`, { valueAsNumber: true })} className="w-20" /></td>
-                          <td className="p-2"><Input aria-label={`Variant ${index + 1} image URL`} {...register(`variants.${index}.imageUrl`)} placeholder="Optional URL" className="min-w-36" /></td>
-                          <td className="p-2 text-center"><input type="checkbox" aria-label={`Variant ${index + 1} active`} {...register(`variants.${index}.isActive`)} className="size-4 accent-primary" /></td>
-                          <td className="p-2"><Button type="button" variant="ghost" size="icon" aria-label={`Remove variant ${index + 1}`} onClick={() => removeVariant(index)}><X className="size-4" /></Button></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <Button type="button" variant="outline" size="sm" onClick={() => appendVariant({
-                    sku: "",
-                    attributes: {},
-                    price: 1,
-                    salePrice: null,
-                    stockQuantity: 0,
-                    imageUrl: "",
-                    isActive: true,
-                  })}><Plus className="mr-1 size-4" /> Add variant</Button>
-                  {errors.variants && <p className="text-xs text-destructive">{errors.variants.message ?? "Check SKU, attributes, price and stock for each row."}</p>}
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Section 3: Product Image */}
-          <div className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-              <ImageIcon className="h-4 w-4 text-primary" /> Media & Images
-            </h3>
-
-            <div className="space-y-2">
-              <Label htmlFor="prod-image">Product Image URL</Label>
-              <div className="flex flex-col sm:flex-row gap-4 items-start">
-                <div className="h-24 w-24 shrink-0 rounded-xl border border-border bg-accent grid place-items-center overflow-hidden relative group">
-                  {imageSrc && failedImageSrc !== imageSrc ? (
-                    <>
-                      <Image
-                        src={imageSrc}
-                        alt="Product preview"
-                        fill
-                        className="object-cover"
-                        onError={() => setFailedImageSrc(imageSrc)}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setValue("imageUrl", "")}
-                        className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
-                        title="Remove image"
-                      >
-                        <X className="h-5 w-5" />
-                      </button>
-                    </>
-                  ) : (
-                    <div className="text-center p-2">
-                      <ImageIcon className="h-6 w-6 text-muted-foreground mx-auto mb-1" />
-                      <span className="text-[10px] text-muted-foreground">No image</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex-1 w-full space-y-2">
-                  <Input
-                    id="prod-image"
-                    {...register("imageUrl")}
-                    placeholder="https://images.unsplash.com/photo-..."
-                  />
-                  <div className="pt-1">
-                    <UploadButton
-                      endpoint="imageUploader"
-                      onClientUploadComplete={(res) => {
-                        const url = res?.[0]?.ufsUrl || res?.[0]?.url;
-                        if (url) {
-                          setValue("imageUrl", url, { shouldValidate: true, shouldDirty: true });
-                          setFailedImageSrc(null);
-                          toast.success("Product image uploaded!");
-                        }
-                      }}
-                      onUploadError={(error: Error) => {
-                        toast.error(`Upload failed: ${error.message}`);
-                      }}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Upload an image file or provide a public URL. Image preview updates automatically.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Section 4: Visibility & Status */}
-          <div className="flex items-center justify-between rounded-xl border border-border bg-muted/20 px-4 py-3">
-            <div>
-              <p className="text-sm font-medium text-foreground">Product Status</p>
-              <p className="text-xs text-muted-foreground">
-                Active products are visible to customers on kitcomart store.
-              </p>
-            </div>
-            <Switch
-              checked={enabledValue}
-              onCheckedChange={(v) => setValue("enabled", v)}
-              aria-label="Toggle active product status"
-            />
-          </div>
-
-          <DialogFooter className="gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setOpen(false)}
-              disabled={isPending || isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isPending || isSubmitting}>
-              {(isPending || isSubmitting) && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              Save Product
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ──────────────────────────────────────────────────────────
-//  Product Details Inspection Dialog
-// ──────────────────────────────────────────────────────────
-function ProductDetailsDialog({
-  product,
-  open,
-  onOpenChange,
-  onEdit,
-  onToggleStatus,
-  onDelete,
-}: {
-  product: SerializedProduct | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onEdit: (product: SerializedProduct) => void;
-  onToggleStatus: (product: SerializedProduct, enabled: boolean) => void;
-  onDelete: (product: SerializedProduct) => void;
-}) {
-  const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
-
-  if (!product) return null;
-
-  const sku = `SKU-${product.id.slice(-6).toUpperCase()}`;
-  const imageSrc = getSupportedImageSrc(product.imageUrl);
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg bg-card">
-        <DialogHeader>
-          <div className="flex items-center justify-between gap-2">
-            <Badge variant={product.enabled ? "default" : "secondary"}>
-              {product.enabled ? "Active" : "Inactive"}
-            </Badge>
-            <span className="font-mono text-xs text-muted-foreground">{sku}</span>
-          </div>
-          <DialogTitle className="font-serif text-2xl mt-1">{product.name}</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4 py-2">
-          {/* Image & Main stats */}
-          <div className="flex gap-4 items-start">
-            <div className="relative h-28 w-28 shrink-0 rounded-xl border border-border bg-accent overflow-hidden grid place-items-center">
-              {imageSrc && failedImageSrc !== imageSrc ? (
-                <Image
-                  src={imageSrc}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                  onError={() => setFailedImageSrc(imageSrc)}
-                />
-              ) : (
-                <ImageIcon className="h-8 w-8 text-muted-foreground" />
-              )}
-            </div>
-
-            <div className="space-y-2 min-w-0 flex-1">
-              <div>
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Price
-                </span>
-                <p className="font-serif text-2xl font-bold text-foreground">
-                  Rs {Math.round(Number(product.price))}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <span className="text-muted-foreground block">Category</span>
-                  <span className="font-medium truncate block">
-                    {product.category?.name || "Uncategorized"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground block">Brand</span>
-                  <span className="font-medium truncate block">
-                    {product.brand?.name || "Generic"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="rounded-xl border border-border bg-muted/20 p-3 space-y-1">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-              Description
-            </span>
-            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-              {product.description || "No product description provided."}
-            </p>
-          </div>
-
-          {/* Metadata */}
-          <div className="grid grid-cols-2 gap-3 text-xs text-muted-foreground pt-1 border-t border-border">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5" />
-              <span>Created: {new Date(product.createdAt).toLocaleDateString()}</span>
-            </div>
-            <div className="flex items-center gap-1.5 justify-end">
-              <Calendar className="h-3.5 w-3.5" />
-              <span>Updated: {new Date(product.updatedAt).toLocaleDateString()}</span>
-            </div>
-          </div>
-        </div>
-
-        <DialogFooter className="gap-2 sm:justify-between pt-2 border-t border-border">
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            onClick={() => {
-              onOpenChange(false);
-              onDelete(product);
-            }}
-          >
-            <Trash2 className="h-4 w-4 mr-1" /> Delete
-          </Button>
-
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => onToggleStatus(product, !product.enabled)}
-            >
-              {product.enabled ? "Disable" : "Enable"}
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => {
-                onOpenChange(false);
-                onEdit(product);
-              }}
-            >
-              <Pencil className="h-4 w-4 mr-1" /> Edit Product
-            </Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 // ──────────────────────────────────────────────────────────
 //  Delete Confirmation Dialog
 // ──────────────────────────────────────────────────────────
@@ -806,11 +158,6 @@ export default function AdminProductsPage() {
   // Stats
   const [stats, setStats] = useState({ total: 0, active: 0, inactive: 0 });
 
-  // Dialog & Modal targets
-  const [selectedInspectProduct, setSelectedInspectProduct] =
-    useState<SerializedProduct | null>(null);
-  const [selectedEditProduct, setSelectedEditProduct] =
-    useState<SerializedProduct | null>(null);
   const [selectedDeleteProduct, setSelectedDeleteProduct] =
     useState<SerializedProduct | null>(null);
 
@@ -882,13 +229,9 @@ export default function AdminProductsPage() {
         setStats(statsRes.data);
       }
 
-      if (catRes.success) {
-        setCategories(catRes.data.items);
-      }
+      if (catRes.success) setCategories(catRes.data.items);
+      if (brandRes.success) setBrands(brandRes.data.items);
 
-      if (brandRes.success) {
-        setBrands(brandRes.data.items);
-      }
     } catch (error) {
       if (requestId !== requestIdRef.current) return;
       toast.error((error as Error).message || "Failed to load admin products.");
@@ -904,63 +247,6 @@ export default function AdminProductsPage() {
   }, [loadData]);
 
   // Mutations
-  async function handleCreateProduct(values: ProductFormValues) {
-    const res = await createProductAction({
-      name: values.name,
-      slug: values.slug || undefined,
-      description: values.description || null,
-      price: values.price,
-      salePrice: values.salePrice ?? null,
-      imageUrl: values.imageUrl || null,
-      enabled: values.enabled,
-      variantsEnabled: values.variantsEnabled,
-      variants: values.variants,
-      brandId: values.brandId || null,
-      categoryId: values.categoryId || null,
-    });
-
-    if (res.success) {
-      toast.success(`Product "${res.data.name}" created successfully`);
-      loadData();
-    } else {
-      toast.error(res.error.message);
-      if (res.error.details) toast.error(Object.values(res.error.details).join(" · "));
-    }
-
-    return res;
-  }
-
-  async function handleUpdateProduct(
-    id: string,
-    values: ProductFormValues
-  ): Promise<ProductActionResult<SerializedProduct>> {
-    const res = await updateProductAction({
-      id,
-      name: values.name,
-      slug: values.slug || undefined,
-      description: values.description || null,
-      price: values.price,
-      salePrice: values.salePrice ?? null,
-      imageUrl: values.imageUrl || null,
-      enabled: values.enabled,
-      variantsEnabled: values.variantsEnabled,
-      variants: values.variants,
-      brandId: values.brandId || null,
-      categoryId: values.categoryId || null,
-    });
-
-    if (res.success) {
-      toast.success(`Product "${res.data.name}" updated successfully`);
-      setSelectedEditProduct(null);
-      loadData();
-    } else {
-      toast.error(res.error.message);
-      if (res.error.details) toast.error(Object.values(res.error.details).join(" · "));
-    }
-
-    return res;
-  }
-
   function handleToggleStatus(product: SerializedProduct, enabled: boolean) {
     startTransition(async () => {
       const res = await toggleProductStatusAction(product.id, enabled);
@@ -1007,18 +293,9 @@ export default function AdminProductsPage() {
         title="Products"
         description="Manage grocery catalog items, pricing, and visibility."
         actions={
-          <ProductFormDialog
-            title="Add New Product"
-            categories={categories}
-            brands={brands}
-            isPending={isPending}
-            trigger={
-              <Button className="rounded-lg shadow-sm">
-                <Plus className="mr-2 h-4 w-4" /> Add Product
-              </Button>
-            }
-            onSave={handleCreateProduct}
-          />
+          <Button className="rounded-lg shadow-sm" onClick={() => router.push("/admin/products/new")}>
+            <Plus className="mr-2 h-4 w-4" /> Add Product
+          </Button>
         }
       />
 
@@ -1174,18 +451,9 @@ export default function AdminProductsPage() {
                         Clear Filters
                       </Button>
                     ) : (
-                      <ProductFormDialog
-                        title="Add New Product"
-                        categories={categories}
-                        brands={brands}
-                        isPending={isPending}
-                        trigger={
-                          <Button size="sm">
-                            <Plus className="mr-2 h-4 w-4" /> Add Product
-                          </Button>
-                        }
-                        onSave={handleCreateProduct}
-                      />
+                      <Button size="sm" onClick={() => router.push("/admin/products/new")}>
+                        <Plus className="mr-2 h-4 w-4" /> Add Product
+                      </Button>
                     )}
                   </td>
                 </tr>
@@ -1303,11 +571,11 @@ export default function AdminProductsPage() {
                               <DropdownMenuLabel className="text-xs">Product Actions</DropdownMenuLabel>
                               <DropdownMenuSeparator />
 
-                              <DropdownMenuItem onClick={() => setSelectedInspectProduct(prod)}>
+                              <DropdownMenuItem onClick={() => router.push(`/admin/products/${prod.id}`)}>
                                 <Eye className="mr-2 h-4 w-4 text-muted-foreground" /> View Details
                               </DropdownMenuItem>
 
-                              <DropdownMenuItem onClick={() => setSelectedEditProduct(prod)}>
+                              <DropdownMenuItem onClick={() => router.push(`/admin/products/${prod.id}/edit`)}>
                                 <Pencil className="mr-2 h-4 w-4 text-muted-foreground" /> Edit
                               </DropdownMenuItem>
 
@@ -1389,49 +657,6 @@ export default function AdminProductsPage() {
             </div>
           </div>
         </div>
-      )}
-
-      {/* Inspect Product Modal */}
-      <ProductDetailsDialog
-        product={selectedInspectProduct}
-        open={Boolean(selectedInspectProduct)}
-        onOpenChange={(open) => !open && setSelectedInspectProduct(null)}
-        onEdit={(prod) => setSelectedEditProduct(prod)}
-        onToggleStatus={(prod, val) => handleToggleStatus(prod, val)}
-        onDelete={(prod) => setSelectedDeleteProduct(prod)}
-      />
-
-      {/* Edit Product Dialog */}
-      {selectedEditProduct && (
-        <ProductFormDialog
-          title="Edit Product"
-          categories={categories}
-          brands={brands}
-          isPending={isPending}
-          defaultValues={{
-            name: selectedEditProduct.name,
-            slug: selectedEditProduct.slug,
-            description: selectedEditProduct.description ?? "",
-            price: Number(selectedEditProduct.price),
-            salePrice: selectedEditProduct.salePrice ? Number(selectedEditProduct.salePrice) : null,
-            imageUrl: selectedEditProduct.imageUrl ?? "",
-            enabled: selectedEditProduct.enabled,
-            brandId: selectedEditProduct.brandId ?? "",
-            categoryId: selectedEditProduct.categoryId ?? "",
-            variantsEnabled: selectedEditProduct.variantsEnabled,
-            variants: selectedEditProduct.variants.map((variant) => ({
-              id: variant.id,
-              sku: variant.sku,
-              attributes: variant.attributes,
-              price: variant.price,
-              salePrice: variant.salePrice,
-              stockQuantity: variant.stockQuantity,
-              imageUrl: variant.imageUrl ?? "",
-              isActive: variant.isActive,
-            })),
-          }}
-          onSave={(values) => handleUpdateProduct(selectedEditProduct.id, values)}
-        />
       )}
 
       {/* Delete Confirmation Modal */}

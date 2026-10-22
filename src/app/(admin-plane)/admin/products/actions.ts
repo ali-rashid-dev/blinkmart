@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin, isAuthError, type AuthActionResult } from "@/lib/authz";
 import {
   getAdminProducts,
+  getAdminProductById,
   getProductStats,
   createProductService,
   updateProductService,
@@ -242,6 +243,23 @@ export async function getAdminProductsAction(
         items: result.items.map(serializeProduct),
       },
     };
+  } catch (error) {
+    return handleServiceError(error);
+  }
+}
+
+export async function getAdminProductAction(id: string): Promise<ProductActionResult<SerializedProduct>> {
+  try {
+    const authResult = await requireProductAdmin();
+    if (isAuthError(authResult)) return authResult;
+
+    if (!id || typeof id !== "string") {
+      return buildError("VALIDATION_ERROR", "A valid product ID is required.");
+    }
+
+    const product = await getAdminProductById(id);
+    if (!product) return buildError("PRODUCT_NOT_FOUND", "Product not found.");
+    return { success: true, data: serializeProduct(product) };
   } catch (error) {
     return handleServiceError(error);
   }
