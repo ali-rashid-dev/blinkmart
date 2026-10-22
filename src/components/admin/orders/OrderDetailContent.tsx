@@ -23,7 +23,12 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import type { Order, OrderStatus } from "@/lib/orders/types";
-import { formatDateTime, formatDeliveryDate } from "@/lib/orders/types";
+import {
+  DELIVERY_TIMEFRAME,
+  formatDateTime,
+  formatDeliveryDeadline,
+  formatDeliveryDate,
+} from "@/lib/orders/types";
 import {
   STATUS_CONFIG,
   DB_STATUS_MAP,
@@ -244,7 +249,7 @@ export function OrderDetailContent({ orderId }: { orderId: string }) {
 
         <div className="rounded-xl border border-border p-4 space-y-3 bg-card">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-primary" /> Shipping Address & Slot
+            <MapPin className="h-4 w-4 text-primary" /> Shipping Address &amp; Delivery
           </h4>
 
           <div className="space-y-1.5 text-xs text-foreground">
@@ -258,7 +263,9 @@ export function OrderDetailContent({ orderId }: { orderId: string }) {
             <div className="pt-2 flex items-center gap-2 text-primary font-medium text-xs">
               <Calendar className="h-3.5 w-3.5" />
               <span>
-                {formatDeliveryDate(order.deliveryDate)} ({order.deliverySlot})
+                {order.deliverySlot === DELIVERY_TIMEFRAME.label
+                  ? `Deliver by ${formatDeliveryDeadline(order.deliveryDate)}`
+                  : `${formatDeliveryDate(order.deliveryDate)} (${order.deliverySlot})`}
               </span>
             </div>
 
@@ -401,9 +408,11 @@ export function OrderDetailContent({ orderId }: { orderId: string }) {
                 <p>{order.address.phone}</p>
               </div>
               <div>
-                <p className="font-bold text-gray-700 uppercase">Delivery Window & Address</p>
+                <p className="font-bold text-gray-700 uppercase">Delivery Deadline & Address</p>
                 <p>
-                  {formatDeliveryDate(order.deliveryDate)} ({order.deliverySlot})
+                  {order.deliverySlot === DELIVERY_TIMEFRAME.label
+                    ? `Deliver by ${formatDeliveryDeadline(order.deliveryDate)}`
+                    : `${formatDeliveryDate(order.deliveryDate)} (${order.deliverySlot})`}
                 </p>
                 <p>
                   {order.address.house}, {order.address.street}

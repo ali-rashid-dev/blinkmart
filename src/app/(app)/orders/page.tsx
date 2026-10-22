@@ -25,7 +25,7 @@ export default function OrdersPage() {
     <main className="mx-auto w-full max-w-4xl px-4 py-10">
       <h1 className="font-display text-3xl text-foreground">Your orders</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Every delivery arrives in the fixed 7:00 PM – 10:00 PM evening window.
+        Orders are delivered within 24 hours of placement.
       </p>
 
       <div className="mt-6">

@@ -35,7 +35,6 @@ import {
   type OrderStatus,
   type OrderItem,
   type OrderTimelineEvent,
-  getAvailableDeliveryDates,
   LIFECYCLE,
 } from "@/lib/orders/types";
 import {
@@ -43,15 +42,7 @@ import {
   FREE_DELIVERY_THRESHOLD,
   DEFAULT_DELIVERY_FEE,
 } from "@/lib/orders/eligibility";
-import { parseISO, isBefore, startOfDay, isAfter, format } from "date-fns";
 import { notifyOrderStatusChange } from "@/services/notification.service";
-
-export class InvalidDeliveryDateError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "InvalidDeliveryDateError";
-  }
-}
 
 export class OrderNotFoundError extends Error {
   constructor(idOrCode: string) {
@@ -122,7 +113,7 @@ export function mapPrismaOrderToDomainOrder(dbOrder: OrderWithItems): Order {
     code: dbOrder.code,
     status,
     placedAt: dbOrder.createdAt.toISOString(),
-    deliveryDate: format(dbOrder.deliveryDate, "yyyy-MM-dd"),
+    deliveryDate: dbOrder.deliveryDate.toISOString(),
     deliverySlot: dbOrder.deliverySlot,
     cancelReason: dbOrder.cancelReason ?? null,
     cancelledAt: dbOrder.cancelledAt ? dbOrder.cancelledAt.toISOString() : null,
@@ -173,34 +164,10 @@ export async function placeOrder(
     throw new EmptyCartError();
   }
 
-  // Validate delivery date against available windows (cutoff rule)
-  const availableWindows = getAvailableDeliveryDates(new Date());
-  const minAvailableIso = availableWindows[0]!.dateIso;
-  const requestedDate = startOfDay(parseISO(parsed.deliveryDate));
-  const minAvailableDate = startOfDay(parseISO(minAvailableIso));
-
-  if (isBefore(requestedDate, minAvailableDate)) {
-    throw new InvalidDeliveryDateError(
-      `Selected delivery date is past the 5:00 PM cutoff window. Earliest delivery date is ${minAvailableIso}.`
-    );
-  }
-
-  // Reject dates beyond the last offered delivery window
-  const maxAvailableIso = availableWindows[availableWindows.length - 1]!.dateIso;
-  const maxAvailableDate = startOfDay(parseISO(maxAvailableIso));
-  if (isAfter(requestedDate, maxAvailableDate)) {
-    throw new InvalidDeliveryDateError(
-      `Selected delivery date is beyond the last available delivery window (${maxAvailableIso}).`
-    );
-  }
-
-  const deliveryDateObj = parseISO(parsed.deliveryDate);
-
   const dbOrder = await createOrderInDb({
     userId,
     cart,
     address: parsed,
-    deliveryDate: deliveryDateObj,
   });
 
   const domainOrder = mapPrismaOrderToDomainOrder(dbOrder);

@@ -73,7 +73,7 @@ export default function PrivacyPolicyPage() {
             Your information is used strictly to fulfill grocery orders in Faisalabad:
           </p>
           <ul className="list-disc list-inside space-y-1">
-            <li>Dispatching drivers to your address during 7–10 PM evening delivery slots</li>
+            <li>Assigning delivery drivers and sharing the details needed to complete your order within 24 hours</li>
             <li>Sending automated SMS and WhatsApp delivery status updates</li>
             <li>Processing cash-on-delivery and online payments (JazzCash/EasyPaisa/Cards)</li>
             <li>Improving route optimization across Faisalabad sectors</li>

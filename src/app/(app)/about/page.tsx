@@ -17,7 +17,7 @@ import {
 export const metadata: Metadata = {
   title: "About Us — kitcomart Grocery Delivery Faisalabad",
   description:
-    "Learn about kitcomart, Faisalabad's leading evening grocery delivery service specializing in quality packaged groceries, daily essentials, and bulk pantry stock-ups.",
+    "Learn about kitcomart, Faisalabad's grocery delivery service for quality packaged groceries, daily essentials, and bulk pantry stock-ups delivered within 24 hours.",
 };
 
 export default function AboutPage() {
@@ -28,7 +28,7 @@ export default function AboutPage() {
         <div className="relative z-10 max-w-3xl flex flex-col gap-4">
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-3.5 py-1 text-xs font-bold text-primary w-fit">
             <Sparkles className="size-3.5" />
-            <span>Faisalabad's Evening Grocery Specialists</span>
+            <span>Faisalabad Grocery Delivery</span>
           </div>
 
           <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground">
@@ -36,7 +36,7 @@ export default function AboutPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            KitcoMart was built with a simple promise: quality packaged groceries, daily essentials and pantry staples delivered directly to your doorstep in Faisalabad when you are actually home—during guaranteed 7:00 PM to 10:00 PM evening slots.
+            KitcoMart was built with a simple promise: quality packaged groceries, daily essentials and pantry staples delivered directly to your doorstep in Faisalabad within 24 hours of ordering.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -76,9 +76,9 @@ export default function AboutPage() {
             <div className="size-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
               <Clock className="size-6" />
             </div>
-            <h3 className="font-bold text-base text-foreground">Guaranteed Evening Slot</h3>
+            <h3 className="font-bold text-base text-foreground">Delivery within 24 hours</h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Order before 5:00 PM and relax. Your groceries arrive between 7:00 PM – 10:00 PM without midday delay or traffic hassle.
+              Place an order any time and receive your groceries within 24 hours.
             </p>
           </div>
 
@@ -124,7 +124,7 @@ export default function AboutPage() {
 
           <div className="flex flex-col gap-1 p-2">
             <span className="font-display text-3xl sm:text-4xl font-extrabold text-primary">99.4%</span>
-            <span className="text-xs font-medium text-muted-foreground">On-Time Slot Delivery</span>
+            <span className="text-xs font-medium text-muted-foreground">On-Time Delivery</span>
           </div>
 
           <div className="flex flex-col gap-1 p-2">
@@ -150,7 +150,7 @@ export default function AboutPage() {
             Founded with the goal of modernizing Faisalabad's grocery distribution, KitcoMart connects trusted consumer goods manufacturers and distributors directly with households.
           </p>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            By operating a centralized warehouse model with evening delivery runs, we eliminate supermarket markups, maintain strict inventory control, and give working families their evenings back.
+            By operating a centralized warehouse model, we eliminate supermarket markups, maintain strict inventory control, and deliver orders within 24 hours.
           </p>
 
           <ul className="space-y-2 pt-2 text-xs font-semibold text-foreground">
@@ -175,7 +175,7 @@ export default function AboutPage() {
             Serving All Key Faisalabad Communities
           </h3>
           <p className="text-xs text-muted-foreground">
-            Our daily evening fleets operate across:
+            Our delivery fleet serves:
           </p>
 
           <div className="grid grid-cols-2 gap-2 text-xs font-medium text-foreground">

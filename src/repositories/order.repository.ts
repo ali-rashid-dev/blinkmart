@@ -8,6 +8,7 @@ import {
 import type { Prisma, OrderStatus } from "@/generated/prisma/client";
 import type { CartWithItems } from "@/repositories/cart.repository";
 import type { PlaceOrderInput } from "@/validations/order";
+import { DELIVERY_TIMEFRAME, getDeliveryDeadline } from "@/lib/orders/types";
 
 export type OrderWithItems = Prisma.OrderGetPayload<{
   include: {
@@ -47,9 +48,8 @@ export async function createOrderInDb(params: {
   userId: string;
   cart: CartWithItems;
   address: PlaceOrderInput;
-  deliveryDate: Date;
 }): Promise<OrderWithItems> {
-  const { userId, cart, address, deliveryDate } = params;
+  const { userId, cart, address } = params;
 
   // Retry the whole transaction if we hit a unique constraint collision on `code` (P2002)
   let attempts = 0;
@@ -116,6 +116,8 @@ export async function createOrderInDb(params: {
           });
           if (stockUpdate.count !== 1) throw new InsufficientStockError();
         }
+        const placedAt = new Date();
+        const deliveryDate = getDeliveryDeadline(placedAt);
         const order = await tx.order.create({
           data: {
             code,
@@ -125,8 +127,9 @@ export async function createOrderInDb(params: {
             deliveryFee,
             platformFee,
             total,
+            createdAt: placedAt,
             deliveryDate,
-            deliverySlot: "7:00 PM – 10:00 PM",
+            deliverySlot: DELIVERY_TIMEFRAME.label,
             fullName: address.fullName,
             phone: address.phone,
             house: address.house,

@@ -44,7 +44,12 @@ import {
 } from "@/app/(admin-plane)/admin/orders/actions";
 
 import type { Order, OrderStatus } from "@/lib/orders/types";
-import { formatDateTime, formatDeliveryDate } from "@/lib/orders/types";
+import {
+  DELIVERY_TIMEFRAME,
+  formatDateTime,
+  formatDeliveryDeadline,
+  formatDeliveryDate,
+} from "@/lib/orders/types";
 import type { AdminOrderStats } from "@/repositories/order.repository";
 import { CancellationDialog } from "@/components/admin/orders/CancellationDialog";
 import {
@@ -415,7 +420,7 @@ export function AdminOrdersPage() {
                 <tr>
                   <th className="py-3 px-4">Order Code</th>
                   <th className="py-3 px-4">Customer Details</th>
-                  <th className="py-3 px-4">Delivery Run</th>
+                  <th className="py-3 px-4">Delivery Due</th>
                   <th className="py-3 px-4">Items Summary</th>
                   <th className="py-3 px-4 text-right">Amount</th>
                   <th className="py-3 px-4 text-center">Status</th>
@@ -452,7 +457,9 @@ export function AdminOrdersPage() {
 
                       <td className="py-3 px-4 align-top">
                         <span className="font-medium text-foreground block">
-                          {formatDeliveryDate(order.deliveryDate)}
+                          {order.deliverySlot === DELIVERY_TIMEFRAME.label
+                            ? formatDeliveryDeadline(order.deliveryDate)
+                            : formatDeliveryDate(order.deliveryDate)}
                         </span>
                         <span className="text-muted-foreground text-[11px] block mt-0.5">
                           {order.deliverySlot}

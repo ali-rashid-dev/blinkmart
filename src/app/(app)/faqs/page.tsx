@@ -22,8 +22,8 @@ interface FAQItem {
 const FAQ_DATA: FAQItem[] = [
   {
     category: "delivery",
-    question: "What is the cutoff time for same-day grocery delivery in Faisalabad?",
-    answer: "Our daily order cutoff is 5:00 PM PKT. Orders placed before 5:00 PM are delivered between 7:00 PM and 10:00 PM on the same evening. Orders placed after 5:00 PM will be delivered during the following evening's 7–10 PM slot.",
+    question: "How soon will my grocery order arrive?",
+    answer: "We deliver orders within 24 hours of placement. You can place an order at any time; there is no daily cutoff or fixed delivery slot.",
   },
   {
     category: "delivery",
@@ -53,7 +53,7 @@ const FAQ_DATA: FAQItem[] = [
   {
     category: "orders",
     question: "Can I modify or cancel my order after placing it?",
-    answer: "You can modify or cancel your order anytime before our 5:00 PM cutoff via your account dashboard under 'My Orders' or by contacting our WhatsApp support.",
+    answer: "You can cancel your order from 'My Orders' before it is marked out for delivery, or contact our WhatsApp support.",
   },
   {
     category: "orders",
@@ -87,7 +87,7 @@ export default function FAQsPage() {
           How Can We Help You Today?
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-          Everything you need to know about grocery delivery in Faisalabad, cutoff times, pricing fee tiers, and freshness guarantees.
+          Everything you need to know about grocery delivery in Faisalabad, delivery timing, pricing fee tiers, and freshness guarantees.
         </p>
       </div>
 
@@ -97,7 +97,7 @@ export default function FAQsPage() {
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search FAQs (e.g. delivery fee, cutoff, refund, Faisalabad)..."
+            placeholder="Search FAQs (e.g. delivery time, fee, refund, Faisalabad)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full h-11 rounded-2xl border border-input bg-card pl-10 pr-4 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary shadow-xs"

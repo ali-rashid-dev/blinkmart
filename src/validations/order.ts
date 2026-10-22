@@ -37,14 +37,6 @@ export const placeOrderSchema = z.object({
     (val) => (typeof val === "string" ? val.trim() : val),
     z.string().max(500, "Notes cannot exceed 500 characters").optional().nullable()
   ),
-  deliveryDate: z
-    .preprocess(
-      (val) => (typeof val === "string" ? val.trim() : val),
-      z
-        .string()
-        .regex(/^\d{4}-\d{2}-\d{2}$/, "Delivery date must be in YYYY-MM-DD format")
-        .refine((value) => isRealCalendarDate(value), "Delivery date must be a real calendar date")
-    ),
 });
 
 export type PlaceOrderInput = z.infer<typeof placeOrderSchema>;
@@ -138,5 +130,4 @@ export const getAdminOrdersSchema = z.object({
 });
 
 export type GetAdminOrdersInput = z.infer<typeof getAdminOrdersSchema>;
-
 

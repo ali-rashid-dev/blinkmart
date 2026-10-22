@@ -6,7 +6,6 @@ import {
   placeOrder,
   EmptyCartError,
   InsufficientStockError,
-  InvalidDeliveryDateError,
 } from "@/services/order.service";
 import { placeOrderSchema, type PlaceOrderInput } from "@/validations/order";
 import type { Order } from "@/lib/orders/types";
@@ -15,7 +14,6 @@ export type OrderActionErrorCode =
   | "UNAUTHORIZED"
   | "EMPTY_CART"
   | "INSUFFICIENT_STOCK"
-  | "INVALID_DELIVERY_DATE"
   | "VALIDATION_ERROR"
   | "DATABASE_ERROR"
   | "UNKNOWN_ERROR";
@@ -76,9 +74,6 @@ export async function placeOrderAction(
     }
     if (error instanceof InsufficientStockError) {
       return buildError("INSUFFICIENT_STOCK", error.message);
-    }
-    if (error instanceof InvalidDeliveryDateError) {
-      return buildError("INVALID_DELIVERY_DATE", error.message);
     }
     console.error("Failed to place order:", error);
     return buildError("DATABASE_ERROR", "Something went wrong while placing your order. Please try again.");

@@ -23,8 +23,8 @@ export function Footer() {
             <div className="flex items-center gap-3">
               <Clock className="size-5 shrink-0 text-primary" />
               <div>
-                <h4 className="text-xs font-bold text-foreground">7–10 PM Evening Slot</h4>
-                <p className="text-[11px] text-muted-foreground">Cutoff at 5 PM daily</p>
+                <h4 className="text-xs font-bold text-foreground">Delivery within 24 hours</h4>
+                <p className="text-[11px] text-muted-foreground">Order anytime, day or night</p>
               </div>
             </div>
 
@@ -62,7 +62,7 @@ export function Footer() {
           <div className="flex flex-col gap-3">
             <Logo href="/" size="md" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Faisalabad’s premier evening grocery delivery service. Quality packaged groceries &amp; essentials delivered to your doorstep.
+              Faisalabad’s grocery delivery service. Quality packaged groceries &amp; essentials delivered within 24 hours.
             </p>
           </div>
 

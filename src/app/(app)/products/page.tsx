@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Shop Groceries — kitcomart",
     description:
-      "Browse quality packaged groceries, beverages and pantry staples with guaranteed evening delivery.",
+      "Browse quality packaged groceries, beverages and pantry staples with delivery within 24 hours.",
   },
 };
 

@@ -107,7 +107,10 @@ export default function OrderDetailPage({
             </div>
 
             <div className="space-y-6">
-              <DeliveryWindowCard deliveryDate={order.deliveryDate} />
+              <DeliveryWindowCard
+                deliveryDate={order.deliveryDate}
+                deliverySlot={order.deliverySlot}
+              />
               <section className="rounded-2xl border border-border bg-card p-5">
                 <h2 className="font-display text-lg text-foreground">Delivery address</h2>
                 <address className="mt-2 space-y-0.5 text-sm not-italic text-muted-foreground">

@@ -7,9 +7,10 @@ import { OrderStatusBadge } from "./OrderStatusBadge";
 import { CancelOrderDialog } from "./CancelOrderDialog";
 import { formatMoney, ordersStore } from "@/lib/orders/store";
 import {
-  DELIVERY_WINDOW,
+  DELIVERY_TIMEFRAME,
   canCancel,
   formatDateTime,
+  formatDeliveryDeadline,
   formatDeliveryDate,
   type Order,
 } from "@/lib/orders/types";
@@ -43,7 +44,9 @@ export function OrderCard({ order, busy }: { order: Order; busy: boolean }) {
             Placed {formatDateTime(order.placedAt)} ·{" "}
             {order.status === "cancelled"
               ? "Delivery cancelled"
-              : `${formatDeliveryDate(order.deliveryDate)}, ${DELIVERY_WINDOW.label}`}
+              : order.deliverySlot === DELIVERY_TIMEFRAME.label
+                ? `Deliver by ${formatDeliveryDeadline(order.deliveryDate)}`
+                : `${formatDeliveryDate(order.deliveryDate)}, ${order.deliverySlot}`}
           </p>
         </div>
         <p className="shrink-0 text-right">

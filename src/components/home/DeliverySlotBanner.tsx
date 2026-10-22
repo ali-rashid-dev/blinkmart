@@ -1,114 +1,32 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { Clock, Moon, ShieldCheck, Sparkles, Truck } from "lucide-react";
-
-function pad(n: number) {
-  return String(n).padStart(2, "0");
-}
+import { Clock, ShieldCheck, Truck } from "lucide-react";
 
 export function DeliverySlotBanner() {
-  const [now, setNow] = useState<Date | null>(null);
-
-  useEffect(() => {
-    setNow(new Date());
-    const interval = setInterval(() => {
-      setNow(new Date());
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  if (!now) {
-    return (
-      <div className="w-full rounded-2xl border border-border/80 bg-card p-4 shadow-xs animate-pulse h-20" />
-    );
-  }
-
-  const cutoffHour = 17;
-  const hours = now.getHours();
-  const isBeforeCutoff = hours < cutoffHour;
-
-  let remainingMs = 0;
-  if (isBeforeCutoff) {
-    const cutoff = new Date(now);
-    cutoff.setHours(cutoffHour, 0, 0, 0);
-    remainingMs = Math.max(0, cutoff.getTime() - now.getTime());
-  }
-
-  const remainingHours = Math.floor(remainingMs / (1000 * 60 * 60));
-  const remainingMins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
-  const remainingSecs = Math.floor((remainingMs % (1000 * 60)) / 1000);
-
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-primary/20 p-4 sm:p-5 shadow-soft">
+    <div className="relative overflow-hidden rounded-2xl border border-primary/20 p-4 shadow-soft sm:p-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        {/* Left Side: Delivery Slot Info */}
         <div className="flex items-start gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-button">
-            <Moon className="size-5" />
+            <Truck className="size-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-bold text-primary">
-                <Sparkles className="size-3" />
-                Evening Slot: 7:00 PM – 10:00 PM
+                <Clock className="size-3" />
+                Delivery within 24 hours
               </span>
-              {isBeforeCutoff ? (
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                  <span className="size-2 rounded-full bg-emerald-500 animate-ping" />
-                  Same-Day Delivery Available
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400">
-                  Next Window: Tomorrow Evening
-                </span>
-              )}
+              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                Order anytime
+              </span>
             </div>
-
             <p className="mt-1 text-sm font-semibold text-foreground">
-              {isBeforeCutoff
-                ? "Orders placed before 5:00 PM arrive in tonight's run."
-                : "5:00 PM cutoff reached. Orders scheduled for tomorrow evening."}
+              Your order is due within 24 hours of placing it.
             </p>
           </div>
         </div>
 
-        {/* Right Side: Cutoff Timer */}
-        {isBeforeCutoff ? (
-          <div className="flex items-center gap-2 rounded-xl bg-card/80 border border-border px-3 py-2 shrink-0 self-start md:self-auto backdrop-blur-xs">
-            <Clock className="size-4 text-primary shrink-0" />
-            <div className="text-xs">
-              <span className="text-muted-foreground block text-[10px] uppercase font-bold tracking-wider">
-                5:00 PM Cutoff In
-              </span>
-              <span className="font-mono text-sm font-bold text-foreground tabular-nums">
-                {pad(remainingHours)}h {pad(remainingMins)}m {pad(remainingSecs)}s
-              </span>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 rounded-xl bg-muted/60 border border-border px-3 py-2 shrink-0 self-start md:self-auto">
-            <Truck className="size-4 text-muted-foreground shrink-0" />
-            <span className="text-xs font-medium text-muted-foreground">
-              Order now for Tomorrow Evening
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Feature Badges */}
-      <div className="mt-3 pt-3 border-t border-border/40 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-muted-foreground">
-        <div className="flex items-center gap-1.5">
-          <ShieldCheck className="size-3.5 text-primary shrink-0" />
-          <span>100% Sealed & Quality Checked</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Truck className="size-3.5 text-primary shrink-0" />
-          <span>Free Delivery &gt; Rs 3000</span>
-        </div>
-        <div className="hidden sm:flex items-center gap-1.5">
-          <Moon className="size-3.5 text-primary shrink-0" />
-          <span>Guaranteed 7:00 PM – 10:00 PM Window</span>
+        <div className="flex items-center gap-2 rounded-xl border border-border bg-card/80 px-3 py-2 text-xs font-medium text-muted-foreground md:shrink-0">
+          <ShieldCheck className="size-4 shrink-0 text-primary" />
+          Fresh, quality-checked groceries
         </div>
       </div>
     </div>

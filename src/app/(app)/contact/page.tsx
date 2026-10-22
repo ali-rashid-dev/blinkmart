@@ -76,7 +76,7 @@ export default function ContactPage() {
           Get in Touch with Our Team
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-          Need help with an ongoing evening order in Faisalabad, product feedback, or partnership queries? We&apos;re available 7 days a week.
+          Need help with an ongoing order in Faisalabad, product feedback, or partnership queries? We&apos;re available 7 days a week.
         </p>
       </div>
 
@@ -115,7 +115,7 @@ export default function ContactPage() {
           </div>
           <h3 className="font-bold text-sm text-foreground">Operating Hours</h3>
           <p className="text-xs font-medium text-foreground">8:00 AM – 11:00 PM Daily</p>
-          <p className="text-[11px] text-muted-foreground">Daily cutoff for delivery: 5:00 PM</p>
+          <p className="text-[11px] text-muted-foreground">Delivery within 24 hours of ordering</p>
         </div>
       </div>
 
@@ -259,7 +259,7 @@ export default function ContactPage() {
               Looking for Immediate Answers?
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Check out our FAQs section for instant details on Faisalabad delivery cutoff times, refund rules, accepted payment options, and fee tiers.
+              Check out our FAQs for delivery timing in Faisalabad, refund rules, accepted payment options, and fee tiers.
             </p>
 
             <Link

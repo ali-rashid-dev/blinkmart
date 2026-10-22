@@ -5,13 +5,13 @@ import { listCustomerProducts } from "@/repositories/product.repository";
 import { toCustomerProduct } from "@/components/products/data";
 
 export const metadata: Metadata = {
-  title: "kitcomart — Weekly & Monthly Grocery Delivery (7–10 PM Slot)",
+  title: "kitcomart — Weekly & Monthly Grocery Delivery",
   description:
-    "Shop flour, grains, pulses, cooking oils, spices, tea, and monthly bulk pantry stock-ups with guaranteed evening delivery (7:00 PM – 10:00 PM) and same-day 5:00 PM cutoff.",
+    "Shop flour, grains, pulses, cooking oils, spices, tea, and monthly bulk pantry stock-ups with delivery within 24 hours.",
   openGraph: {
-    title: "kitcomart — Weekly & Monthly Grocery Delivery (7–10 PM Slot)",
+    title: "kitcomart — Weekly & Monthly Grocery Delivery",
     description:
-      "Weekly staple essentials and monthly pantry stock-ups delivered in our guaranteed evening slot.",
+      "Weekly staple essentials and monthly pantry stock-ups delivered within 24 hours.",
   },
 };
 

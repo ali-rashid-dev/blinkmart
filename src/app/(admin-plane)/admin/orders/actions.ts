@@ -13,7 +13,6 @@ import { updateOrderStatusSchema, getAdminOrdersSchema } from "@/validations/ord
 import {
   OrderNotFoundError,
   EmptyCartError,
-  InvalidDeliveryDateError,
 } from "@/services/order.service";
 import { OrderCannotCancelError } from "@/services/order.errors";
 import type { Order } from "@/lib/orders/types";
@@ -147,9 +146,6 @@ export async function updateAdminOrderStatusAction(params: {
       return buildStatusUpdateError("NOT_FOUND", "Order not found.");
     }
     if (error instanceof OrderCannotCancelError) {
-      return buildStatusUpdateError("VALIDATION_ERROR", error.message);
-    }
-    if (error instanceof InvalidDeliveryDateError) {
       return buildStatusUpdateError("VALIDATION_ERROR", error.message);
     }
     if (error instanceof EmptyCartError) {

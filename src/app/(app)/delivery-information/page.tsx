@@ -14,9 +14,9 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Grocery Delivery Faisalabad — Evening Slots & Fee Tiers | kitcomart",
+  title: "Grocery Delivery Faisalabad — 24-Hour Delivery & Fees | kitcomart",
   description:
-    "Complete delivery information for grocery delivery in Faisalabad. Learn about our guaranteed 7–10 PM evening slot, 5 PM order cutoff, sector coverage, and delivery fee tiers.",
+    "Complete grocery delivery information for Faisalabad. Learn about delivery within 24 hours, sector coverage, and delivery fee tiers.",
 };
 
 export default function DeliveryInformationPage() {
@@ -35,7 +35,7 @@ export default function DeliveryInformationPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            KitcoMart provides reliable evening grocery delivery across Faisalabad. Order before our daily 5:00 PM cutoff to receive quality packaged groceries, staples, and bulk pantry stock-ups in our evening delivery slot (7:00 PM – 10:00 PM).
+            KitcoMart delivers quality packaged groceries, staples, and pantry stock-ups across Faisalabad within 24 hours of ordering. Place your order anytime; there is no daily cutoff or fixed delivery slot.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -118,22 +118,22 @@ export default function DeliveryInformationPage() {
         </div>
       </section>
 
-      {/* ── 3. Evening Delivery Window & Cutoff ───────────────────────────── */}
+      {/* ── 3. Delivery Promise ───────────────────────────────────────────── */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 flex flex-col gap-4 shadow-xs">
           <div className="size-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
             <Clock className="size-6" />
           </div>
           <h3 className="font-display text-xl font-bold text-foreground">
-            Daily 5:00 PM Order Cutoff
+            Order Anytime
           </h3>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            All orders accepted before <strong>5:00 PM PKT</strong> enter our same-day evening fulfillment run. Orders accepted after 5:00 PM are automatically scheduled for the following evening's run.
+            Place your order whenever it suits you. Every order is due within <strong>24 hours of placement</strong>, with no fixed daily cutoff.
           </p>
           <ul className="space-y-2 text-xs text-muted-foreground">
             <li className="flex items-center gap-2">
               <CheckCircle className="size-4 text-emerald-500 shrink-0" />
-              <span>Allows streamlined packing and quality check before evening dispatch</span>
+              <span>Orders are prepared and quality checked before dispatch</span>
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle className="size-4 text-emerald-500 shrink-0" />
@@ -147,15 +147,15 @@ export default function DeliveryInformationPage() {
             <Package className="size-6" />
           </div>
           <h3 className="font-display text-xl font-bold text-foreground">
-            Guaranteed 7–10 PM Slot
+            Delivery within 24 hours
           </h3>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Our delivery fleet operates between <strong>7:00 PM and 10:00 PM</strong> daily. You will receive an automated SMS notification when your delivery vehicle leaves our hub with contact details for your driver.
+            Your order is due within <strong>24 hours of placing it</strong>. We will notify you when it is dispatched and share driver contact details.
           </p>
           <ul className="space-y-2 text-xs text-muted-foreground">
             <li className="flex items-center gap-2">
               <CheckCircle className="size-4 text-emerald-500 shrink-0" />
-              <span>No missed packages—deliveries happen when families are home</span>
+              <span>Track your order as it moves through fulfillment</span>
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle className="size-4 text-emerald-500 shrink-0" />

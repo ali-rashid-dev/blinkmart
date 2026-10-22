@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   CalendarClock,
-  CheckCircle2,
   ChevronRight,
   Info,
   Loader2,
@@ -16,7 +15,6 @@ import {
 } from "lucide-react";
 import { cartStore, cartTotals, formatPrice, useCartState } from "@/lib/cart/store";
 import { formatMoney } from "@/lib/orders/store";
-import { getAvailableDeliveryDates, DELIVERY_WINDOW, type DeliveryDateOption } from "@/lib/orders/types";
 import {
   calculateDeliveryFee,
   calculatePlatformFee,
@@ -36,10 +34,6 @@ export default function CheckoutPage() {
   const total = Math.round((subtotal + deliveryFee + platformFee) * 100) / 100;
   const tierInfo = getNextDeliveryTier(subtotal);
 
-  // Delivery dates based on 5:00 PM cutoff rule
-  const [deliveryDateOptions, setDeliveryDateOptions] = useState<DeliveryDateOption[]>([]);
-  const [selectedDateIso, setSelectedDateIso] = useState<string>("");
-
   // Address form fields
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
@@ -57,12 +51,6 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     void cartStore.load();
-    const dates = getAvailableDeliveryDates(new Date());
-    setDeliveryDateOptions(dates);
-    if (dates.length > 0) {
-      setSelectedDateIso(dates[0]!.dateIso);
-    }
-
     // Attempt to load existing user profile address to prefill
     async function loadAddress() {
       try {
@@ -108,7 +96,6 @@ export default function CheckoutPage() {
         city,
         postal,
         notes: notes || undefined,
-        deliveryDate: selectedDateIso,
       });
 
       if (res.success) {
@@ -187,7 +174,7 @@ export default function CheckoutPage() {
 
       <form onSubmit={handleSubmit} className="mt-8 grid gap-8 lg:grid-cols-[1.5fr_1fr]">
         <div className="space-y-8">
-          {/* 1. Fixed Delivery Time Section */}
+          {/* 1. Delivery Promise */}
           <section className="rounded-2xl border border-border bg-card p-6 shadow-soft">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -195,12 +182,12 @@ export default function CheckoutPage() {
                   <CalendarClock className="size-5" />
                 </span>
                 <div>
-                  <h2 className="font-display text-lg font-bold text-foreground">Fixed Delivery Window</h2>
-                  <p className="text-xs text-muted-foreground">Every KitcoMart order delivers in our evening slot</p>
+                  <h2 className="font-display text-lg font-bold text-foreground">Delivery within 24 hours</h2>
+                  <p className="text-xs text-muted-foreground">Order anytime, day or night</p>
                 </div>
               </div>
               <span className="rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary">
-                {DELIVERY_WINDOW.label}
+                24-hour delivery
               </span>
             </div>
 
@@ -208,37 +195,8 @@ export default function CheckoutPage() {
               <div className="flex items-start gap-2">
                 <Info className="mt-0.5 size-4 shrink-0 text-secondary" />
                 <span>
-                  Orders placed before <strong>5:00 PM</strong> qualify for same-day delivery between <strong>7:00 PM – 10:00 PM</strong>. Orders after 5:00 PM are scheduled for tomorrow evening.
+                  We deliver your order within <strong>24 hours of placing it</strong>. There is no daily cutoff or fixed delivery slot.
                 </span>
-              </div>
-            </div>
-
-            <div className="mt-5">
-              <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                Select Delivery Date
-              </label>
-              <div className="mt-2.5 grid gap-3 sm:grid-cols-2">
-                {deliveryDateOptions.map((opt) => {
-                  const isSelected = selectedDateIso === opt.dateIso;
-                  return (
-                    <button
-                      key={opt.dateIso}
-                      type="button"
-                      onClick={() => setSelectedDateIso(opt.dateIso)}
-                      className={`flex items-center justify-between rounded-xl border p-4 text-left transition-all ${
-                        isSelected
-                          ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                          : "border-border bg-card hover:bg-accent/50"
-                      }`}
-                    >
-                      <div>
-                        <p className="font-semibold text-foreground text-sm">{opt.label}</p>
-                        <p className="mt-0.5 text-xs text-muted-foreground">{DELIVERY_WINDOW.label}</p>
-                      </div>
-                      {isSelected && <CheckCircle2 className="size-5 text-primary shrink-0" />}
-                    </button>
-                  );
-                })}
               </div>
             </div>
           </section>
@@ -466,7 +424,7 @@ export default function CheckoutPage() {
               {tierInfo && (
                 <p className="rounded-lg bg-accent/50 p-2 text-xs text-muted-foreground">
                   {tierInfo.isFree ? (
-                    <span className="font-medium text-success">🎉 You qualify for FREE evening delivery!</span>
+                    <span className="font-medium text-success">🎉 You qualify for FREE delivery!</span>
                   ) : (
                     <>
                       Add <span className="font-semibold text-foreground">{formatMoney(tierInfo.amountNeeded)}</span> more for {tierInfo.nextFee === 0 ? "FREE" : formatMoney(tierInfo.nextFee)} delivery!

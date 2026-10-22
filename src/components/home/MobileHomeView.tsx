@@ -41,12 +41,12 @@ export function MobileHomeView({
           <div className="min-w-0">
             <div className="flex items-center gap-1">
               <span className="text-[11px] font-bold uppercase text-primary tracking-wider">
-                Evening Delivery Run
+                24-Hour Delivery
               </span>
               <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
             </div>
             <p className="text-xs font-semibold text-foreground truncate">
-              Slot: 7:00 PM – 10:00 PM • Cutoff 5:00 PM
+              Delivered within 24 hours of ordering
             </p>
           </div>
         </div>

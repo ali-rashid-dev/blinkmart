@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { getAvailableDeliveryDates, canCancel, type Order } from "../lib/orders/types";
+import { getDeliveryDeadline, canCancel, type Order } from "../lib/orders/types";
 import {
   calculateDeliveryFee,
   calculatePlatformFee,
@@ -30,37 +30,11 @@ describe("Order Module Service & Utilities", () => {
     assert.equal(orderable[1]?.quantity, 1);
   });
 
-  it("computes delivery date options before 5:00 PM cutoff", () => {
-    // Local date 2026-08-19 14:00 (2:00 PM)
-    const mockTimeBeforeCutoff = new Date(2026, 7, 19, 14, 0, 0);
-    const options = getAvailableDeliveryDates(mockTimeBeforeCutoff);
+  it("sets delivery deadline exactly 24 hours after order placement", () => {
+    const placedAt = new Date("2026-08-19T14:00:00.000Z");
+    const deadline = getDeliveryDeadline(placedAt);
 
-    assert.equal(options.length, 2);
-    assert.equal(options[0]?.isDefault, true);
-    assert.equal(options[0]?.dateIso, "2026-08-19");
-    assert.match(options[0]?.label || "", /Today/);
-    assert.equal(options[1]?.dateIso, "2026-08-20");
-    assert.match(options[1]?.label || "", /Tomorrow/);
-  });
-
-  it("computes delivery date options after 5:00 PM cutoff", () => {
-    // Local date 2026-08-19 18:00 (6:00 PM)
-    const mockTimeAfterCutoff = new Date(2026, 7, 19, 18, 0, 0);
-    const options = getAvailableDeliveryDates(mockTimeAfterCutoff);
-
-    assert.equal(options.length, 2);
-    assert.equal(options[0]?.isDefault, true);
-    assert.equal(options[0]?.dateIso, "2026-08-20");
-    assert.match(options[0]?.label || "", /Tomorrow/);
-  });
-
-  it("treats the 5:00 PM cutoff as inclusive", () => {
-    const mockTimeAtCutoff = new Date(2026, 7, 19, 17, 0, 0);
-    const options = getAvailableDeliveryDates(mockTimeAtCutoff);
-
-    assert.equal(options.length, 2);
-    assert.equal(options[0]?.dateIso, "2026-08-20");
-    assert.equal(options[0]?.isDefault, true);
+    assert.equal(deadline.toISOString(), "2026-08-20T14:00:00.000Z");
   });
 
   it("trims address fields before validation and rejects whitespace-only values", () => {
@@ -72,7 +46,6 @@ describe("Order Module Service & Utilities", () => {
       area: "  Central  ",
       city: "  Lahore  ",
       postal: " 54000 ",
-      deliveryDate: "2026-08-20",
     };
 
     const parsed = placeOrderSchema.safeParse(validData);
@@ -125,8 +98,8 @@ describe("Order Module Service & Utilities", () => {
       code: "ORD-123456",
       status: "placed",
       placedAt: new Date().toISOString(),
-      deliveryDate: "2026-08-19",
-      deliverySlot: "7:00 PM – 10:00 PM",
+      deliveryDate: "2026-08-20T14:00:00.000Z",
+      deliverySlot: "Within 24 hours",
       subtotal: 40,
       deliveryFee: 100,
       platformFee: 20,
@@ -162,7 +135,6 @@ describe("Order Module Service & Utilities", () => {
       city: "Springfield",
       postal: "90210",
       notes: "Leave near front door",
-      deliveryDate: "2026-08-20",
     };
 
     const res = placeOrderSchema.safeParse(validData);
@@ -178,7 +150,6 @@ describe("Order Module Service & Utilities", () => {
       area: "",
       city: "",
       postal: "",
-      deliveryDate: "",
     };
 
     const res = placeOrderSchema.safeParse(invalidData);
@@ -317,4 +288,3 @@ describe("Order Module Service & Utilities", () => {
     });
   });
 });
-

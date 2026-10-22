@@ -10,7 +10,7 @@ export function FinalCta() {
           {/* Badge */}
           <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-primary">
             <Sparkles className="size-3.5" />
-            Guaranteed Evening Delivery
+            Delivery within 24 hours
           </span>
 
           {/* Heading */}
@@ -24,7 +24,7 @@ export function FinalCta() {
           {/* Description */}
           <p className="mt-4 max-w-lg text-sm leading-relaxed text-secondary-foreground/70 sm:text-base">
             Shop top-quality packaged groceries, weekly staples &amp; monthly pantry
-            stock-ups delivered straight to your door in our 7:00 PM – 10:00 PM evening slot.
+            stock-ups delivered straight to your door within 24 hours of ordering.
           </p>
 
           {/* CTA */}

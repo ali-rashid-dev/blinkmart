@@ -125,7 +125,7 @@ export function CartSummary({
         {tierInfo && (
           <p className="rounded-lg bg-accent/60 p-2 text-xs text-muted-foreground">
             {tierInfo.isFree ? (
-              <span className="font-medium text-success">🎉 You qualify for FREE evening delivery!</span>
+              <span className="font-medium text-success">🎉 You qualify for FREE delivery!</span>
             ) : (
               <>
                 Add <span className="font-semibold text-foreground">{formatPrice(tierInfo.amountNeeded)}</span> more for {tierInfo.nextFee === 0 ? "FREE" : formatPrice(tierInfo.nextFee)} delivery!

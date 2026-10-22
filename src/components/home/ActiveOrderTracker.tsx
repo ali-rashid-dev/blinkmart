@@ -4,7 +4,14 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { CheckCircle2, ChevronRight, Clock, PackageCheck, ShoppingBag, Truck } from "lucide-react";
 import { ordersStore, useOrdersState } from "@/lib/orders/store";
-import { LIFECYCLE, STATUS_LABEL, STATUS_HINT, type OrderStatus } from "@/lib/orders/types";
+import {
+  DELIVERY_TIMEFRAME,
+  formatDeliveryDeadline,
+  LIFECYCLE,
+  STATUS_LABEL,
+  STATUS_HINT,
+  type OrderStatus,
+} from "@/lib/orders/types";
 import { cn } from "@/lib/utils";
 
 const STATUS_ICONS: Record<OrderStatus, typeof PackageCheck> = {
@@ -109,7 +116,12 @@ export function ActiveOrderTracker() {
         <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/40">
           <span className="flex items-center gap-1">
             <Clock className="size-3.5 text-primary" />
-            Scheduled Window: <strong className="text-foreground font-semibold">{activeOrder.deliverySlot || "7:00 PM – 10:00 PM"}</strong>
+            {activeOrder.deliverySlot === DELIVERY_TIMEFRAME.label ? "Deliver by" : "Scheduled"}{" "}
+            <strong className="text-foreground font-semibold">
+              {activeOrder.deliverySlot === DELIVERY_TIMEFRAME.label
+                ? formatDeliveryDeadline(activeOrder.deliveryDate)
+                : activeOrder.deliverySlot}
+            </strong>
           </span>
           <span>
             {activeOrder.items.length} {activeOrder.items.length === 1 ? "item" : "items"} • Rs {Math.round(activeOrder.total)}

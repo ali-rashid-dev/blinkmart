@@ -3,7 +3,7 @@
 import {
   Flame,
   Layout,
-  Moon,
+  Clock,
   Sliders,
   Package,
   Power,
@@ -16,8 +16,6 @@ interface HomePageSettings {
   heroCtaText: string;
   heroCtaLink: string;
   heroImageUrl: string;
-  deliverySlotLabel: string;
-  cutoffHour: number;
   freeDeliveryThreshold: number;
   showDealOfTheDay: boolean;
   dealBadgeText: string;
@@ -31,13 +29,11 @@ interface HomePageSettings {
 
 const DEFAULT_SETTINGS: HomePageSettings = {
   heroTitle: "Quality packaged groceries,",
-  heroHighlight: "delivered tonight.",
-  heroSubtitle: "Flour, pulses, cooking oils, spices, tea, snacks, and daily household essentials — delivered in our guaranteed evening slot.",
+  heroHighlight: "delivered within 24 hours.",
+  heroSubtitle: "Flour, pulses, cooking oils, spices, tea, snacks, and daily household essentials — delivered within 24 hours.",
   heroCtaText: "Explore Market",
   heroCtaLink: "/products",
   heroImageUrl: "https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=1600&auto=format&fit=crop&q=80",
-  deliverySlotLabel: "7:00 PM – 10:00 PM",
-  cutoffHour: 17,
   freeDeliveryThreshold: 3000,
   showDealOfTheDay: true,
   dealBadgeText: "20% OFF Daily Offer",
@@ -66,7 +62,7 @@ export default function AdminHomepageControlPage() {
             </h1>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage hero banners, delivery slot rules, flash deal of the day, and promotional sections for desktop &amp; mobile shoppers.
+            Manage hero banners, delivery promise, flash deal of the day, and promotional sections for desktop &amp; mobile shoppers.
           </p>
         </div>
 
@@ -145,40 +141,23 @@ export default function AdminHomepageControlPage() {
           </div>
         </div>
 
-        {/* Section 2: Delivery Slot & Cutoff Rules */}
+        {/* Section 2: Delivery Promise */}
         <div className="rounded-2xl border border-border bg-card p-6 shadow-xs space-y-4">
           <div className="flex items-center gap-2 border-b border-border/60 pb-3">
-            <Moon className="size-5 text-primary" />
+            <Clock className="size-5 text-primary" />
             <h2 className="font-display text-lg font-bold text-foreground">
-              Evening Delivery Window &amp; Cutoff Rules
+              Delivery within 24 hours
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">
-                Delivery Window Label
+                Delivery Promise
               </label>
-              <input
-                type="text"
-                value={settings.deliverySlotLabel}
-                readOnly
-                className="w-full rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">
-                Order Cutoff Hour (24h format, e.g. 17 = 5 PM)
-              </label>
-              <input
-                type="number"
-                min={0}
-                max={23}
-                value={settings.cutoffHour}
-                readOnly
-                className="w-full rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50"
-              />
+              <p className="rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground">
+                Within 24 hours of order placement. Orders accepted anytime.
+              </p>
             </div>
 
             <div>

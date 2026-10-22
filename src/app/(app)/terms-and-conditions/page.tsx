@@ -5,7 +5,7 @@ import { FileText, Shield, Scale, Clock, Truck, Lock } from "lucide-react";
 export const metadata: Metadata = {
   title: "Terms & Conditions — kitcomart Grocery Delivery Faisalabad",
   description:
-    "Read the terms and conditions for ordering groceries, cutoff times, delivery fee tiers, and refunds with kitcomart in Faisalabad.",
+    "Read the terms and conditions for ordering groceries, delivery within 24 hours, delivery fee tiers, and refunds with kitcomart in Faisalabad.",
 };
 
 export default function TermsAndConditionsPage() {
@@ -31,7 +31,7 @@ export default function TermsAndConditionsPage() {
         <ol className="list-decimal list-inside space-y-1 font-medium text-foreground">
           <li>Acceptance of Terms</li>
           <li>Service Scope &amp; Faisalabad Deliveries</li>
-          <li>Order Cutoff Times &amp; Delivery Windows</li>
+          <li>Delivery Timing</li>
           <li>Delivery Fee Structure &amp; Platform Fees</li>
           <li>Product Pricing &amp; Fresh Weight Variances</li>
           <li>Cancellations, Quality Guarantee &amp; Refunds</li>
@@ -51,14 +51,14 @@ export default function TermsAndConditionsPage() {
         <section className="flex flex-col gap-2">
           <h2 className="text-lg font-bold text-foreground font-display">2. Service Scope &amp; Faisalabad Deliveries</h2>
           <p>
-            KitcoMart operates an evening grocery delivery service serving selected residential and commercial zones across Faisalabad, Pakistan. We reserve the right to restrict delivery to designated postal sectors (including Kohinoor City, D-Ground, Canal Road, People's Colony, Madina Town, Susan Road, and neighboring areas).
+            KitcoMart provides grocery delivery to selected residential and commercial zones across Faisalabad, Pakistan. We reserve the right to restrict delivery to designated postal sectors (including Kohinoor City, D-Ground, Canal Road, People's Colony, Madina Town, Susan Road, and neighboring areas).
           </p>
         </section>
 
         <section className="flex flex-col gap-2">
-          <h2 className="text-lg font-bold text-foreground font-display">3. Order Cutoff Times &amp; Delivery Windows</h2>
+          <h2 className="text-lg font-bold text-foreground font-display">3. Delivery Timing</h2>
           <p>
-            Standard orders placed before <strong>5:00 PM PKT</strong> qualify for same-day evening delivery between <strong>7:00 PM and 10:00 PM</strong>. Orders confirmed after 5:00 PM PKT will automatically be assigned to the next evening’s delivery window.
+            Orders may be placed at any time and are due to be delivered within <strong>24 hours of placement</strong>. There is no daily cutoff or fixed delivery window.
           </p>
         </section>
 
@@ -112,7 +112,7 @@ export default function TermsAndConditionsPage() {
         <section className="flex flex-col gap-2">
           <h2 className="text-lg font-bold text-foreground font-display">6. Cancellations, Quality Guarantee &amp; Refunds</h2>
           <p>
-            Orders can be canceled free of charge prior to 5:00 PM PKT on the day of delivery. If an item delivered is damaged or defective, notify us within 24 hours for a full replacement.
+            Orders can be canceled free of charge before they are marked out for delivery. If an item delivered is damaged or defective, notify us within 24 hours for a full replacement.
           </p>
         </section>
 

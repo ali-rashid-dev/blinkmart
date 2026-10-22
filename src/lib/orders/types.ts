@@ -1,4 +1,4 @@
-import { format, parseISO, isBefore, addDays } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 export type OrderStatus =
   | "placed"
@@ -29,16 +29,14 @@ export const STATUS_HINT: Record<OrderStatus, string> = {
   placed: "We received your order and are processing it.",
   confirmed: "Store confirmed your order and items are being assigned.",
   packed: "Items have been picked and carefully packed for delivery.",
-  out_for_delivery: "Your basket is on its way in tonight's 7:00 PM – 10:00 PM delivery run.",
-  delivered: "Delivered safely to your address during the evening window.",
+  out_for_delivery: "Your basket is on its way to your address.",
+  delivered: "Your order has been delivered safely to your address.",
   cancelled: "Order was cancelled.",
 };
 
-export const DELIVERY_WINDOW = {
-  start: "19:00",
-  end: "22:00",
-  label: "7:00 PM – 10:00 PM",
-  cutoffHour: 17, // 5:00 PM
+export const DELIVERY_TIMEFRAME = {
+  hours: 24,
+  label: "Within 24 hours",
 };
 
 export interface OrderAddress {
@@ -116,52 +114,14 @@ export function formatDeliveryDate(dateString: string): string {
   }
 }
 
-export interface DeliveryDateOption {
-  dateIso: string;
-  label: string; // e.g. "Today, Aug 19" or "Tomorrow, Aug 20"
-  isDefault: boolean;
+export function getDeliveryDeadline(now: Date = new Date()): Date {
+  return new Date(now.getTime() + DELIVERY_TIMEFRAME.hours * 60 * 60 * 1000);
 }
 
-/**
- * Returns available delivery dates for the fixed 7:00 PM – 10:00 PM window.
- * Cutoff is 5:00 PM (17:00).
- * If now < 5:00 PM, today is available and default.
- * If now >= 5:00 PM, today is past cutoff, so tomorrow is the earliest date available.
- */
-export function getAvailableDeliveryDates(now: Date = new Date()): DeliveryDateOption[] {
-  // Build an exact cutoff at cutoffHour:00:00.000 in local time
-  const cutoff = new Date(now);
-  cutoff.setHours(DELIVERY_WINDOW.cutoffHour, 0, 0, 0);
-  const pastCutoff = !isBefore(now, cutoff);
-
-  const options: DeliveryDateOption[] = [];
-
-  if (!pastCutoff) {
-    options.push({
-      dateIso: format(now, "yyyy-MM-dd"),
-      label: `Today, ${format(now, "MMM d")}`,
-      isDefault: true,
-    });
-    const tomorrow = addDays(now, 1);
-    options.push({
-      dateIso: format(tomorrow, "yyyy-MM-dd"),
-      label: `Tomorrow, ${format(tomorrow, "MMM d")}`,
-      isDefault: false,
-    });
-  } else {
-    const tomorrow = addDays(now, 1);
-    options.push({
-      dateIso: format(tomorrow, "yyyy-MM-dd"),
-      label: `Tomorrow, ${format(tomorrow, "MMM d")}`,
-      isDefault: true,
-    });
-    const dayAfter = addDays(now, 2);
-    options.push({
-      dateIso: format(dayAfter, "yyyy-MM-dd"),
-      label: format(dayAfter, "EEEE, MMM d"),
-      isDefault: false,
-    });
+export function formatDeliveryDeadline(isoString: string): string {
+  try {
+    return format(parseISO(isoString), "MMM d, yyyy 'by' h:mm a");
+  } catch {
+    return isoString;
   }
-
-  return options;
 }
