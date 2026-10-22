@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { MarketHero } from "./MarketHero";
 import { CategoryStrip } from "./CategoryStrip";
 import { PromoBanner } from "./PromoBanner";
@@ -16,11 +16,20 @@ import { Footer } from "@/components/layout/Footer";
 import type { HomeCategory } from "./CategoryStrip";
 import type { CustomerProduct } from "@/components/products/data";
 
+const subscribeToViewport = (onChange: () => void) => {
+  window.addEventListener("resize", onChange);
+  return () => window.removeEventListener("resize", onChange);
+};
+
+const getIsMobile = () => window.innerWidth < 1024;
+const getServerIsMobile = () => false;
+
 interface HomeLayoutProps {
   categories: HomeCategory[];
   products: CustomerProduct[];
-  bestSellers: CustomerProduct[];
-  freshArrivals: CustomerProduct[];
+  recentProducts: CustomerProduct[];
+  moreProducts: CustomerProduct[];
+  productsFailedToLoad: boolean;
   dealProduct: CustomerProduct | null;
   dealCompareAtPrice: number | null;
 }
@@ -28,35 +37,20 @@ interface HomeLayoutProps {
 export function HomeLayout({
   categories,
   products,
-  bestSellers,
-  freshArrivals,
+  recentProducts,
+  moreProducts,
+  productsFailedToLoad,
   dealProduct: serverDealProduct,
   dealCompareAtPrice,
 }: HomeLayoutProps) {
-  const [isMobile, setIsMobile] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    setIsMobile(window.innerWidth < 1024);
-
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  if (isMobile === null) {
-    return null;
-  }
+  const isMobile = useSyncExternalStore(subscribeToViewport, getIsMobile, getServerIsMobile);
 
   if (isMobile) {
     return (
       <MobileHomeView
         categories={categories}
         products={products}
-        bestSellers={bestSellers}
-        dealProduct={serverDealProduct}
+        productsFailedToLoad={productsFailedToLoad}
       />
     );
   }
@@ -74,17 +68,19 @@ export function HomeLayout({
       <CategoryStrip categories={categories} />
       <PromoBanner />
       <ProductRow
-        title="Weekly Staples & Best Sellers"
-        subtitle="Customer favorite packaged groceries, pantry staples & household items."
-        products={bestSellers}
+        title="Recently added"
+        subtitle="Browse the latest products added to the market."
+        products={recentProducts}
         ctaLabel="View All Products"
+        error={productsFailedToLoad}
       />
       {serverDealProduct && <DealOfTheDay product={serverDealProduct} compareAtPrice={dealCompareAtPrice} />}
       <ProductRow
-        title="Monthly Stock-Up Essentials"
-        subtitle="Bulk pantry items, flour, rice, oils, and restocked shelves."
-        products={freshArrivals.length > 0 ? freshArrivals : bestSellers}
+        title="More to explore"
+        subtitle="Continue browsing more products from the market."
+        products={moreProducts}
         ctaLabel="See All Items"
+        error={productsFailedToLoad}
       />
       <WhyShopWithUs />
       <FinalCta />

@@ -1,42 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
   ChevronRight,
-  Flame,
-  Leaf,
   Moon,
   Search,
-  ShieldCheck,
   ShoppingBag,
-  Sparkles,
-  ImageIcon,
 } from "lucide-react";
 
 import { DeliverySlotBanner } from "./DeliverySlotBanner";
 import { ActiveOrderTracker } from "./ActiveOrderTracker";
 import { RepeatOrderCard } from "./RepeatOrderCard";
 import { Footer } from "@/components/layout/Footer";
-import { AddToCartButton } from "@/components/products/AddToCartButton";
+import { ProductCard } from "@/components/products/ProductCard";
 import type { CustomerProduct } from "@/components/products/data";
 import type { HomeCategory } from "./CategoryStrip";
 
 interface MobileHomeViewProps {
   categories: HomeCategory[];
   products: CustomerProduct[];
-  bestSellers?: CustomerProduct[];
-  dealProduct?: CustomerProduct | null;
+  productsFailedToLoad: boolean;
 }
 
 export function MobileHomeView({
   categories = [],
   products = [],
-  bestSellers = [],
-  dealProduct,
+  productsFailedToLoad,
 }: MobileHomeViewProps) {
-  const displayProducts = bestSellers.length > 0 ? bestSellers : products;
+  const displayProducts = products;
 
   return (
     <div className="lg:hidden flex flex-col gap-5 px-4 pt-4 pb-8">
@@ -61,7 +53,7 @@ export function MobileHomeView({
         <Link
           href="/products"
           className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground hover:text-foreground"
-          aria-label="Search items"
+          aria-label="Browse and search products"
         >
           <Search className="size-4" />
         </Link>
@@ -92,7 +84,7 @@ export function MobileHomeView({
         </div>
 
         <div className="flex items-start gap-3 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4">
-          {categories.map((cat) => (
+          {categories.length > 0 ? categories.map((cat) => (
             <Link
               key={cat.id}
               href={`/products?category=${encodeURIComponent(cat.slug)}`}
@@ -114,132 +106,42 @@ export function MobileHomeView({
                 {cat.name}
               </span>
             </Link>
-          ))}
+          )) : (
+            <Link href="/products" className="rounded-lg border border-border bg-card px-4 py-3 text-sm font-semibold text-primary">
+              Browse all products
+            </Link>
+          )}
         </div>
       </div>
 
-      {/* ── 7. Flash Deal Spotlight ────────────────────────────────── */}
-      {dealProduct && (
-        <div className="overflow-hidden rounded-2xl border border-destructive/30 bg-gradient-to-br from-card via-card to-destructive/5 p-4 shadow-soft">
-          <div className="flex items-center justify-between border-b border-border/50 pb-2 mb-3">
-            <span className="inline-flex items-center gap-1 rounded-full bg-destructive text-destructive-foreground px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
-              <Flame className="size-3" /> Flash Deal Offer
-            </span>
-            <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
-              <Moon className="size-3 text-primary" /> Tonight 7:00 PM – 10:00 PM
-            </span>
-          </div>
-
-          <div className="flex gap-3 items-center">
-            <div className="relative size-24 shrink-0 rounded-xl overflow-hidden bg-accent/60">
-              {dealProduct.imageUrl ? (
-                <Image
-                  src={dealProduct.imageUrl}
-                  alt={dealProduct.name}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center text-muted-foreground/40">
-                  <ImageIcon className="size-8" />
-                </div>
-              )}
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <span className="text-[10px] font-bold uppercase text-primary tracking-wider">
-                {dealProduct.categoryName || "Fresh Grocery"}
-              </span>
-              <h3 className="font-display text-base font-bold text-foreground truncate">
-                {dealProduct.name}
-              </h3>
-
-              <div className="flex items-baseline gap-2 mt-1">
-                <span className="font-display text-lg font-bold text-foreground">
-                  Rs {Math.round(dealProduct.price)}
-                </span>
-                <span className="text-xs text-muted-foreground line-through">
-                  Rs {Math.round(dealProduct.price / 0.8)}
-                </span>
-              </div>
-
-              <div className="mt-2 flex items-center gap-2">
-                <AddToCartButton
-                  productId={dealProduct.id}
-                  quantity={1}
-                  label={dealProduct.name}
-                  size="md"
-                  className="w-full text-xs py-1.5 h-8"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── 8. Best Selling Products Grid ───────────────────────────── */}
+      {/* ── 8. Products ──────────────────────────────────────────────── */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-bold text-foreground flex items-center gap-1.5">
-            <Flame className="size-4 text-amber-500 fill-amber-500/20" />
-            Best Selling Products
+            <ShoppingBag className="size-4 text-primary" />
+            Browse products
           </h2>
           <span className="text-xs text-muted-foreground">
-            {displayProducts.length} items
+            {displayProducts.length} {displayProducts.length === 1 ? "product" : "products"}
           </span>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          {displayProducts.map((prod) => (
-            <div
-              key={prod.id}
-              className="flex flex-col justify-between rounded-2xl border border-border/80 bg-card p-3 shadow-xs transition-shadow hover:shadow-soft"
-            >
-              <div>
-                <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-accent/50 mb-2">
-                  {prod.imageUrl ? (
-                    <Image
-                      src={prod.imageUrl}
-                      alt={prod.name}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-muted-foreground/30">
-                      <ShoppingBag className="size-8" />
-                    </div>
-                  )}
-
-                  <span className="absolute left-1.5 top-1.5 rounded-md bg-background/90 backdrop-blur-xs px-1.5 py-0.5 text-[9px] font-bold text-foreground shadow-xs">
-                    {prod.categoryName || "1 Pack"}
-                  </span>
-                </div>
-
-                <h3 className="text-xs font-bold text-foreground line-clamp-2 leading-tight">
-                  {prod.name}
-                </h3>
-              </div>
-
-              <div className="mt-3 pt-2 border-t border-border/50 flex flex-col gap-2">
-                <div className="flex items-baseline justify-between">
-                  <span className="font-display text-sm font-bold text-foreground">
-                    Rs {Math.round(prod.price)}
-                  </span>
-                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
-                    In Stock
-                  </span>
-                </div>
-
-                <AddToCartButton
-                  productId={prod.id}
-                  quantity={1}
-                  label={prod.name}
-                  size="md"
-                  className="w-full text-xs h-8 rounded-xl font-bold"
-                />
-              </div>
+          {productsFailedToLoad ? (
+            <div className="col-span-full rounded-xl border border-border bg-card px-4 py-10 text-center">
+              <p className="font-semibold text-foreground">Products are temporarily unavailable</p>
+              <p className="mt-1 text-sm text-muted-foreground">Please try again shortly.</p>
+              <Link href="/products" className="mt-3 inline-flex text-sm font-semibold text-primary">Browse all products</Link>
             </div>
-          ))}
+          ) : displayProducts.length > 0 ? (
+            displayProducts.map((product) => <ProductCard key={product.id} product={product} />)
+          ) : (
+            <div className="col-span-full rounded-xl border border-border bg-card px-4 py-10 text-center">
+              <ShoppingBag className="mx-auto size-8 text-muted-foreground" aria-hidden="true" />
+              <p className="mt-3 font-semibold text-foreground">No products to show yet</p>
+              <p className="mt-1 text-sm text-muted-foreground">Please check back soon.</p>
+            </div>
+          )}
         </div>
       </div>
 

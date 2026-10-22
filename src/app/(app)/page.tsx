@@ -20,6 +20,7 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   let dbCategories: Awaited<ReturnType<typeof listCustomerCategories>> = [];
   let dbProducts: Awaited<ReturnType<typeof listCustomerProducts>> = [];
+  let productsFailedToLoad = false;
 
   try {
     dbCategories = await listCustomerCategories({});
@@ -31,18 +32,12 @@ export default async function HomePage() {
     dbProducts = await listCustomerProducts({ take: 30 });
   } catch (error) {
     console.error("Error loading products for home page:", error);
+    productsFailedToLoad = true;
   }
 
   const allCustomerProducts = dbProducts.map(toCustomerProduct);
-  const bestSellers = allCustomerProducts.slice(0, 10);
-  let freshArrivals = allCustomerProducts.slice(10, 20);
-  if (freshArrivals.length < 10 && allCustomerProducts.length > 0) {
-    const remainingNeeded = 10 - freshArrivals.length;
-    const padding = allCustomerProducts.slice(0, remainingNeeded);
-    freshArrivals = [...freshArrivals, ...padding].slice(0, 10);
-  }
-
-  const dealProduct = null;
+  const recentProducts = allCustomerProducts.slice(0, 10);
+  const moreProducts = allCustomerProducts.slice(10, 20);
 
   return (
     <>
@@ -50,9 +45,10 @@ export default async function HomePage() {
       <HomeLayout
         categories={dbCategories}
         products={allCustomerProducts}
-        bestSellers={bestSellers}
-        freshArrivals={freshArrivals}
-        dealProduct={dealProduct}
+        recentProducts={recentProducts}
+        moreProducts={moreProducts}
+        productsFailedToLoad={productsFailedToLoad}
+        dealProduct={null}
         dealCompareAtPrice={null}
       />
     </>

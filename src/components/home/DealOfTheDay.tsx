@@ -47,9 +47,9 @@ export function DealOfTheDay({ product, compareAtPrice }: DealOfTheDayProps) {
 
   const p = product;
   const soldOut = !p.enabled;
-  const originalPrice = compareAtPrice ?? (p.discountPercent > 0 ? p.price : Math.round(p.price / 0.8));
+  const originalPrice = compareAtPrice ?? (p.discountPercent > 0 ? p.price : null);
   const sellingPrice = p.effectivePrice;
-  const discountPercent = originalPrice > sellingPrice
+  const discountPercent = originalPrice !== null && originalPrice > sellingPrice
     ? Math.round(((originalPrice - sellingPrice) / originalPrice) * 100)
     : p.discountPercent;
   const imageSrc = getSupportedImageSrc(p.imageUrl);
@@ -98,7 +98,7 @@ export function DealOfTheDay({ product, compareAtPrice }: DealOfTheDayProps) {
 
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <span className="font-display text-3xl text-foreground">{formatCurrency(sellingPrice)}</span>
-            {originalPrice > sellingPrice && (
+            {originalPrice !== null && originalPrice > sellingPrice && (
               <span className="text-sm text-muted-foreground line-through">
                 {formatCurrency(originalPrice)}
               </span>
@@ -152,4 +152,3 @@ export function DealOfTheDay({ product, compareAtPrice }: DealOfTheDayProps) {
     </section>
   );
 }
-

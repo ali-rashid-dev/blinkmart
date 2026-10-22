@@ -30,7 +30,7 @@ export function ProductCard({
   return (
     <article
       className={cn(
-        "group animate-rise flex h-full overflow-hidden rounded-3xl border border-border bg-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)] focus-within:-translate-y-0.5",
+        "group animate-rise flex h-full overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)] focus-within:-translate-y-0.5",
         compact ? "items-center gap-3 p-3" : "flex-col",
       )}
     >

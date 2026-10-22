@@ -36,36 +36,41 @@ export function CategoryStrip({ categories = [] }: CategoryStripProps) {
         </Link>
       </div>
 
-      <ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
-        {categories.map((c) => (
-          <li key={c.id} className="flex flex-col items-center gap-3">
-            <Link
-              href={`/products?category=${encodeURIComponent(c.slug)}`}
-              className="group relative aspect-square w-full overflow-hidden rounded-2xl bg-card shadow-[var(--shadow-card)] ring-1 ring-border/60 transition-all duration-300 hover:-translate-y-1 hover:ring-primary/30 hover:shadow-[var(--shadow-soft)] flex items-center justify-center p-3"
-            >
-              {c.imageUrl ? (
-                <Image
-                  src={c.imageUrl}
-                  alt={c.name}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105 rounded-xl"
-                />
-              ) : (
-                <div className="flex flex-col items-center justify-center text-primary/70 group-hover:scale-110 transition-transform">
-                  <ShoppingBag className="size-8" />
-                </div>
-              )}
-            </Link>
-            <Link
-              href={`/products?category=${encodeURIComponent(c.slug)}`}
-              className="text-center text-sm font-semibold text-foreground hover:text-primary transition-colors line-clamp-1"
-            >
-              {c.name}
-            </Link>
-          </li>
-        ))}
-      </ul>
+      {categories.length > 0 ? (
+        <ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+          {categories.map((c) => (
+            <li key={c.id} className="flex flex-col items-center gap-3">
+              <Link
+                href={`/products?category=${encodeURIComponent(c.slug)}`}
+                className="group relative aspect-square w-full overflow-hidden rounded-xl bg-card shadow-[var(--shadow-card)] ring-1 ring-border/60 transition-all duration-300 hover:-translate-y-1 hover:ring-primary/30 hover:shadow-[var(--shadow-soft)] flex items-center justify-center p-3"
+              >
+                {c.imageUrl ? (
+                  <Image
+                    src={c.imageUrl}
+                    alt={c.name}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105 rounded-lg"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-primary/70 group-hover:scale-110 transition-transform">
+                    <ShoppingBag className="size-8" />
+                  </div>
+                )}
+              </Link>
+              <Link
+                href={`/products?category=${encodeURIComponent(c.slug)}`}
+                className="text-center text-sm font-semibold text-foreground hover:text-primary transition-colors line-clamp-1"
+              >
+                {c.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-8 rounded-xl border border-border bg-card px-5 py-8 text-center text-sm text-muted-foreground">
+          Categories are not available right now. You can still browse all products.
+        </p>
+      )}
     </section>
   );
 }
-

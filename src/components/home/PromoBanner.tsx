@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, ShoppingBasket } from "lucide-react";
 
 export function PromoBanner() {
   return (
@@ -16,14 +16,14 @@ export function PromoBanner() {
         <div className="relative flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="max-w-xl">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-foreground/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-secondary-foreground">
-              <Sparkles className="size-3" />
-              Limited time
+              <ShoppingBasket className="size-3" />
+              Everyday essentials
             </span>
             <h2 className="mt-3 font-display text-2xl text-secondary-foreground sm:text-4xl">
-              Fresh deals every day
+              Stock up, made simple
             </h2>
             <p className="mt-2 text-sm text-secondary-foreground/80 sm:text-base">
-              Save up to 30% on selected groceries, refreshed each morning.
+              Find pantry staples, cooking essentials, and household favorites in one place.
             </p>
           </div>
           <div className="flex items-center gap-4">
@@ -34,7 +34,7 @@ export function PromoBanner() {
               href="/products"
               className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-button)] transition-all duration-300 hover:brightness-105 active:scale-[0.98]"
             >
-              Shop Deals
+              Browse products
               <ArrowRight className="size-4" />
             </Link>
           </div>
@@ -43,4 +43,3 @@ export function PromoBanner() {
     </section>
   );
 }
-
