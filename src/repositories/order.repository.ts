@@ -29,6 +29,20 @@ function generateOrderCode(): string {
   return `ORD-${random}`;
 }
 
+async function restoreVariantStock(
+  tx: Prisma.TransactionClient,
+  items: Array<{ variantId: string | null; quantity: number }>
+): Promise<void> {
+  for (const item of items) {
+    if (item.variantId) {
+      await tx.productVariant.updateMany({
+        where: { id: item.variantId },
+        data: { stockQuantity: { increment: item.quantity } },
+      });
+    }
+  }
+}
+
 export async function createOrderInDb(params: {
   userId: string;
   cart: CartWithItems;
@@ -270,14 +284,7 @@ export async function cancelOrderInDb(
       );
     }
 
-    for (const item of existing.items) {
-      if (item.variantId) {
-        await tx.productVariant.update({
-          where: { id: item.variantId },
-          data: { stockQuantity: { increment: item.quantity } },
-        });
-      }
-    }
+    await restoreVariantStock(tx, existing.items);
 
     return tx.order.findUnique({
       where: { id: existing.id },
@@ -437,54 +444,61 @@ export async function updateAdminOrderStatusInDb(params: {
 }): Promise<OrderWithItems> {
   const { orderId, status, cancelReason, reinstate } = params;
 
-  const existing = await prisma.order.findUnique({
-    where: { id: orderId },
-  });
+  return prisma.$transaction(async (tx) => {
+    const existing = await tx.order.findUnique({
+      where: { id: orderId },
+      include: { items: { select: { variantId: true, quantity: true } } },
+    });
 
-  if (!existing) {
-    throw new Error(`Order "${orderId}" not found.`);
-  }
+    if (!existing) {
+      throw new Error(`Order "${orderId}" not found.`);
+    }
 
-  const data: Prisma.OrderUpdateInput = {
-    status,
-  };
+    const data: Prisma.OrderUpdateInput = {
+      status,
+    };
 
-  if (status === "CANCELLED") {
-    // Treat cancelReason as user-visible data; do not persist internal sentinels.
-    data.cancelReason = cancelReason || "Cancelled by store administrator";
-    data.cancelledAt = new Date();
-  } else if (existing.status === "CANCELLED") {
-    // Any transition away from CANCELLED should clear cancellation metadata
-    data.cancelReason = null;
-    data.cancelledAt = null;
-  } else {
-    data.cancelReason = existing.cancelReason ?? null;
-    data.cancelledAt = existing.cancelledAt ?? null;
-  }
+    if (status === "CANCELLED") {
+      // Treat cancelReason as user-visible data; do not persist internal sentinels.
+      data.cancelReason = cancelReason || "Cancelled by store administrator";
+      data.cancelledAt = existing.status === "CANCELLED" ? existing.cancelledAt : new Date();
+    } else if (existing.status === "CANCELLED") {
+      // Any transition away from CANCELLED should clear cancellation metadata
+      data.cancelReason = null;
+      data.cancelledAt = null;
+    } else {
+      data.cancelReason = existing.cancelReason ?? null;
+      data.cancelledAt = existing.cancelledAt ?? null;
+    }
 
-  const updateResult = await prisma.order.updateMany({
-    where: { id: orderId, status: existing.status },
-    data,
-  });
+    const updateResult = await tx.order.updateMany({
+      where: { id: orderId, status: existing.status },
+      data,
+    });
 
-  if (updateResult.count === 0) {
-    throw new Error(`Order "${orderId}" was updated by another administrator.`);
-  }
+    if (updateResult.count === 0) {
+      throw new Error(`Order "${orderId}" was updated by another administrator.`);
+    }
 
-  return prisma.order.findUniqueOrThrow({
-    where: { id: orderId },
-    include: {
-      items: {
-        include: {
-          product: {
-            include: {
-              brand: true,
-              category: true,
+    if (status === "CANCELLED" && existing.status !== "CANCELLED") {
+      await restoreVariantStock(tx, existing.items);
+    }
+
+    return tx.order.findUniqueOrThrow({
+      where: { id: orderId },
+      include: {
+        items: {
+          include: {
+            product: {
+              include: {
+                brand: true,
+                category: true,
+              },
             },
           },
         },
       },
-    },
+    });
   });
 }
 

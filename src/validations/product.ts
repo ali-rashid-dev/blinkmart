@@ -54,7 +54,7 @@ const productVariantSchema = z.object({
     variant.salePrice >= 0 &&
     variant.salePrice <= 10000000 &&
     variant.salePrice < variant.price &&
-    Math.round(variant.salePrice * 100) === variant.salePrice * 100
+    Math.abs(variant.salePrice * 100 - Math.round(variant.salePrice * 100)) < 1e-8
   ),
   { message: "Sale price must be between Rs 0 and the regular price (up to 2 decimal places)", path: ["salePrice"] }
 );

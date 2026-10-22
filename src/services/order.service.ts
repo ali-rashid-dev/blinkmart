@@ -20,7 +20,7 @@ export { OrderCannotCancelError, EmptyCartError, InsufficientStockError, Invalid
 import type { OrderStatus as PrismaOrderStatus } from "@/generated/prisma/client";
 import { OrderStatus as PrismaOrderStatusEnum } from "@/generated/prisma/enums";
 import { findCartByIdentifier } from "@/repositories/cart.repository";
-import { addItemToCart, VariantUnavailableError } from "@/services/cart.service";
+import { addItemToCart, InvalidQuantityError, VariantUnavailableError } from "@/services/cart.service";
 import {
   placeOrderSchema,
   cancelOrderSchema,
@@ -261,7 +261,7 @@ export async function reorderUserOrder(
         });
         itemCount += item.quantity;
       } catch (error) {
-        if (!(error instanceof VariantUnavailableError)) throw error;
+        if (!(error instanceof VariantUnavailableError) && !(error instanceof InvalidQuantityError)) throw error;
       }
     }
   }

@@ -52,6 +52,10 @@ export type CustomerProductVariant = {
 /** Legacy alias for ProductCard — keep components working */
 export type Product = CustomerProduct;
 
+export function getVariantEffectivePrice(price: number, salePrice: number | null): number {
+  return salePrice !== null && salePrice > 0 && salePrice < price ? salePrice : price;
+}
+
 /** Convert a DB row to a CustomerProduct DTO */
 export function toCustomerProduct(p: ProductWithBrandAndCategory): CustomerProduct {
   const variants = p.variants.map((variant) => {
@@ -66,7 +70,7 @@ export function toCustomerProduct(p: ProductWithBrandAndCategory): CustomerProdu
       attributes,
       price,
       salePrice,
-      effectivePrice: salePrice !== null && salePrice < price ? salePrice : price,
+      effectivePrice: getVariantEffectivePrice(price, salePrice),
       stockQuantity: variant.stockQuantity,
       imageUrl: variant.imageUrl,
       isActive: variant.isActive,

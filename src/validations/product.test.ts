@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { createProductSchema, updateProductSchema } from "./product";
+import { getVariantEffectivePrice } from "../components/products/data";
 
 describe("product sale price validation", () => {
   it("accepts decimal values and empty input when creating products", () => {
@@ -20,6 +21,12 @@ describe("product sale price validation", () => {
   });
 
   describe("product variant validation", () => {
+    it("treats a zero variant sale price as no sale", () => {
+      assert.equal(getVariantEffectivePrice(25, 0), 25);
+      assert.equal(getVariantEffectivePrice(25, 10), 10);
+      assert.equal(getVariantEffectivePrice(25, null), 25);
+    });
+
     const base = {
       name: "Cooking Oil",
       price: 100,
@@ -50,6 +57,15 @@ describe("product sale price validation", () => {
       if (result.success) {
         assert.equal(result.data.variants[0]?.sku, "OIL-1L");
         assert.equal(result.data.variants[1]?.salePrice, 250);
+      }
+
+      const decimalSale = structuredClone(base);
+      decimalSale.variants[0]!.price = 1.3;
+      decimalSale.variants[0]!.salePrice = 1.29;
+      const decimalResult = createProductSchema.safeParse(decimalSale);
+      assert.equal(decimalResult.success, true);
+      if (decimalResult.success) {
+        assert.equal(decimalResult.data.variants[0]?.salePrice, 1.29);
       }
     });
 
