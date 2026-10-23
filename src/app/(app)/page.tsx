@@ -5,13 +5,13 @@ import { listCustomerProducts } from "@/repositories/product.repository";
 import { toCustomerProduct } from "@/components/products/data";
 
 export const metadata: Metadata = {
-  title: "kitcomart — Weekly & Monthly Grocery Delivery",
+  title: "kitcomart — Grocery Essentials",
   description:
-    "Shop flour, grains, pulses, cooking oils, spices, tea, and monthly bulk pantry stock-ups. New orders are due within 24 hours.",
+    "Shop packaged groceries, pantry staples, beverages, snacks, personal care, and household essentials in one convenient place.",
   openGraph: {
-    title: "kitcomart — Weekly & Monthly Grocery Delivery",
+    title: "kitcomart — Grocery Essentials",
     description:
-      "Weekly staple essentials and monthly pantry stock-ups. New orders are due within 24 hours.",
+      "Shop packaged groceries, pantry staples, beverages, snacks, personal care, and household essentials in one convenient place.",
   },
 };
 
@@ -41,7 +41,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <h1 className="sr-only">kitcomart — Weekly &amp; Monthly Grocery Delivery</h1>
+      <h1 className="sr-only">kitcomart — Grocery Essentials</h1>
       <HomeLayout
         categories={dbCategories}
         products={allCustomerProducts}
