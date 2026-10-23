@@ -158,6 +158,7 @@ export function ProductsClient({
       return {
         id: c.id,
         label: c.name,
+        emoji: c.emoji,
       };
     });
   }, [rawCategories]);
@@ -183,6 +184,7 @@ export function ProductsClient({
       return {
         id: cat.id,
         label: cat.label,
+        emoji: cat.emoji,
         count,
       };
     });

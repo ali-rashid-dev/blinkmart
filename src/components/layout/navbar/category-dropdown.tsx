@@ -64,14 +64,18 @@ export function CategoryDropdown({ categories }: CategoryDropdownProps) {
           )}
         >
           <div className="p-1.5 space-y-0.5">
-            {categories.map(({ id, label, href }) => (
+            {categories.map(({ id, label, emoji, href }) => (
               <Link
                 key={id}
                 href={href}
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
               >
-                <Tag aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+                {emoji ? (
+                  <span aria-hidden="true" className="shrink-0 text-base">{emoji}</span>
+                ) : (
+                  <Tag aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+                )}
                 <span className="truncate">{label}</span>
               </Link>
             ))}

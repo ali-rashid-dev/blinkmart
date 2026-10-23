@@ -41,6 +41,7 @@ function CheckRow({
 export type CategoryCountItem = {
   id: string;
   label: string;
+  emoji?: string | null;
   count: number;
 };
 
@@ -101,7 +102,7 @@ export function FilterSidebar({
                     )}
                   >
                     <span aria-hidden="true" className="grid size-7 shrink-0 place-items-center rounded-lg bg-card text-secondary shadow-sm">
-                      <ShoppingBasket className="size-4" />
+                      {c.emoji || <ShoppingBasket className="size-4" />}
                     </span>
                     <span className="min-w-0 flex-1 truncate text-sm font-medium">{c.label}</span>
                     <span className="text-[11px] font-semibold text-muted-foreground">{c.count}</span>

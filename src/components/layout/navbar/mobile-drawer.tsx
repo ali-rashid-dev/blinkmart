@@ -96,7 +96,7 @@ export function MobileDrawer({ session, onLogout, categories }: MobileDrawerProp
             Shop by Category
           </p>
           <nav className="flex flex-col gap-0.5">
-            {categories.map(({ id, label, href }) => (
+            {categories.map(({ id, label, emoji, href }) => (
               <Link
                 key={id}
                 href={href}
@@ -104,7 +104,11 @@ export function MobileDrawer({ session, onLogout, categories }: MobileDrawerProp
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
               >
                 <div className="size-8 rounded-lg bg-primary/10 grid place-items-center shrink-0 text-primary">
-                  <Tag aria-hidden="true" className="size-4" />
+                  {emoji ? (
+                    <span aria-hidden="true" className="text-base">{emoji}</span>
+                  ) : (
+                    <Tag aria-hidden="true" className="size-4" />
+                  )}
                 </div>
                 <span className="truncate">{label}</span>
               </Link>
