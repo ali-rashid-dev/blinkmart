@@ -13,6 +13,7 @@ import { DeliverySlotBanner } from "./DeliverySlotBanner";
 import { ActiveOrderTracker } from "./ActiveOrderTracker";
 import { RepeatOrderCard } from "./RepeatOrderCard";
 import { ProductCard } from "@/components/products/ProductCard";
+import { SearchBar } from "@/components/layout/navbar/search-bar";
 import type { CustomerProduct } from "@/components/products/data";
 import type { HomeCategory } from "./CategoryStrip";
 
@@ -32,6 +33,8 @@ export function MobileHomeView({
   return (
     <div className="lg:hidden flex flex-col gap-5 px-4 pt-4 pb-8">
       {/* ── 1. Top Location & Slot Header ─────────────────────────── */}
+      <SearchBar className="h-12 rounded-xl bg-card shadow-xs" />
+
       <div className="flex items-center justify-between gap-2 rounded-xl bg-card p-3 border border-border/80 shadow-xs">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">

@@ -81,7 +81,7 @@ export function Navbar() {
             </div>
 
             {/* Search bar */}
-            <div className="flex-1 min-w-0 mx-2 lg:mx-4">
+            <div className="hidden flex-1 min-w-0 mx-2 lg:mx-4 lg:block">
               <SearchBar className="max-w-2xl mx-auto lg:mx-0" />
             </div>
 
