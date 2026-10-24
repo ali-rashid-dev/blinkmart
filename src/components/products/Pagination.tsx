@@ -27,19 +27,19 @@ export function Pagination({
   onPerPageChange: (n: number) => void;
 }) {
   const nav =
-    "grid size-9 place-items-center rounded-xl border border-border bg-card text-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40";
+    "grid size-8 sm:size-9 place-items-center rounded-xl border border-border bg-card text-sm text-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40";
 
   return (
     <nav
       aria-label="Pagination"
-      className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-card/60 p-3"
+      className="mb-20 flex flex-col items-center gap-3 rounded-2xl border border-border bg-card/60 p-3 sm:mb-0 sm:flex-row sm:flex-wrap sm:justify-between sm:gap-4"
     >
       <label className="flex items-center gap-2 text-xs text-muted-foreground">
         Rows per page
         <select
           value={perPage}
           onChange={(e) => onPerPageChange(Number(e.target.value))}
-          className="h-9 rounded-xl border border-border bg-card px-2 text-sm font-semibold text-foreground outline-none"
+          className="h-8 sm:h-9 rounded-xl border border-border bg-card px-2 text-sm font-semibold text-foreground outline-none"
         >
           {[8, 12, 16, 24].map((n) => (
             <option key={n} value={n}>
@@ -49,7 +49,7 @@ export function Pagination({
         </select>
       </label>
 
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-center">
         <button type="button" className={nav} onClick={() => onPageChange(1)} disabled={page === 1} aria-label="First page">
           <ChevronsLeft className="size-4" />
         </button>

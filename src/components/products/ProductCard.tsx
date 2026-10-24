@@ -3,10 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, ListPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AddToCartButton } from "./AddToCartButton";
 import { QuantitySelector } from "./QuantitySelector";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { cartStore, useCartState } from "@/lib/cart/store";
 import type { CustomerProduct } from "./data";
 import { getSupportedImageSrc } from "@/lib/image";
@@ -140,12 +148,65 @@ export function ProductCard({
         {/* Cart actions */}
         <div className="mt-auto flex items-center gap-2 pt-2">
           {product.variantsEnabled ? (
-            <Link
-              href={`/products/${product.slug}`}
-              className="inline-flex h-9 flex-1 items-center justify-center rounded-xl bg-primary px-3 text-sm font-semibold text-primary-foreground transition hover:brightness-105"
-            >
-              Choose options
-            </Link>
+            <Dialog>
+              <DialogTrigger
+                aria-label={`Choose options for ${product.name}`}
+                className="inline-flex size-10 flex-none items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground transition hover:brightness-105 sm:h-9 sm:flex-1 sm:px-3"
+              >
+                <ListPlus className="size-4 sm:hidden" aria-hidden="true" />
+                <span className="sr-only sm:not-sr-only">Choose options</span>
+              </DialogTrigger>
+              <DialogContent className="max-h-[85dvh] overflow-y-auto max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:left-0 max-sm:w-full max-sm:max-w-none max-sm:translate-x-0 max-sm:translate-y-0 max-sm:gap-4 max-sm:rounded-b-none max-sm:rounded-t-2xl max-sm:px-4 max-sm:pb-[calc(env(safe-area-inset-bottom)+1rem)] max-sm:pt-6">
+                <DialogHeader>
+                  <DialogTitle>Choose {product.name}</DialogTitle>
+                  <DialogDescription>
+                    Select an option to add it directly to your cart.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-3">
+                  {product.variants
+                    .filter((variant) => variant.isActive)
+                    .map((variant) => {
+                      const variantLabel = Object.entries(variant.attributes)
+                        .map(([key, value]) => `${key}: ${value}`)
+                        .join(" · ") || variant.sku;
+                      const unavailable = variant.stockQuantity < 1;
+
+                      return (
+                        <div
+                          key={variant.id}
+                          className="flex min-h-20 items-center justify-between gap-2 rounded-xl border border-border bg-card p-3 sm:gap-3"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium leading-snug text-foreground">{variantLabel}</p>
+                            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                              {unavailable ? "Out of stock" : `${variant.stockQuantity} available`}
+                            </p>
+                            <div className="mt-1 flex items-baseline gap-2">
+                              <span className="font-semibold text-foreground">
+                                {formatCurrency(variant.effectivePrice)}
+                              </span>
+                              {variant.effectivePrice < variant.price && (
+                                <span className="text-xs text-muted-foreground line-through">
+                                  {formatCurrency(variant.price)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <AddToCartButton
+                            className="size-11 flex-none sm:h-10 sm:flex-1"
+                            productId={product.id}
+                            variantId={variant.id}
+                            label={`${product.name} (${variantLabel})`}
+                            disabled={unavailable}
+                            responsive
+                          />
+                        </div>
+                      );
+                    })}
+                </div>
+              </DialogContent>
+            </Dialog>
           ) : qty > 0 && !soldOut ? (
             <QuantitySelector
               value={qty}

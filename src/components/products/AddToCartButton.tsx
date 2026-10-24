@@ -9,6 +9,7 @@ export function AddToCartButton({
   label,
   disabled,
   compact,
+  responsive = false,
   size = "md",
   productId,
   variantId,
@@ -19,6 +20,7 @@ export function AddToCartButton({
   label: string;
   disabled?: boolean;
   compact?: boolean;
+  responsive?: boolean;
   size?: "md" | "lg";
   productId?: string;
   variantId?: string;
@@ -54,6 +56,7 @@ export function AddToCartButton({
       className={cn(
         "group/atc relative inline-flex h-10 flex-1 items-center justify-center gap-2 overflow-hidden rounded-xl bg-primary px-3 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-button)] transition-all duration-300 hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none",
         compact ? "h-9" : size === "lg" ? "h-12 text-base" : "h-10",
+        responsive && "size-11 flex-none px-0 sm:h-10 sm:flex-1 sm:px-3",
         state === "done" && "bg-success shadow-none",
         state === "error" && "bg-destructive shadow-none",
         className
@@ -70,7 +73,7 @@ export function AddToCartButton({
       ) : (
         <ShoppingBasket className="size-4" />
       )}
-      <span className="relative">
+      <span className={cn("relative", responsive && "sr-only sm:not-sr-only")}>
         {state === "loading"
           ? "Adding…"
           : state === "done"
