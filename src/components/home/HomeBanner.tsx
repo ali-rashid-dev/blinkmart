@@ -98,7 +98,7 @@ function DefaultHero() {
 // ──────────────────────────────────────────────────────────
 function AdHero({ banner }: { banner: AdBannerRecord }) {
   const inner = (
-    <div className="relative overflow-hidden rounded-[2rem] border border-border/60">
+    <div className="relative aspect-[16/5] overflow-hidden rounded-[2rem] border border-border/60">
       <Image
         src={banner.imageUrl}
         alt={banner.altText}

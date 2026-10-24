@@ -149,6 +149,14 @@ export async function adminUpdateAdBanner(input: {
     const existing = await getAdBannerById(parsed.data.id);
     if (!existing) return buildError("BANNER_NOT_FOUND", "Banner not found.");
 
+    const startDate = parsed.data.startDate ?? existing.startDate;
+    const endDate = parsed.data.endDate ?? existing.endDate;
+    if (endDate <= startDate) {
+      return buildError("VALIDATION_ERROR", "Invalid input.", {
+        endDate: "End date must be after start date",
+      });
+    }
+
     const { id, ...rest } = parsed.data;
     const updated = await updateAdBanner(id, rest);
     revalidatePath("/");
@@ -203,8 +211,11 @@ export async function adminDeleteAdBanner(
     if (!existing) return buildError("BANNER_NOT_FOUND", "Banner not found.");
 
     await deleteAdBanner(id);
-    // Best-effort cleanup — don't block on failure
-    await deleteUploadThingFile(existing.imageUrl);
+    try {
+      await deleteUploadThingFile(existing.imageUrl);
+    } catch (error) {
+      console.error("[AdBanner] Failed to clean up banner image:", error);
+    }
 
     revalidatePath("/");
     revalidatePath("/admin/homepage");

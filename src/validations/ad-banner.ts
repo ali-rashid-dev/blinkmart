@@ -1,25 +1,27 @@
 import { z } from "zod";
 
+const httpsUrlSchema = (message: string) =>
+  z.string().trim().url({ protocol: /^https$/i, error: message });
+
+const uploadThingImageUrlSchema = z.string().trim().url({
+  protocol: /^https$/i,
+  hostname: /^(utfs\.io|[^.]+\.ufs\.sh)$/i,
+  error: "Image URL must be a valid HTTPS UploadThing URL",
+});
+
 // ──────────────────────────────────────────────────────────
 //  Create
 // ──────────────────────────────────────────────────────────
 export const createAdBannerSchema = z
   .object({
-    imageUrl: z
-      .string()
-      .trim()
-      .url("Image URL must be a valid URL")
-      .min(1, "Image URL is required"),
+    imageUrl: uploadThingImageUrlSchema.min(1, "Image URL is required"),
     altText: z
       .string()
       .trim()
       .max(200, "Alt text must be at most 200 characters")
       .optional()
       .default("Advertisement"),
-    linkUrl: z
-      .string()
-      .trim()
-      .url("Link must be a valid URL")
+    linkUrl: httpsUrlSchema("Link must be a valid URL")
       .or(z.literal(""))
       .nullable()
       .optional()
@@ -41,24 +43,17 @@ export type CreateAdBannerInput = z.infer<typeof createAdBannerSchema>;
 export const updateAdBannerSchema = z
   .object({
     id: z.string().min(1, "Banner ID is required"),
-    imageUrl: z
-      .string()
-      .trim()
-      .url("Image URL must be a valid URL")
-      .optional(),
+    imageUrl: uploadThingImageUrlSchema.optional(),
     altText: z
       .string()
       .trim()
       .max(200, "Alt text must be at most 200 characters")
       .optional(),
-    linkUrl: z
-      .string()
-      .trim()
-      .url("Link must be a valid URL")
+    linkUrl: httpsUrlSchema("Link must be a valid URL")
       .or(z.literal(""))
       .nullable()
       .optional()
-      .transform((v) => (v === "" ? null : v ?? null)),
+      .transform((v) => (v === "" ? null : v)),
     isEnabled: z.boolean().optional(),
     startDate: z.coerce.date().optional(),
     endDate: z.coerce.date().optional(),
