@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { MarketHero } from "./MarketHero";
+import { HomeBanner } from "./HomeBanner";
 import { CategoryStrip } from "./CategoryStrip";
 import { PromoBanner } from "./PromoBanner";
 import { ProductRow } from "./ProductRow";
@@ -14,6 +14,7 @@ import { DeliverySlotBanner } from "./DeliverySlotBanner";
 import { MobileHomeView } from "./MobileHomeView";
 import type { HomeCategory } from "./CategoryStrip";
 import type { CustomerProduct } from "@/components/products/data";
+import type { AdBannerRecord } from "@/repositories/ad-banner.repository";
 
 const subscribeToViewport = (onChange: () => void) => {
   window.addEventListener("resize", onChange);
@@ -31,6 +32,8 @@ interface HomeLayoutProps {
   productsFailedToLoad: boolean;
   dealProduct: CustomerProduct | null;
   dealCompareAtPrice: number | null;
+  /** Pass the currently active AdBanner (or null for the default hero). */
+  activeAd: AdBannerRecord | null;
 }
 
 export function HomeLayout({
@@ -41,6 +44,7 @@ export function HomeLayout({
   productsFailedToLoad,
   dealProduct: serverDealProduct,
   dealCompareAtPrice,
+  activeAd,
 }: HomeLayoutProps) {
   const isMobile = useSyncExternalStore(subscribeToViewport, getIsMobile, getServerIsMobile);
 
@@ -50,13 +54,14 @@ export function HomeLayout({
         categories={categories}
         products={products}
         productsFailedToLoad={productsFailedToLoad}
+        activeAd={activeAd}
       />
     );
   }
 
   return (
     <main className="overflow-x-hidden bg-background">
-      <MarketHero />
+      <HomeBanner activeAd={activeAd} />
 
       <div className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 flex flex-col gap-6">
         <ActiveOrderTracker />

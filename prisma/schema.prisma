@@ -303,3 +303,20 @@ model Notification {
   @@index([userId, createdAt(sort: Desc)])
   @@index([orderId])
 }
+
+/// A single admin-uploaded advertising banner that replaces the homepage hero
+/// when it is enabled and the current time falls within [startDate, endDate].
+model AdBanner {
+  id          String    @id @default(cuid())
+  imageUrl    String
+  altText     String    @default("Advertisement")
+  linkUrl     String?
+  isEnabled   Boolean   @default(false)
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("ad_banner")
+  @@index([isEnabled, startDate, endDate])
+}

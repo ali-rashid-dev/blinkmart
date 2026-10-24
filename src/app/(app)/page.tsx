@@ -3,6 +3,7 @@ import { HomeLayout } from "@/components/home/HomeLayout";
 import { listCustomerCategories } from "@/repositories/category.repository";
 import { listCustomerProducts } from "@/repositories/product.repository";
 import { toCustomerProduct } from "@/components/products/data";
+import { getActiveAdBanner } from "@/repositories/ad-banner.repository";
 
 export const metadata: Metadata = {
   title: "kitcomart — Grocery Essentials",
@@ -21,6 +22,7 @@ export default async function HomePage() {
   let dbCategories: Awaited<ReturnType<typeof listCustomerCategories>> = [];
   let dbProducts: Awaited<ReturnType<typeof listCustomerProducts>> = [];
   let productsFailedToLoad = false;
+  let activeAd: Awaited<ReturnType<typeof getActiveAdBanner>> = null;
 
   try {
     dbCategories = await listCustomerCategories({});
@@ -33,6 +35,12 @@ export default async function HomePage() {
   } catch (error) {
     console.error("Error loading products for home page:", error);
     productsFailedToLoad = true;
+  }
+
+  try {
+    activeAd = await getActiveAdBanner();
+  } catch (error) {
+    console.error("Error loading active ad banner for home page:", error);
   }
 
   const allCustomerProducts = dbProducts.map(toCustomerProduct);
@@ -50,6 +58,7 @@ export default async function HomePage() {
         productsFailedToLoad={productsFailedToLoad}
         dealProduct={null}
         dealCompareAtPrice={null}
+        activeAd={activeAd}
       />
     </>
   );
