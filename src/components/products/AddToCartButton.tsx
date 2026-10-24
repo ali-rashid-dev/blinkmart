@@ -73,7 +73,14 @@ export function AddToCartButton({
       ) : (
         <ShoppingBasket className="size-4" />
       )}
-      <span className={cn("relative", responsive && "sr-only sm:not-sr-only")}>
+      <span
+        role={state === "error" ? "alert" : undefined}
+        aria-live={state === "error" ? "assertive" : undefined}
+        className={cn(
+          "relative",
+          responsive && state !== "error" && "sr-only sm:not-sr-only",
+        )}
+      >
         {state === "loading"
           ? "Adding…"
           : state === "done"

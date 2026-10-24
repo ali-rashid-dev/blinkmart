@@ -198,7 +198,7 @@ export function ProductCard({
                             productId={product.id}
                             variantId={variant.id}
                             label={`${product.name} (${variantLabel})`}
-                            disabled={unavailable}
+                            disabled={!product.enabled || unavailable}
                             responsive
                           />
                         </div>
