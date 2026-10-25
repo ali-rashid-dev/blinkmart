@@ -26,7 +26,7 @@ A full-stack grocery e-commerce platform with a customer storefront and a full a
 ## Features
 
 ### Customer Storefront
-- Home page with hero, category strip, promo banner, best sellers, deal of the day, and fresh arrivals
+- Home page with an independent hero, category strip, promo banner, best sellers, deal of the day, and fresh arrivals; up to three scheduled ads appear at the top, middle, and end
 - Product listing with filtering by category and brand
 - Canonical product detail pages with selectable size, weight, color, flavor, and packaging variants
 - Shopping cart

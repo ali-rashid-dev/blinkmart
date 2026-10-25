@@ -19,7 +19,21 @@ export type AdBannerRecord = {
 //  Reads
 // ──────────────────────────────────────────────────────────
 
-/** Returns the first banner that is enabled and currently within its schedule. */
+/** Returns up to three enabled banners that are currently within their schedule. */
+export async function getActiveAdBanners(): Promise<AdBannerRecord[]> {
+  const now = new Date();
+  return prisma.adBanner.findMany({
+    where: {
+      isEnabled: true,
+      startDate: { lte: now },
+      endDate: { gte: now },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 3,
+  });
+}
+
+/** Returns the newest banner that is enabled and currently within its schedule. */
 export async function getActiveAdBanner(): Promise<AdBannerRecord | null> {
   const now = new Date();
   return prisma.adBanner.findFirst({

@@ -522,8 +522,8 @@ export function AdminAdBannerPanel({ initialBanners }: AdminAdBannerPanelProps) 
             Advertisement Banner
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Upload and schedule a banner that replaces the default Kitcomart hero.
-            The original hero automatically returns when no active ad is found.
+            Upload and schedule banners shown separately from the hero. Up to three
+            active banners appear at the top, middle, and end of the homepage.
           </p>
         </div>
       </div>
@@ -531,19 +531,21 @@ export function AdminAdBannerPanel({ initialBanners }: AdminAdBannerPanelProps) 
       {/* Active banner status callout */}
       {(() => {
         const now = new Date();
-        const activeBanner = banners.find(
+        const activeBanners = banners.filter(
           (b) => b.isEnabled && b.startDate <= now && b.endDate >= now
         );
-        if (activeBanner) {
+        if (activeBanners.length > 0) {
           return (
             <div className="flex items-start gap-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-3">
               <CheckCircle2 className="size-5 text-emerald-600 shrink-0 mt-0.5" aria-hidden="true" />
               <div className="text-sm">
                 <p className="font-semibold text-emerald-700 dark:text-emerald-400">
-                  An ad banner is currently live on the homepage.
+                  {Math.min(activeBanners.length, 3)} of 3 ad placements are currently live.
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Expires {activeBanner.endDate.toLocaleString()}
+                  {activeBanners.length > 3
+                    ? "The three newest active banners are shown."
+                    : "Newest active banner appears at the top; the next two appear mid-page and at the end."}
                 </p>
               </div>
             </div>
@@ -553,8 +555,7 @@ export function AdminAdBannerPanel({ initialBanners }: AdminAdBannerPanelProps) 
           <div className="flex items-start gap-3 rounded-xl bg-muted/40 border border-border px-4 py-3">
             <Megaphone className="size-5 text-muted-foreground shrink-0 mt-0.5" aria-hidden="true" />
             <p className="text-sm text-muted-foreground">
-              No ad banner is currently active. The default Kitcomart hero is
-              displayed on the homepage.
+              No ad banners are active. The homepage hero displays independently.
             </p>
           </div>
         );

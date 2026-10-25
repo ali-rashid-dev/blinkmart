@@ -12,6 +12,7 @@ import { ActiveOrderTracker } from "./ActiveOrderTracker";
 import { RepeatOrderCard } from "./RepeatOrderCard";
 import { DeliverySlotBanner } from "./DeliverySlotBanner";
 import { MobileHomeView } from "./MobileHomeView";
+import { AdBanner } from "./AdBanner";
 import type { HomeCategory } from "./CategoryStrip";
 import type { CustomerProduct } from "@/components/products/data";
 import type { AdBannerRecord } from "@/repositories/ad-banner.repository";
@@ -32,8 +33,8 @@ interface HomeLayoutProps {
   productsFailedToLoad: boolean;
   dealProduct: CustomerProduct | null;
   dealCompareAtPrice: number | null;
-  /** Pass the currently active AdBanner (or null for the default hero). */
-  activeAd: AdBannerRecord | null;
+  /** Up to three active banners, ordered top, middle, then end of page. */
+  activeAds: AdBannerRecord[];
 }
 
 export function HomeLayout({
@@ -44,7 +45,7 @@ export function HomeLayout({
   productsFailedToLoad,
   dealProduct: serverDealProduct,
   dealCompareAtPrice,
-  activeAd,
+  activeAds,
 }: HomeLayoutProps) {
   const isMobile = useSyncExternalStore(subscribeToViewport, getIsMobile, getServerIsMobile);
 
@@ -54,14 +55,19 @@ export function HomeLayout({
         categories={categories}
         products={products}
         productsFailedToLoad={productsFailedToLoad}
-        activeAd={activeAd}
+        activeAds={activeAds}
       />
     );
   }
 
   return (
     <main className="overflow-x-hidden bg-background">
-      <HomeBanner activeAd={activeAd} />
+      {activeAds[0] && (
+        <div className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 sm:pt-8">
+          <AdBanner banner={activeAds[0]} />
+        </div>
+      )}
+      <HomeBanner />
 
       <div className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 flex flex-col gap-6">
         <ActiveOrderTracker />
@@ -71,6 +77,11 @@ export function HomeLayout({
 
       <CategoryStrip categories={categories} />
       <PromoBanner />
+      {activeAds[1] && (
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
+          <AdBanner banner={activeAds[1]} />
+        </div>
+      )}
       <ProductRow
         title="Recently added"
         subtitle="Browse the latest products added to the market."
@@ -90,6 +101,11 @@ export function HomeLayout({
       )}
       <WhyShopWithUs />
       <FinalCta />
+      {activeAds[2] && (
+        <div className="mx-auto w-full max-w-7xl px-4 pb-6 sm:px-6 sm:pb-8">
+          <AdBanner banner={activeAds[2]} />
+        </div>
+      )}
     </main>
   );
 }

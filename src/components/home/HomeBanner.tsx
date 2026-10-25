@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Clock, ShieldCheck, Truck } from "lucide-react";
-import type { AdBannerRecord } from "@/repositories/ad-banner.repository";
 
 // ──────────────────────────────────────────────────────────
 //  Default Kitcomart hero
@@ -93,63 +92,13 @@ function DefaultHero() {
   );
 }
 
-// ──────────────────────────────────────────────────────────
-//  Ad banner
-// ──────────────────────────────────────────────────────────
-function AdHero({ banner }: { banner: AdBannerRecord }) {
-  const inner = (
-    <div className="relative aspect-[16/5] overflow-hidden rounded-[2rem] border border-border/60">
-      <Image
-        src={banner.imageUrl}
-        alt={banner.altText}
-        fill
-        priority
-        className="object-cover"
-        sizes="(max-width: 640px) 100vw, (max-width: 1280px) 90vw, 1280px"
-      />
-      {/* Subtle sponsored label */}
-      <span className="absolute bottom-3 right-4 rounded-full bg-black/40 backdrop-blur-sm px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/80 select-none">
-        Sponsored
-      </span>
-    </div>
-  );
-
-  if (banner.linkUrl) {
-    return (
-      <a
-        href={banner.linkUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block"
-        aria-label={`${banner.altText} — sponsored advertisement`}
-      >
-        {inner}
-      </a>
-    );
-  }
-
-  return <div aria-label={`${banner.altText} — sponsored advertisement`}>{inner}</div>;
-}
-
-// ──────────────────────────────────────────────────────────
-//  Exported hero wrapper — wraps both variants
-// ──────────────────────────────────────────────────────────
-interface HomeBannerProps {
-  /** Pass the active AdBanner record, or null to show the default hero. */
-  activeAd: AdBannerRecord | null;
-}
-
-export function HomeBanner({ activeAd }: HomeBannerProps) {
+export function HomeBanner() {
   return (
     <section
-      aria-label={
-        activeAd
-          ? "Sponsored advertisement banner"
-          : "Quality groceries, with new orders due within 24 hours"
-      }
+      aria-label="Quality groceries, with new orders due within 24 hours"
       className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 sm:pt-8"
     >
-      {activeAd ? <AdHero banner={activeAd} /> : <DefaultHero />}
+      <DefaultHero />
     </section>
   );
 }

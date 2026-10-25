@@ -14,6 +14,7 @@ import { ActiveOrderTracker } from "./ActiveOrderTracker";
 import { RepeatOrderCard } from "./RepeatOrderCard";
 import { ProductCard } from "@/components/products/ProductCard";
 import { SearchBar } from "@/components/layout/navbar/search-bar";
+import { AdBanner } from "./AdBanner";
 import type { CustomerProduct } from "@/components/products/data";
 import type { HomeCategory } from "./CategoryStrip";
 import type { AdBannerRecord } from "@/repositories/ad-banner.repository";
@@ -22,63 +23,20 @@ interface MobileHomeViewProps {
   categories: HomeCategory[];
   products: CustomerProduct[];
   productsFailedToLoad: boolean;
-  activeAd?: AdBannerRecord | null;
+  activeAds: AdBannerRecord[];
 }
 
 export function MobileHomeView({
   categories = [],
   products = [],
   productsFailedToLoad,
-  activeAd = null,
+  activeAds,
 }: MobileHomeViewProps) {
   const displayProducts = products;
 
   return (
     <div className="lg:hidden flex flex-col gap-5 px-4 pt-4 pb-8">
-      {/* ── 0. Ad Banner (when active) ─────────────────────────────── */}
-      {activeAd && (
-        <div className="-mx-4">
-          {activeAd.linkUrl ? (
-            <a
-              href={activeAd.linkUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${activeAd.altText} — sponsored advertisement`}
-            >
-              <div className="relative aspect-[21/9] w-full overflow-hidden">
-                <Image
-                  src={activeAd.imageUrl}
-                  alt={activeAd.altText}
-                  fill
-                  priority
-                  className="object-cover"
-                  sizes="100vw"
-                />
-                <span className="absolute bottom-2 right-3 rounded-full bg-black/40 backdrop-blur-sm px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white/80 select-none">
-                  Sponsored
-                </span>
-              </div>
-            </a>
-          ) : (
-            <div
-              aria-label={`${activeAd.altText} — sponsored advertisement`}
-              className="relative aspect-[21/9] w-full overflow-hidden"
-            >
-              <Image
-                src={activeAd.imageUrl}
-                alt={activeAd.altText}
-                fill
-                priority
-                className="object-cover"
-                sizes="100vw"
-              />
-              <span className="absolute bottom-2 right-3 rounded-full bg-black/40 backdrop-blur-sm px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white/80 select-none">
-                Sponsored
-              </span>
-            </div>
-          )}
-        </div>
-      )}
+      {activeAds[0] && <AdBanner banner={activeAds[0]} />}
       {/* ── 1. Top Location & Slot Header ─────────────────────────── */}
       <SearchBar className="h-12 rounded-xl bg-card shadow-xs" />
 
@@ -163,6 +121,8 @@ export function MobileHomeView({
         </div>
       </div>
 
+      {activeAds[1] && <AdBanner banner={activeAds[1]} />}
+
       {/* ── 8. Products ──────────────────────────────────────────────── */}
       <div>
         <div className="flex items-center justify-between mb-3">
@@ -194,6 +154,7 @@ export function MobileHomeView({
         </div>
       </div>
 
+      {activeAds[2] && <AdBanner banner={activeAds[2]} />}
     </div>
   );
 }
