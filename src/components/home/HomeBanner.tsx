@@ -120,7 +120,7 @@ export function HomeBanner() {
               {[
                 { Icon: ShieldCheck, text: "Quality-inspected essentials" },
                 { Icon: Clock,       text: "Orders within 24 hours" },
-                { Icon: Truck,       text: "Free delivery over Rs. 3,000" },
+                { Icon: Truck,       text: "Free delivery on orders of Rs. 3,000 or more" },
               ].map(({ Icon, text }) => (
                 <li
                   key={text}
