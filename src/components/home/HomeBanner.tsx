@@ -1,97 +1,83 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Clock, ShieldCheck, ShoppingBasket, Truck } from "lucide-react";
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  Kitcomart — FreshMart-style Campaign Hero
-//  Layout: giant headline text sits behind the centred model image.
-//  The model PNG (/public/hero-modle.png) has a white background that blends
-//  away on the cream/green hero background via mix-blend-mode: multiply.
-// ─────────────────────────────────────────────────────────────────────────────
+import { ArrowRight, ShoppingBasket } from "lucide-react";
 
 export function HomeBanner() {
   return (
     <section
-      aria-label="Kitcomart — Your Home Essentials, Online"
-      className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 sm:pt-8"
+      aria-labelledby="home-banner-title"
+      className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8"
     >
-      {/* ── Campaign Container ──────────────────────────────────────────── */}
       <div
-        className="relative overflow-hidden rounded-[1.75rem]"
+        className="relative isolate min-h-[390px] overflow-hidden rounded-[2rem] sm:min-h-[420px]"
         style={{
-          background: "linear-gradient(160deg, #2D4A3E 0%, #3a6352 35%, #4d8066 60%, #6fa882 80%, #a8d4b8 100%)",
-          border: "1.5px solid rgba(45,74,62,0.5)",
-          minHeight: "340px",
+          background:
+            "linear-gradient(120deg, #203b32 0%, #2d4a3e 36%, #4d8066 72%, #8bb99a 100%)",
+          border: "1px solid rgba(45,74,62,0.45)",
+          boxShadow: "0 24px 60px -34px rgba(34,59,49,0.65)",
         }}
       >
-        {/* ── Giant background headline ────────────────────────────────── */}
-        {/*  Sits at z-0, behind everything. Mimics FreshMart's wordmark.  */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 flex items-center justify-center select-none overflow-hidden"
-          style={{ zIndex: 0 }}
+          className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden select-none"
         >
           <span
-            className="font-display font-black leading-none tracking-tight whitespace-nowrap"
+            className="font-display text-[clamp(5rem,15vw,13rem)] font-black leading-none tracking-[-0.06em] whitespace-nowrap"
             style={{
-              fontSize: "clamp(5rem, 18vw, 16rem)",
               color: "transparent",
-              WebkitTextStroke: "2px rgba(255,255,255,0.18)",
-              letterSpacing: "-0.04em",
+              WebkitTextStroke: "1.5px rgba(255,255,255,0.14)",
             }}
           >
             kitcomart
           </span>
         </div>
 
-        {/* Subtle vignette so text on left is legible */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 55% 100% at 8% 50%, rgba(45,74,62,0.72) 0%, rgba(45,74,62,0.18) 60%, transparent 100%)",
-            zIndex: 1,
+              "linear-gradient(90deg, rgba(32,59,50,0.42) 0%, rgba(32,59,50,0.08) 52%, transparent 78%)",
           }}
         />
 
-        {/* ── Main content layer ───────────────────────────────────────── */}
         <div
-          className="relative flex h-full items-stretch"
-          style={{ zIndex: 2, minHeight: "340px" }}
+          className="relative flex min-h-[390px] items-center px-6 py-10 sm:min-h-[420px] sm:px-10 lg:px-12"
         >
-          {/* ── LEFT: Supporting copy + CTA ──────────────────────────── */}
-          <div className="flex flex-col justify-center gap-4 px-6 py-8 sm:px-10 lg:max-w-[340px] xl:max-w-[380px]">
-            {/* Badge */}
+          <div className="relative z-10 flex max-w-[560px] flex-col items-start gap-6 sm:gap-7">
             <span
-              className="inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em]"
+              className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] sm:text-[11px]"
               style={{
-                background: "rgba(255,255,255,0.15)",
-                border: "1px solid rgba(255,255,255,0.3)",
+                background: "rgba(255,255,255,0.12)",
+                border: "1px solid rgba(255,255,255,0.24)",
                 color: "#fff",
               }}
             >
-              <span className="size-1.5 rounded-full bg-[#D96C3F]" />
-              Faisalabad &amp; beyond
+              <span className="size-2 rounded-full bg-[#E17C4E] shadow-[0_0_0_3px_rgba(225,124,78,0.18)]" />
+              faisalabad Pakistan
             </span>
 
-            {/* Copy */}
-            <p
-              className="max-w-[220px] text-sm leading-relaxed sm:text-base"
-              style={{ color: "rgba(255,255,255,0.85)" }}
+            <h1
+              id="home-banner-title"
+              className="max-w-full font-display text-[clamp(2.75rem,4.2vw,3.8rem)] font-black leading-[0.96] tracking-[-0.055em] text-white"
             >
+              Ghar Ka Har
+              <br />
+              <span style={{ color: "#b9dfc5" }}>Zaroori Saaman.</span>
+            </h1>
+
+            <p className="max-w-[360px] text-sm leading-relaxed text-white/80 sm:text-base">
               From pantry staples to household essentials — shop everything your home needs.
             </p>
 
-            {/* CTA */}
             <div className="flex flex-wrap items-center gap-3">
               <Link
                 href="/products"
                 id="hero-cta-primary"
-                className="group inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                className="group inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#2D4A3E]"
                 style={{
                   background: "#D96C3F",
-                  boxShadow: "0 6px 20px -6px rgba(217,108,63,0.55)",
+                  boxShadow: "0 8px 22px -8px rgba(217,108,63,0.75)",
                 }}
               >
                 Shop Now
@@ -101,92 +87,67 @@ export function HomeBanner() {
                 />
               </Link>
 
-              {/* Toggle-style secondary (mimics FreshMart's toggle pill) */}
               <Link
                 href="/products"
                 id="hero-cta-secondary"
-                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                style={{
-                  border: "1px solid rgba(255,255,255,0.35)",
-                  color: "rgba(255,255,255,0.9)",
-                }}
+                className="inline-flex items-center gap-2 rounded-xl border border-white/35 px-4 py-3 text-sm font-semibold text-white/90 transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
                 Browse All
+                <ArrowRight aria-hidden="true" className="size-4" />
               </Link>
             </div>
-
-            {/* Trust pills */}
-            <ul className="flex flex-col gap-2 mt-1">
-              {[
-                { Icon: ShieldCheck, text: "Quality-inspected essentials" },
-                { Icon: Clock,       text: "Orders within 24 hours" },
-                { Icon: Truck,       text: "Free delivery on orders of Rs. 3,000 or more" },
-              ].map(({ Icon, text }) => (
-                <li
-                  key={text}
-                  className="flex items-center gap-2 text-[11px] font-medium"
-                  style={{ color: "rgba(255,255,255,0.72)" }}
-                >
-                  <Icon aria-hidden="true" className="size-3.5 shrink-0" style={{ color: "#a8d4b8" }} />
-                  {text}
-                </li>
-              ))}
-            </ul>
           </div>
 
-          {/* ── CENTRE: Hero model — sits on top of the wordmark ─────── */}
           <div
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full"
-            style={{ maxWidth: "min(480px, 52%)", zIndex: 3 }}
+            aria-hidden="true"
+            className="pointer-events-none absolute bottom-0 left-[43%] z-[2] w-[36%] max-w-[430px]"
           >
             <Image
               src="/hero-modle.png"
-              alt="Kitcomart shopper holding a box full of packaged grocery essentials — rice, cooking oil, tea, and household items"
-              width={1100}
-              height={1280}
+              alt=""
+              width={1306}
+              height={1205}
               priority
-              quality={95}
-              className="h-auto w-full object-contain object-bottom"
+              sizes="(max-width: 1280px) 36vw, 430px"
+              className="block h-auto w-full object-contain object-bottom"
               style={{
                 mixBlendMode: "multiply",
-                maxHeight: "360px",
-                display: "block",
               }}
             />
           </div>
 
-          {/* ── RIGHT: Floating product card ──────────────────────────── */}
-          <div className="ml-auto flex items-center pr-5 sm:pr-8" style={{ zIndex: 4 }}>
+          <div className="absolute right-5 top-1/2 z-[4] hidden -translate-y-1/2 sm:block lg:right-8">
             <div
-              className="animate-hero-card w-40 overflow-hidden rounded-2xl sm:w-44"
+              className="w-40 overflow-hidden rounded-2xl sm:w-44"
               style={{
                 background: "rgba(255,255,255,0.97)",
-                border: "1px solid rgba(45,74,62,0.1)",
-                boxShadow: "0 16px 48px -10px rgba(45,74,62,0.28), 0 4px 12px -4px rgba(0,0,0,0.08)",
+                border: "1px solid rgba(255,255,255,0.72)",
+                boxShadow: "0 20px 50px -18px rgba(24,48,39,0.55)",
               }}
             >
-              {/* Card image area */}
               <div
                 className="flex h-24 items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #f0f7f1 0%, #e0f0e8 100%)" }}
+                style={{
+                  background:
+                    "radial-gradient(circle at 50% 25%, #fff 0%, #e7f2e9 75%, #d7eadc 100%)",
+                }}
               >
                 <ShoppingBasket
                   aria-hidden="true"
-                  className="size-10"
+                  className="size-11"
                   style={{ color: "#2D4A3E" }}
                 />
               </div>
 
-              {/* Card body */}
-              <div className="px-3 py-3">
+              <div className="px-3.5 py-3.5">
                 <p
-                  className="text-[11px] font-bold leading-tight"
+                  className="text-xs font-bold leading-tight"
                   style={{ color: "#2B2420" }}
                 >
                   Grocery Essentials
                 </p>
                 <p
-                  className="mt-0.5 text-[10px] leading-snug"
+                  className="mt-1 text-[11px] leading-snug"
                   style={{ color: "#7A6F63" }}
                 >
                   Rice, Oil, Tea &amp; more
@@ -195,7 +156,7 @@ export function HomeBanner() {
                 <Link
                   href="/products"
                   id="hero-card-link"
-                  className="mt-2.5 flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition-all duration-200 hover:brightness-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#D96C3F]"
+                  className="mt-3 flex items-center justify-between rounded-lg px-3 py-2 text-[11px] font-bold transition-all duration-200 hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D96C3F]"
                   style={{
                     background: "#D96C3F",
                     color: "#fff",
@@ -207,21 +168,6 @@ export function HomeBanner() {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* ── Bottom headline strip (mobile) ───────────────────────────── */}
-        {/* On small screens the giant wordmark is too large; show a smaller strip */}
-        <div
-          className="relative px-6 pb-5 pt-2 sm:hidden"
-          style={{ zIndex: 5 }}
-        >
-          <h2
-            className="font-display font-black leading-none tracking-[-0.03em] text-white/90"
-            style={{ fontSize: "clamp(2.4rem, 12vw, 3.2rem)" }}
-          >
-            Ghar Ka Har<br />
-            <span style={{ color: "#a8d4b8" }}>Zaroori Saaman.</span>
-          </h2>
         </div>
       </div>
     </section>
