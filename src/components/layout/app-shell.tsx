@@ -24,7 +24,8 @@ const nav = [
   { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/admin/brands", label: "Brands", icon: Store },
   { href: "/admin/categories", label: "Categories", icon: Tag },
-  { href: "/admin/homepage", label: "Homepage", icon: Megaphone },
+  { href: "/admin/homepage", label: "Homepage", icon: Sliders },
+  { href: "/admin/ads", label: "Ads", icon: Megaphone },
   { href: "/admin/reports", label: "Reports", icon: BarChart3 },
   { href: "/admin/notification", label: "Notifications", icon: Bell },
 ] as const;

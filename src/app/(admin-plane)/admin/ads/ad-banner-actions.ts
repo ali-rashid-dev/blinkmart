@@ -111,7 +111,7 @@ export async function adminCreateAdBanner(
   try {
     const banner = await createAdBanner(parsed.data);
     revalidatePath("/");
-    revalidatePath("/admin/homepage");
+    revalidatePath("/admin/ads");
     return { success: true, data: banner };
   } catch (error) {
     console.error("[AdBanner] Failed to create banner:", error);
@@ -160,7 +160,7 @@ export async function adminUpdateAdBanner(input: {
     const { id, ...rest } = parsed.data;
     const updated = await updateAdBanner(id, rest);
     revalidatePath("/");
-    revalidatePath("/admin/homepage");
+    revalidatePath("/admin/ads");
     return { success: true, data: updated };
   } catch (error) {
     console.error("[AdBanner] Failed to update banner:", error);
@@ -189,7 +189,7 @@ export async function adminToggleAdBanner(input: {
       isEnabled: parsed.data.isEnabled,
     });
     revalidatePath("/");
-    revalidatePath("/admin/homepage");
+    revalidatePath("/admin/ads");
     return { success: true, data: updated };
   } catch (error) {
     console.error("[AdBanner] Failed to toggle banner:", error);
@@ -218,7 +218,7 @@ export async function adminDeleteAdBanner(
     }
 
     revalidatePath("/");
-    revalidatePath("/admin/homepage");
+    revalidatePath("/admin/ads");
     return { success: true, data: { id } };
   } catch (error) {
     console.error("[AdBanner] Failed to delete banner:", error);

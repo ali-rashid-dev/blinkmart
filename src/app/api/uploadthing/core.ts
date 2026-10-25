@@ -62,7 +62,7 @@ export const ourFileRouter = {
       return { uploadedBy: metadata.userId };
     }),
 
-  /** Admin-only uploader for homepage advertising banners. */
+  /** Admin-only uploader for advertising banners. */
   bannerImageUploader: f({
     image: {
       maxFileSize: "4MB",

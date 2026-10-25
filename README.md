@@ -40,6 +40,7 @@ A full-stack grocery e-commerce platform with a customer storefront and a full a
 - Dashboard with key metrics
 - Product management (list, create, edit, and per-variant pricing/SKU/stock)
 - Category & brand management
+- Homepage controls and advertising banner management (`/admin/homepage`, `/admin/ads`)
 - Order management with status updates
 - Customer management
 - Revenue reports
@@ -74,7 +75,8 @@ src/
 │   │       ├── customers/
 │   │       ├── reports/
 │   │       ├── revenue/
-│   │       └── notification/
+│   │       ├── notification/
+│   │       └── ads/
 │   ├── (auth)/             # Auth pages
 │   │   ├── login/
 │   │   ├── signup/

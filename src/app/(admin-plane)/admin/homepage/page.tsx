@@ -6,8 +6,6 @@ import {
   Package,
   Power,
 } from "lucide-react";
-import { AdminAdBannerPanel } from "./AdminAdBannerPanel";
-import { listAdBanners } from "@/repositories/ad-banner.repository";
 
 interface HomePageSettings {
   heroTitle: string;
@@ -47,13 +45,6 @@ const DEFAULT_SETTINGS: HomePageSettings = {
 
 export default async function AdminHomepageControlPage() {
   const settings = DEFAULT_SETTINGS;
-
-  let initialBanners: Awaited<ReturnType<typeof listAdBanners>> = [];
-  try {
-    initialBanners = await listAdBanners();
-  } catch (error) {
-    console.error("[AdminHomepage] Failed to load ad banners:", error);
-  }
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-8 p-6">
@@ -353,10 +344,6 @@ export default async function AdminHomepageControlPage() {
             </div>
           </div>
         </div>
-
-        {/* Section 4: Advertisement Banner */}
-        <AdminAdBannerPanel initialBanners={initialBanners} />
-
       </div>
     </div>
   );
