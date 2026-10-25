@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
+  ArrowRight,
   ChevronRight,
   Moon,
   Search,
@@ -37,34 +38,101 @@ export function MobileHomeView({
   return (
     <div className="lg:hidden flex flex-col gap-5 px-4 pt-4 pb-8">
       {activeAds[0] && <AdBanner banner={activeAds[0]} />}
-      {/* ── 1. Top Location & Slot Header ─────────────────────────── */}
+
+      {/* ── 1. Search ───────────────────────────────────────────────────── */}
       <SearchBar className="h-12 rounded-xl bg-card shadow-xs" />
 
-      <div className="flex items-center justify-between gap-2 rounded-xl bg-card p-3 border border-border/80 shadow-xs">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <Moon className="size-4" />
+
+      {/* ── 0. FreshMart-style Mobile Campaign Hero ───────────────────── */}
+      <div
+        className="relative overflow-hidden rounded-2xl"
+        style={{
+          background:
+            "linear-gradient(160deg, #2D4A3E 0%, #3a6352 35%, #4d8066 60%, #6fa882 80%, #a8d4b8 100%)",
+          border: "1.5px solid rgba(45,74,62,0.45)",
+          minHeight: "200px",
+        }}
+      >
+        {/* Giant background wordmark */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden select-none"
+        >
+          <span
+            className="font-display font-black leading-none tracking-tight whitespace-nowrap"
+            style={{
+              fontSize: "clamp(4.5rem, 28vw, 8rem)",
+              color: "transparent",
+              WebkitTextStroke: "1.5px rgba(255,255,255,0.15)",
+              letterSpacing: "-0.04em",
+            }}
+          >
+            kitcomart
+          </span>
+        </div>
+
+        {/* Left vignette */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 100% at 5% 50%, rgba(45,74,62,0.75) 0%, rgba(45,74,62,0.15) 65%, transparent 100%)",
+          }}
+        />
+
+        {/* Content */}
+        <div className="relative flex items-end" style={{ minHeight: "200px" }}>
+          {/* Left copy */}
+          <div
+            className="z-10 flex flex-col gap-3 p-5 pb-6 pr-2"
+            style={{ maxWidth: "55%" }}
+          >
+            <h2
+              className="font-display font-black leading-[1.05] tracking-[-0.03em] text-white"
+              style={{ fontSize: "clamp(1.6rem, 7vw, 2.2rem)" }}
+            >
+              Ghar Ka Har
+              <br />
+              <span style={{ color: "#a8d4b8" }}>Zaroori</span>{" "}
+              <span style={{ color: "#FAF6F0" }}>Saaman.</span>
+            </h2>
+
+            <Link
+              href="/products"
+              id="mobile-hero-cta-primary"
+              className="inline-flex w-fit items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold text-white transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              style={{
+                background: "#D96C3F",
+                boxShadow: "0 4px 14px -4px rgba(217,108,63,0.5)",
+              }}
+            >
+              Shop Now
+              <ArrowRight aria-hidden="true" className="size-3.5" />
+            </Link>
           </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1">
-              <span className="text-[11px] font-bold uppercase text-primary tracking-wider">
-                24-Hour Delivery
-              </span>
-              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            </div>
-            <p className="text-xs font-semibold text-foreground truncate">
-              New orders delivered within 24 hours
-            </p>
+
+          {/* Model image */}
+          <div
+            className="absolute bottom-0 right-0"
+            style={{ width: "50%", maxWidth: "190px", zIndex: 5 }}
+          >
+            <Image
+              src="/hero-modle.png"
+              alt="Kitcomart shopper with packaged groceries"
+              width={550}
+              height={640}
+              className="h-auto w-full object-contain object-bottom"
+              style={{
+                mixBlendMode: "multiply",
+                maxHeight: "210px",
+                display: "block",
+              }}
+            />
           </div>
         </div>
-        <Link
-          href="/products"
-          className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground hover:text-foreground"
-          aria-label="Browse and search products"
-        >
-          <Search className="size-4" />
-        </Link>
       </div>
+
 
       {/* ── 2. Active Order Progress Tracker ───────────────────────── */}
       <ActiveOrderTracker />
@@ -73,14 +141,13 @@ export function MobileHomeView({
       <RepeatOrderCard />
 
       {/* ── 4. Delivery Slot & Cutoff Banner ───────────────────────── */}
-      <DeliverySlotBanner />
 
       {/* ── 5. Category Aisles Bubbles ─────────────────────────────── */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-bold text-foreground flex items-center gap-1.5">
             <ShoppingBag className="size-4 text-primary" />
-            Shop Groceries & Essentials
+            Shop Groceries &amp; Essentials
           </h2>
           <Link
             href="/products"

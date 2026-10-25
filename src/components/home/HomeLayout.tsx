@@ -72,7 +72,6 @@ export function HomeLayout({
       <div className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 flex flex-col gap-6">
         <ActiveOrderTracker />
         <RepeatOrderCard />
-        <DeliverySlotBanner />
       </div>
 
       <CategoryStrip categories={categories} />

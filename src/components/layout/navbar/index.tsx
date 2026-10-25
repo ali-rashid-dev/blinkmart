@@ -64,7 +64,7 @@ export function Navbar() {
         className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur-md shadow-xs"
       >
         <div className="container mx-auto px-4 lg:px-6">
-          <div className="flex items-center gap-3 h-16">
+          <div className="flex items-center justify-between gap-3 h-16">
             {/* Mobile Drawer & Mobile Logo */}
             <div className="lg:hidden flex items-center gap-2 shrink-0">
               <Logo href="/" variant="full" size="sm" priority />
